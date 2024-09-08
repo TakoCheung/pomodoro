@@ -26,7 +26,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
             TimerModeSwitcherUI(),
             SizedBox(height: 48),
             TimerDisplay(),
-            SizedBox(height: 20),
+            SizedBox(height: 40),
             GearIconButton(),
           ],
         ),

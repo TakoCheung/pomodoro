@@ -15,29 +15,31 @@ class TimerDisplay extends ConsumerWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            // Bottom layer: Image
-            Transform.rotate(
-              angle: 0.785398,
-              child: Container(
-                width: 410,
-                height: 410,
-                decoration: const BoxDecoration(
+            Container(
+              width: 410,
+              height: 410,
+              decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                      colors: [Color(0xFF0E112A), Color(0xFF2E325A)]),
-                ),
-              ),
+                      colors: [Color(0xFF0E112A), Color(0xFF2E325A)],
+                      transform: GradientRotation(0.785398)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFF27254A),
+                      spreadRadius: 0,
+                      blurRadius: 100,
+                      offset: Offset(-50, -50),
+                    ),
+                  ]),
             ),
-            // Middle layer: Colored circle
             Container(
               width: 373,
               height: 373,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF161932), // Your specified color
+                color: Color(0xFF161932),
               ),
             ),
-            // Circular Progress Indicator
             SizedBox(
               width: 339,
               height: 339,
@@ -45,8 +47,8 @@ class TimerDisplay extends ConsumerWidget {
                 strokeAlign: BorderSide.strokeAlignCenter,
                 value: ref.read(timerProvider.notifier).progress(),
                 strokeWidth: 12,
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFF70F3F8)),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Color(0xFF70F3F8)),
                 backgroundColor: Colors.transparent,
               ),
             ),
@@ -87,5 +89,4 @@ class TimerDisplay extends ConsumerWidget {
       ],
     );
   }
-
 }

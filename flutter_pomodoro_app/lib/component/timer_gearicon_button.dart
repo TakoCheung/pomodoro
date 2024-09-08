@@ -6,6 +6,7 @@ class GearIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      iconSize: 28,
       icon: Icon(
         Icons.settings,
         color: Colors.white.withOpacity(0.5),
