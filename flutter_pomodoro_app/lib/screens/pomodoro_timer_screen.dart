@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro_app/component/timer_display.dart';
-import 'package:flutter_pomodoro_app/component/timer_gearicon_button.dart';
-import 'package:flutter_pomodoro_app/component/timer_mode_switch_ui.dart';
+import 'package:flutter_pomodoro_app/components/timer/timer_display.dart';
+import 'package:flutter_pomodoro_app/components/timer/timer_gearicon_button.dart';
+import 'package:flutter_pomodoro_app/components/timer/timer_mode_switch_ui.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

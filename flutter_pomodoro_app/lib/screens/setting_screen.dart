@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,11 +8,11 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final timerState = ref.read(timerProvider);
-    final timerNotifier = ref.read(timerProvider.notifier);
-
+    final timerState = ref.watch(timerProvider);
+    // final timerNotifier = ref.watch(timerProvider.notifier);
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -28,23 +29,32 @@ class SettingsScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildTimeSetting(
-                  context,
-                  'pomodoro',
-                  timerState.initPomodoro,
-                  (value) => timerNotifier.updatePomodoroDuration(value!),
+                NumberInput(
+                  initialValue: timerState.initPomodoro,
+                  minValue: 25,
+                  maxValue: 60, 
+                  onValueChanged: (value) => ref
+                      .read(timerProvider.notifier)
+                      .updateShortBreakDuration(
+                          value),
                 ),
                 _buildTimeSetting(
                   context,
                   'short break',
-                  timerState.initShortBreak,
-                  (value) => timerNotifier.updateShortBreakDuration(value!),
+                  TimerState.shortBreakDefaut,
+                  (value) => ref
+                      .read(timerProvider.notifier)
+                      .updateShortBreakDuration(
+                          value ?? ref.read(timerProvider).initShortBreak),
                 ),
                 _buildTimeSetting(
                   context,
                   'long break',
-                  timerState.initLongBreak,
-                  (value) => timerNotifier.updateLongBreakDuration(value!),
+                  TimerState.longBreakDefaut,
+                  (value) => ref
+                      .read(timerProvider.notifier)
+                      .updateLongBreakDuration(
+                          value ?? ref.read(timerProvider).initLongBreak),
                 ),
               ],
             ),
@@ -81,7 +91,8 @@ class SettingsScreen extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 ),
                 child: const Text('Apply', style: TextStyle(fontSize: 16)),
               ),
@@ -92,26 +103,33 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeSetting(BuildContext context, String label, int initialValue, ValueChanged<int?> onChanged) {
+  Widget _buildTimeSetting(BuildContext context, String label, int initialValue,
+      ValueChanged<int?> onChanged) {
+    final items = List.generate(60, (index) => index + 1)
+        .map((value) => DropdownMenuItem<int>(
+              value: value,
+              child: Text(value.toString()),
+            ))
+        .toList();
+    final validInitialValue = items.any((item) => item.value == initialValue)
+        ? initialValue
+        : items.first.value;
+
     return Column(
       children: [
         Text(label, style: TextStyle(color: Colors.grey[600])),
         const SizedBox(height: 5),
         DropdownButton<int>(
-          value: initialValue,
-          items: List.generate(60, (index) => index + 1)
-              .map((value) => DropdownMenuItem<int>(
-                    value: value,
-                    child: Text(value.toString()),
-                  ))
-              .toList(),
+          value: validInitialValue,
+          items: items,
           onChanged: onChanged,
         ),
       ],
     );
   }
 
-  Widget _buildFontOption(BuildContext context, String text, String fontFamily) {
+  Widget _buildFontOption(
+      BuildContext context, String text, String fontFamily) {
     return GestureDetector(
       onTap: () {
         // Update the font in the timer provider
@@ -130,7 +148,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildColorOption(BuildContext context, Color color, String colorName) {
+  Widget _buildColorOption(
+      BuildContext context, Color color, String colorName) {
     return GestureDetector(
       onTap: () {
         // Update the color in the timer provider

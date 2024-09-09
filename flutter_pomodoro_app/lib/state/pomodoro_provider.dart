@@ -13,12 +13,10 @@ enum TimerMode {
   longBreak,
 }
 
-const int pomodoroDefaut = 1500;
-const int longBreakDefaut = 900;
-const int shortBreakDefaut = 600;
-const int sixty = 60;
-
 class TimerState {
+  static const int pomodoroDefaut = 1500;
+  static const int longBreakDefaut = 900;
+  static const int shortBreakDefaut = 600;
   final int timeRemaining;
   final bool isRunning;
   final TimerMode mode;
@@ -56,15 +54,15 @@ class TimerState {
 }
 
 class TimerNotifier extends StateNotifier<TimerState> {
+  static const int sixty = 60;
   TimerNotifier()
       : super(TimerState(
-            timeRemaining:
-                pomodoroDefaut,
+            timeRemaining: TimerState.pomodoroDefaut,
             isRunning: false,
             mode: TimerMode.pomodoro,
-            initLongBreak: longBreakDefaut,
-            initPomodoro: pomodoroDefaut,
-            initShortBreak: shortBreakDefaut,
+            initLongBreak: TimerState.longBreakDefaut,
+            initPomodoro: TimerState.pomodoroDefaut,
+            initShortBreak: TimerState.shortBreakDefaut,
             fontFamily: AppTextStyles.kumbhSans));
 
   void startTimer() {
@@ -106,10 +104,14 @@ class TimerNotifier extends StateNotifier<TimerState> {
     return state.timeRemaining % sixty / sixty;
   }
 
-  String timeFormatted() {
-    final minutes = (state.timeRemaining ~/ sixty).toString().padLeft(2, '0');
-    final secs = (state.timeRemaining % sixty).toString().padLeft(2, '0');
+  String timeFormatted(int time) {
+    final minutes = (time ~/ sixty).toString().padLeft(2, '0');
+    final secs = (time % sixty).toString().padLeft(2, '0');
     return '$minutes:$secs';
+  }
+
+  String minuteFormatted(int time) {
+    return (time ~/ sixty).toString().padLeft(2, '0');
   }
 
   int getInitialDuration() {
@@ -126,7 +128,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   updatePomodoroDuration(int value) {
-    state = state.copyWith(initPomodoro: value);
+    state = state.copyWith(initPomodoro: value * 60);
   }
 
   updateShortBreakDuration(int value) {

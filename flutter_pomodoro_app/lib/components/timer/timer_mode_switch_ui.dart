@@ -14,9 +14,9 @@ class TimerModeSwitcherUI extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.cobalt,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(31.5),
       ),
-      padding: const EdgeInsets.all(7.5),
+      padding: const EdgeInsets.symmetric(vertical: 7.5),
       width: 370,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -60,7 +60,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
             maximumSize: const Size(120, 48),
             minimumSize: const Size(120, 48),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(26.5),
             ),
           ),
           child: Text(

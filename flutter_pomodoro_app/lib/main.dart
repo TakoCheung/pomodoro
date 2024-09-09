@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro_app/component/pomodoro_timer.dart';
+import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
