@@ -72,7 +72,7 @@ class TimerDisplay extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  ref.read(timerProvider.notifier).timeFormatted(),
+                  ref.read(timerProvider.notifier).timeFormatted(timerState.timeRemaining),
                   style: TextStyle(
                     fontSize: AppTextStyles.h1FontSize,
                     color: AppColors.lightBlueGray,

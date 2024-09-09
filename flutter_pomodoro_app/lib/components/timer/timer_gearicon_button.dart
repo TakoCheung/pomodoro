@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro_app/component/setting_screen.dart';
+import 'package:flutter_pomodoro_app/screens/setting_screen.dart';
 
 class GearIconButton extends StatelessWidget {
   const GearIconButton({super.key});
