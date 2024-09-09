@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,7 +13,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121330),
+        color: AppColors.cobalt,
         borderRadius: BorderRadius.circular(30),
       ),
       padding: const EdgeInsets.all(7.5),
@@ -55,7 +56,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
         child: TextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(
-            backgroundColor: isActive ? const Color(0xFF70F3F8) : Colors.transparent,
+            backgroundColor: isActive ? AppColors.lightBlue : Colors.transparent,
             maximumSize: const Size(120, 48),
             minimumSize: const Size(120, 48),
             shape: RoundedRectangleBorder(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/component/setting_screen.dart';
 
 class GearIconButton extends StatelessWidget {
   const GearIconButton({super.key});
@@ -12,7 +13,7 @@ class GearIconButton extends StatelessWidget {
         color: Colors.white.withOpacity(0.5),
       ),
       onPressed: () {
-        // Implement the restart timer logic
+        showSettingsDialog(context);
       },
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_colors.dart';
+import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,24 +23,36 @@ class TimerDisplay extends ConsumerWidget {
               decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                      colors: [Color(0xFF0E112A), Color(0xFF2E325A)],
+                      colors: [AppColors.midnightNavy, AppColors.twilightBlue],
                       transform: GradientRotation(0.785398)),
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0xFF27254A),
+                      color: AppColors.shawdowBlue,
                       spreadRadius: 0,
                       blurRadius: 100,
                       offset: Offset(-50, -50),
+                    ),
+                    BoxShadow(
+                      color: AppColors.shawdowDarkBlue,
+                      spreadRadius: 0,
+                      blurRadius: 100,
+                      offset: Offset(50, 50),
                     ),
                   ]),
             ),
             Container(
               width: 373,
               height: 373,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF161932),
-              ),
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.darkDarkBlue,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(.25),
+                        spreadRadius: 0,
+                        blurRadius: 4,
+                        offset: const Offset(0, 4)),
+                  ]),
             ),
             SizedBox(
               width: 339,
@@ -46,10 +60,11 @@ class TimerDisplay extends ConsumerWidget {
               child: CircularProgressIndicator(
                 strokeAlign: BorderSide.strokeAlignCenter,
                 value: ref.read(timerProvider.notifier).progress(),
-                strokeWidth: 12,
+                strokeWidth: 11,
                 valueColor:
-                    const AlwaysStoppedAnimation<Color>(Color(0xFF70F3F8)),
+                    const AlwaysStoppedAnimation<Color>(AppColors.lightBlue),
                 backgroundColor: Colors.transparent,
+                strokeCap: StrokeCap.round,
               ),
             ),
             // Timer text and button
@@ -58,10 +73,12 @@ class TimerDisplay extends ConsumerWidget {
               children: [
                 Text(
                   ref.read(timerProvider.notifier).timeFormatted(),
-                  style: const TextStyle(
-                    fontSize: 64,
-                    color: Colors.white,
-                    fontFamily: 'SpaceMono',
+                  style: TextStyle(
+                    fontSize: AppTextStyles.h1FontSize,
+                    color: AppColors.lightBlueGray,
+                    letterSpacing: AppTextStyles.h1LetterSpacing,
+                    height: AppTextStyles.h1LineSpacing,
+                    fontFamily: timerState.fontFamily,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -76,10 +93,11 @@ class TimerDisplay extends ConsumerWidget {
                   child: Text(
                     timerState.isRunning ? 'PAUSE' : 'RESTART',
                     style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white.withOpacity(0.6),
-                      letterSpacing: 3,
-                    ),
+                        fontSize: AppTextStyles.h3FontSize,
+                        color: AppColors.lightBlueGray,
+                        letterSpacing: AppTextStyles.h3LetterSpacing,
+                        height: AppTextStyles.h3LineSpacing,
+                        fontFamily: timerState.fontFamily),
                   ),
                 ),
               ],
