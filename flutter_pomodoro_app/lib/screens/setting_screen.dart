@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
+import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,31 +31,22 @@ class SettingsScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 NumberInput(
-                  initialValue: timerState.initPomodoro,
+                  title: AppTextStyles.pomodoro,
+                  initialValue: timerState.initPomodoro ~/ 60,
                   minValue: 25,
                   maxValue: 60, 
-                  onValueChanged: (value) => ref
-                      .read(timerProvider.notifier)
-                      .updateShortBreakDuration(
-                          value),
                 ),
-                _buildTimeSetting(
-                  context,
-                  'short break',
-                  TimerState.shortBreakDefaut,
-                  (value) => ref
-                      .read(timerProvider.notifier)
-                      .updateShortBreakDuration(
-                          value ?? ref.read(timerProvider).initShortBreak),
+                NumberInput(
+                  title: AppTextStyles.shortBreak,
+                  initialValue: timerState.initShortBreak ~/ 60,
+                  minValue: 5,
+                  maxValue: 15, 
                 ),
-                _buildTimeSetting(
-                  context,
-                  'long break',
-                  TimerState.longBreakDefaut,
-                  (value) => ref
-                      .read(timerProvider.notifier)
-                      .updateLongBreakDuration(
-                          value ?? ref.read(timerProvider).initLongBreak),
+                NumberInput(
+                  title: AppTextStyles.longBreak,
+                  initialValue: timerState.initLongBreak ~/ 60,
+                  minValue: 15,
+                  maxValue: 30, 
                 ),
               ],
             ),
