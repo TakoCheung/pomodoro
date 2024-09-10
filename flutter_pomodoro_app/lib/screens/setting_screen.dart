@@ -61,9 +61,7 @@ class SettingsScreen extends ConsumerWidget {
                 : _buildTimeColumn(timerState, timerNotifier),
             const CustomDivider(),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               const Text(
                 'FONT',
                 style: TextStyle(fontSize: 16),
@@ -76,15 +74,17 @@ class SettingsScreen extends ConsumerWidget {
               )
             ]),
             const CustomDivider(),
-            const Text(
-              'COLOR',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            isTablet
-                ? _buildColorRow(timerState, timerNotifier)
-                : _buildColorColumn(timerState, timerNotifier),
-            const SizedBox(height: 20),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              const Text(
+                'COLOR',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 10),
+              isTablet
+                  ? _buildColorRow(timerState, timerNotifier)
+                  : _buildColorColumn(timerState, timerNotifier),
+            ]),
+            const CustomDivider(),
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -154,12 +154,16 @@ class SettingsScreen extends ConsumerWidget {
             timerState.fontFamily == AppTextStyles.kumbhSans, () {
           timerNotifier.updateFontFamily(AppTextStyles.kumbhSans);
         }),
-        const SizedBox(width: 10,),
+        const SizedBox(
+          width: 10,
+        ),
         _buildFontOption('Aa', AppTextStyles.spaceMono,
             timerState.fontFamily == AppTextStyles.spaceMono, () {
           timerNotifier.updateFontFamily(AppTextStyles.spaceMono);
         }),
-        const SizedBox(width: 10,),
+        const SizedBox(
+          width: 10,
+        ),
         _buildFontOption('Aa', AppTextStyles.robotoSlab,
             timerState.fontFamily == AppTextStyles.robotoSlab, () {
           timerNotifier.updateFontFamily(AppTextStyles.robotoSlab);
@@ -194,17 +198,23 @@ class SettingsScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildColorOption(Colors.red, 'color1', timerState.color == Colors.red,
+        _buildColorOption(AppColors.orangeRed, timerState.color == AppColors.orangeRed,
             () {
-          timerNotifier.updateColor(Colors.red);
+          timerNotifier.updateColor(AppColors.orangeRed);
         }),
+        const SizedBox(
+          width: 10,
+        ),
         _buildColorOption(
-            Colors.cyan, 'color2', timerState.color == Colors.cyan, () {
-          timerNotifier.updateColor(Colors.cyan);
+            AppColors.lightBlue, timerState.color == AppColors.lightBlue, () {
+          timerNotifier.updateColor(AppColors.lightBlue);
         }),
+        const SizedBox(
+          width: 10,
+        ),
         _buildColorOption(
-            Colors.purple, 'color3', timerState.color == Colors.purple, () {
-          timerNotifier.updateColor(Colors.purple);
+            AppColors.lightPurle,  timerState.color == AppColors.lightPurle, () {
+          timerNotifier.updateColor(AppColors.lightPurle);
         }),
       ],
     );
@@ -214,18 +224,18 @@ class SettingsScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildColorOption(Colors.red, 'color1', timerState.color == Colors.red,
+        _buildColorOption(Colors.red, timerState.color == Colors.red,
             () {
           timerNotifier.updateColor(Colors.red);
         }),
         const SizedBox(height: 10),
         _buildColorOption(
-            Colors.cyan, 'color2', timerState.color == Colors.cyan, () {
+            Colors.cyan, timerState.color == Colors.cyan, () {
           timerNotifier.updateColor(Colors.cyan);
         }),
         const SizedBox(height: 10),
         _buildColorOption(
-            Colors.purple, 'color3', timerState.color == Colors.purple, () {
+            Colors.purple, timerState.color == Colors.purple, () {
           timerNotifier.updateColor(Colors.purple);
         }),
       ],
@@ -270,7 +280,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildColorOption(
-      Color color, String colorName, bool isActive, VoidCallback onTap) {
+      Color color, bool isActive, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: CircleAvatar(

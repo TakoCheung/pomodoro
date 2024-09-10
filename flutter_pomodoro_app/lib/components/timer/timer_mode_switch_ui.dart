@@ -26,18 +26,21 @@ class TimerModeSwitcherUI extends ConsumerWidget {
             label: 'pomodoro',
             isActive: timerState.mode == TimerMode.pomodoro,
             onPressed: () => timerNotifier.setMode(TimerMode.pomodoro),
+            color: timerState.color
           ),
           _buildModeButton(
             context: context,
             label: 'short break',
             isActive: timerState.mode == TimerMode.shortBreak,
             onPressed: () => timerNotifier.setMode(TimerMode.shortBreak),
+            color: timerState.color
           ),
           _buildModeButton(
             context: context,
             label: 'long break',
             isActive: timerState.mode == TimerMode.longBreak,
             onPressed: () => timerNotifier.setMode(TimerMode.longBreak),
+            color: timerState.color
           ),
         ],
       ),
@@ -49,6 +52,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
     required String label,
     required bool isActive,
     required VoidCallback onPressed,
+    required Color color
   }) {
     return Center(
       // child: Padding(
@@ -56,7 +60,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
         child: TextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(
-            backgroundColor: isActive ? AppColors.lightBlue : Colors.transparent,
+            backgroundColor: isActive ? color : Colors.transparent,
             maximumSize: const Size(120, 48),
             minimumSize: const Size(120, 48),
             shape: RoundedRectangleBorder(
