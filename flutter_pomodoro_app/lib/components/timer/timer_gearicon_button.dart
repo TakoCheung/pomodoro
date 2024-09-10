@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/screens/setting_screen.dart';
 
 class GearIconButton extends StatelessWidget {
@@ -8,9 +9,9 @@ class GearIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       iconSize: 28,
-      icon: Icon(
+      icon: const Icon(
         Icons.settings,
-        color: Colors.white.withOpacity(0.5),
+        color: AppColors.lightBlueGray,//TODO: did not match figma
       ),
       onPressed: () {
         showSettingsDialog(context);
