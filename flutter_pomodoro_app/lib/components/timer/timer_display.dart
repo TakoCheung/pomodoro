@@ -62,7 +62,7 @@ class TimerDisplay extends ConsumerWidget {
                 value: ref.read(timerProvider.notifier).progress(),
                 strokeWidth: 11,
                 valueColor:
-                    const AlwaysStoppedAnimation<Color>(AppColors.lightBlue),
+                    AlwaysStoppedAnimation<Color>(timerState.color),
                 backgroundColor: Colors.transparent,
                 strokeCap: StrokeCap.round,
               ),
