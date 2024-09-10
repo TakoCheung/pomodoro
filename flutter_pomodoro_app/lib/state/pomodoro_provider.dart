@@ -136,21 +136,26 @@ class TimerNotifier extends StateNotifier<TimerState> {
 
   updatePomodoroDuration(int value) {
     state = state.copyWith(initPomodoro: value);
+    setMode(state.mode);
   }
 
   updateShortBreakDuration(int value) {
     state = state.copyWith(initShortBreak: value);
+    setMode(state.mode);
   }
 
   updateLongBreakDuration(int value) {
     state = state.copyWith(initLongBreak: value);
+    setMode(state.mode);
   }
 
   updateFontFamily(String font){
     state = state.copyWith(fontFamily: font);
+    // setMode(state.mode);
   }
 
   updateColor(Color color){
     state = state.copyWith(color: color);
+    // setMode(state.mode);
   }
 }
