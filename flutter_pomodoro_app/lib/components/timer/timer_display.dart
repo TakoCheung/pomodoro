@@ -75,7 +75,7 @@ class TimerDisplay extends ConsumerWidget {
                   ref.read(timerProvider.notifier).timeFormatted(timerState.timeRemaining),
                   style: TextStyle(
                     fontSize: AppTextStyles.h1FontSize,
-                    color: AppColors.lightBlueGray,
+                    color: timerState.color,
                     letterSpacing: AppTextStyles.h1LetterSpacing,
                     height: AppTextStyles.h1LineSpacing,
                     fontFamily: timerState.fontFamily,
@@ -94,7 +94,7 @@ class TimerDisplay extends ConsumerWidget {
                     timerState.isRunning ? 'PAUSE' : 'RESTART',
                     style: TextStyle(
                         fontSize: AppTextStyles.h3FontSize,
-                        color: AppColors.lightBlueGray,
+                        color: timerState.color,
                         letterSpacing: AppTextStyles.h3LetterSpacing,
                         height: AppTextStyles.h3LineSpacing,
                         fontFamily: timerState.fontFamily),

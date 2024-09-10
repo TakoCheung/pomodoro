@@ -6,13 +6,55 @@ import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+class LocalSettings {
+  int initPomodoro;
+  int initShortBreak;
+  int initLongBreak;
+  String fontFamily;
+  Color color;
+
+  LocalSettings({
+    required this.initPomodoro,
+    required this.initShortBreak,
+    required this.initLongBreak,
+    required this.fontFamily,
+    required this.color,
+  });
+
+  LocalSettings copyWith(
+      {int? initPomodoro,
+      int? initLongBreak,
+      int? initShortBreak,
+      String? fontFamily,
+      Color? color}) {
+    return LocalSettings(
+        initLongBreak: initLongBreak ?? this.initLongBreak,
+        initPomodoro: initPomodoro ?? this.initPomodoro,
+        initShortBreak: initShortBreak ?? this.initShortBreak,
+        fontFamily: fontFamily ?? this.fontFamily,
+        color: color ?? this.color);
+  }
+}
+
+final localSettingsProvider = StateProvider<LocalSettings>((ref) {
+  final globalSettings = ref.read(timerProvider);
+  return LocalSettings(
+    initPomodoro: globalSettings.initPomodoro,
+    initShortBreak: globalSettings.initShortBreak,
+    initLongBreak: globalSettings.initLongBreak,
+    fontFamily: globalSettings.fontFamily,
+    color: globalSettings.color,
+  );
+});
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final timerState = ref.watch(timerProvider);
-    final timerNotifier = ref.watch(timerProvider.notifier);
+    final localSettings = ref.watch(localSettingsProvider);
+    final timerState = ref.read(timerProvider);
+    final timerNotifier = ref.read(timerProvider.notifier);
     final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Dialog(
@@ -43,55 +85,48 @@ class SettingsScreen extends ConsumerWidget {
                 },
               )
             ]),
-            const CustomDivider(),
+            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
             const Text(
               'TIME (MINUTES)',
-              style: TextStyle(
-                fontSize: AppTextStyles.h4FontSize,
-                fontWeight: FontWeight.bold,
-                fontFamily: AppTextStyles.kumbhSans,
-                letterSpacing: AppTextStyles.h4LetterSpacing,
-                height: AppTextStyles.h4LineSpacing,
-                color: AppColors.darkDarkBlue,
-              ),
+              style: AppTextStyles.h4,
             ),
             const SizedBox(height: 10),
             isTablet
-                ? _buildTimeRow(timerState, timerNotifier)
-                : _buildTimeColumn(timerState, timerNotifier),
-            const CustomDivider(),
+                ? _buildTimeRow(localSettings)
+                : _buildTimeColumn(localSettings),
+            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
             const SizedBox(height: 10),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               const Text(
                 'FONT',
-                style: TextStyle(fontSize: 16),
+                style: AppTextStyles.h4,
               ),
               const SizedBox(height: 10),
               Container(
                 child: isTablet
-                    ? _buildFontRow(timerState, timerNotifier)
-                    : _buildFontColumn(timerState, timerNotifier),
+                    ? _buildFontRow(localSettings)
+                    : _buildFontColumn(localSettings),
               )
             ]),
-            const CustomDivider(),
+            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               const Text(
                 'COLOR',
-                style: TextStyle(fontSize: 16),
+                style: AppTextStyles.h4,
               ),
               const SizedBox(height: 10),
               isTablet
-                  ? _buildColorRow(timerState, timerNotifier)
-                  : _buildColorColumn(timerState, timerNotifier),
+                  ? _buildColorRow(localSettings)
+                  : _buildColorColumn(localSettings),
             ]),
-            const CustomDivider(),
+            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
             Center(
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor: AppColors.orangeRed,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
@@ -107,136 +142,150 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeRow(timerState, timerNotifier) {
+  Widget _buildTimeRow(localSettings) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildNumberInput('Pomodoro', timerState.initPomodoro, 25, 60, (value) {
-          timerNotifier.updatePomodoroDuration(value * 60);
-        }),
-        _buildNumberInput('Short Break', timerState.initShortBreak, 5, 15,
+        _buildNumberInput('Pomodoro', localSettings.initPomodoro, 25, 60,
             (value) {
-          timerNotifier.updateShortBreakDuration(value * 60);
+          localSettings.initPomodoro = value * 60;
         }),
-        _buildNumberInput('Long Break', timerState.initLongBreak, 15, 30,
+        _buildNumberInput('Short Break', localSettings.initShortBreak, 5, 15,
             (value) {
-          timerNotifier.updateLongBreakDuration(value * 60);
+          localSettings.initShortBreak = value * 60;
+        }),
+        _buildNumberInput('Long Break', localSettings.initLongBreak, 15, 30,
+            (value) {
+          localSettings.initLongBreak = value * 60;
         }),
       ],
     );
   }
 
-  Widget _buildTimeColumn(timerState, timerNotifier) {
+  Widget _buildTimeColumn(localSettings) {
     return Column(
       children: [
-        _buildNumberInput('Pomodoro', timerState.initPomodoro, 25, 60, (value) {
-          timerNotifier.updatePomodoroDuration(value * 60);
-        }),
-        const SizedBox(height: 10),
-        _buildNumberInput('Short Break', timerState.initShortBreak, 5, 15,
+        _buildNumberInput('Pomodoro', localSettings.initPomodoro, 25, 60,
             (value) {
-          timerNotifier.updateShortBreakDuration(value * 60);
+          localSettings.initPomodoro = value * 60;
         }),
-        const SizedBox(height: 10),
-        _buildNumberInput('Long Break', timerState.initLongBreak, 15, 30,
+        _buildNumberInput('Short Break', localSettings.initShortBreak, 5, 15,
             (value) {
-          timerNotifier.updateLongBreakDuration(value * 60);
+          localSettings.initShortBreak = value * 60;
+        }),
+        _buildNumberInput('Long Break', localSettings.initLongBreak, 15, 30,
+            (value) {
+          localSettings.initLongBreak = value * 60;
         }),
       ],
     );
   }
 
-  Widget _buildFontRow(timerState, timerNotifier) {
+  Widget _buildFontRow(localSettings) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildFontOption('Aa', AppTextStyles.kumbhSans,
-            timerState.fontFamily == AppTextStyles.kumbhSans, () {
-          timerNotifier.updateFontFamily(AppTextStyles.kumbhSans);
+            localSettings.fontFamily == AppTextStyles.kumbhSans, () {
+          localSettings.fontFamily = AppTextStyles.kumbhSans;
         }),
         const SizedBox(
           width: 10,
         ),
         _buildFontOption('Aa', AppTextStyles.spaceMono,
-            timerState.fontFamily == AppTextStyles.spaceMono, () {
-          timerNotifier.updateFontFamily(AppTextStyles.spaceMono);
+            localSettings.fontFamily == AppTextStyles.spaceMono, () {
+          localSettings = AppTextStyles.spaceMono;
         }),
         const SizedBox(
           width: 10,
         ),
         _buildFontOption('Aa', AppTextStyles.robotoSlab,
-            timerState.fontFamily == AppTextStyles.robotoSlab, () {
-          timerNotifier.updateFontFamily(AppTextStyles.robotoSlab);
+            localSettings.fontFamily == AppTextStyles.robotoSlab, () {
+          localSettings = AppTextStyles.robotoSlab;
         }),
       ],
     );
   }
 
-  Widget _buildFontColumn(timerState, timerNotifier) {
+  Widget _buildFontColumn(localSettings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFontOption('Aa', AppTextStyles.kumbhSans,
-            timerState.fontFamily == AppTextStyles.kumbhSans, () {
-          timerNotifier.updateFontFamily(AppTextStyles.kumbhSans);
+            localSettings.fontFamily == AppTextStyles.kumbhSans, () {
+          localSettings.fontFamily = AppTextStyles.kumbhSans;
         }),
-        const SizedBox(height: 10),
+        const SizedBox(
+          width: 10,
+        ),
         _buildFontOption('Aa', AppTextStyles.spaceMono,
-            timerState.fontFamily == AppTextStyles.spaceMono, () {
-          timerNotifier.updateFontFamily(AppTextStyles.spaceMono);
+            localSettings.fontFamily == AppTextStyles.spaceMono, () {
+          localSettings = AppTextStyles.spaceMono;
         }),
-        const SizedBox(height: 10),
+        const SizedBox(
+          width: 10,
+        ),
         _buildFontOption('Aa', AppTextStyles.robotoSlab,
-            timerState.fontFamily == AppTextStyles.robotoSlab, () {
-          timerNotifier.updateFontFamily(AppTextStyles.robotoSlab);
+            localSettings.fontFamily == AppTextStyles.robotoSlab, () {
+          localSettings = AppTextStyles.robotoSlab;
         }),
       ],
     );
   }
 
-  Widget _buildColorRow(timerState, timerNotifier) {
+  Widget _buildColorRow(localSettings) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildColorOption(AppColors.orangeRed, timerState.color == AppColors.orangeRed,
+        _buildColorOption(
+            AppColors.orangeRed, localSettings.color == AppColors.orangeRed,
             () {
-          timerNotifier.updateColor(AppColors.orangeRed);
+          localSettings.color = AppColors.orangeRed;
         }),
         const SizedBox(
           width: 10,
         ),
         _buildColorOption(
-            AppColors.lightBlue, timerState.color == AppColors.lightBlue, () {
-          timerNotifier.updateColor(AppColors.lightBlue);
+            AppColors.lightBlue, localSettings.color == AppColors.lightBlue,
+            () {
+          localSettings = AppColors.lightBlue;
         }),
         const SizedBox(
           width: 10,
         ),
         _buildColorOption(
-            AppColors.lightPurle,  timerState.color == AppColors.lightPurle, () {
-          timerNotifier.updateColor(AppColors.lightPurle);
+            AppColors.lightPurle, localSettings.color == AppColors.lightPurle,
+            () {
+          localSettings = AppColors.lightPurle;
         }),
       ],
     );
   }
 
-  Widget _buildColorColumn(timerState, timerNotifier) {
+  Widget _buildColorColumn(localSettings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildColorOption(Colors.red, timerState.color == Colors.red,
+        _buildColorOption(
+            AppColors.orangeRed, localSettings.color == AppColors.orangeRed,
             () {
-          timerNotifier.updateColor(Colors.red);
+          localSettings.color = AppColors.orangeRed;
         }),
-        const SizedBox(height: 10),
+        const SizedBox(
+          width: 10,
+        ),
         _buildColorOption(
-            Colors.cyan, timerState.color == Colors.cyan, () {
-          timerNotifier.updateColor(Colors.cyan);
+            AppColors.lightBlue, localSettings.color == AppColors.lightBlue,
+            () {
+          localSettings = AppColors.lightBlue;
         }),
-        const SizedBox(height: 10),
+        const SizedBox(
+          width: 10,
+        ),
         _buildColorOption(
-            Colors.purple, timerState.color == Colors.purple, () {
-          timerNotifier.updateColor(Colors.purple);
+            AppColors.lightPurle, localSettings.color == AppColors.lightPurle,
+            () {
+          localSettings = AppColors.lightPurle;
         }),
       ],
     );
@@ -271,7 +320,7 @@ class SettingsScreen extends ConsumerWidget {
           text,
           style: TextStyle(
             fontFamily: fontFamily,
-            fontSize: 20,
+            fontSize: AppTextStyles.h3FontSize,
             color: isActive ? Colors.white : Colors.black,
           ),
         ),
@@ -279,8 +328,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildColorOption(
-      Color color, bool isActive, VoidCallback onTap) {
+  Widget _buildColorOption(Color color, bool isActive, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: CircleAvatar(

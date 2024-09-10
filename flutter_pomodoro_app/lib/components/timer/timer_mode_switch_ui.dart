@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
+import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,7 +18,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
         borderRadius: BorderRadius.circular(31.5),
       ),
       padding: const EdgeInsets.symmetric(vertical: 7.5),
-      width: 370,
+      width: 373,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -26,21 +27,21 @@ class TimerModeSwitcherUI extends ConsumerWidget {
             label: 'pomodoro',
             isActive: timerState.mode == TimerMode.pomodoro,
             onPressed: () => timerNotifier.setMode(TimerMode.pomodoro),
-            color: timerState.color
+            state: timerState
           ),
           _buildModeButton(
             context: context,
             label: 'short break',
             isActive: timerState.mode == TimerMode.shortBreak,
             onPressed: () => timerNotifier.setMode(TimerMode.shortBreak),
-            color: timerState.color
+            state: timerState
           ),
           _buildModeButton(
             context: context,
             label: 'long break',
             isActive: timerState.mode == TimerMode.longBreak,
             onPressed: () => timerNotifier.setMode(TimerMode.longBreak),
-            color: timerState.color
+            state: timerState
           ),
         ],
       ),
@@ -52,7 +53,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
     required String label,
     required bool isActive,
     required VoidCallback onPressed,
-    required Color color
+    required TimerState state
   }) {
     return Center(
       // child: Padding(
@@ -60,7 +61,7 @@ class TimerModeSwitcherUI extends ConsumerWidget {
         child: TextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(
-            backgroundColor: isActive ? color : Colors.transparent,
+            backgroundColor: isActive ? state.color : Colors.transparent,
             maximumSize: const Size(120, 48),
             minimumSize: const Size(120, 48),
             shape: RoundedRectangleBorder(
@@ -70,9 +71,9 @@ class TimerModeSwitcherUI extends ConsumerWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 16,
-              color: isActive ? Colors.black : Colors.white.withOpacity(0.5),
-              fontFamily: 'RobotoSlab',
+              fontSize: AppTextStyles.bodyFontSize,
+              color: isActive ? AppColors.darkBlue : AppColors.lightBlueGray,
+              fontFamily: state.fontFamily,
               fontWeight: FontWeight.bold,
             ),
           ),
