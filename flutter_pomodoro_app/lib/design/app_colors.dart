@@ -14,4 +14,5 @@ class AppColors {
   static const Color shawdowDarkBlue = Color(0xFF121530);
   static const Color cobalt =Color(0xFF161932);
   static const Color backgroundColor = Color(0xFF1E1E2E);
+  static const Color divider = Color(0xFF979797);
 }

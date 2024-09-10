@@ -7,12 +7,9 @@ class AppTextStyles {
   static const double bodyFontSize = 14;
   static const double body2FontSize = 12;
 
-  static const double h1LetterSpacing = 5;
-  static const double h2LetterSpacing = 28;
-  static const double h3LetterSpacing = 16;
-  static const double h4LetterSpacing = 13;
-  static const double bodyLetterSpacing = 14;
-  static const double body2LetterSpacing = 12;
+  static const double h1LetterSpacing = -5;
+  static const double h3LetterSpacing = 15;
+  static const double h4LetterSpacing = 5;
 
   static const double h1LineSpacing = 1.2;
   static const double h2LineSpacing = 1.214;

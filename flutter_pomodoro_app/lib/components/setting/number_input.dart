@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
+import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 
 class NumberInput extends StatefulWidget {
   final int initialValue;
   final int minValue;
   final int maxValue;
   final String title;
-  // final void Function(int) onValueChanged;
+  final void Function(int) onValueChanged;
 
   const NumberInput({
     super.key,
@@ -14,7 +15,7 @@ class NumberInput extends StatefulWidget {
     required this.title,
     this.minValue = 0,
     this.maxValue = 60,
-    // required this.onValueChanged,
+    required this.onValueChanged,
   });
 
   @override
@@ -35,7 +36,7 @@ class _NumberInputState extends State<NumberInput> {
       setState(() {
         _value++;
       });
-      // widget.onValueChanged(_value);
+      widget.onValueChanged(_value);
     }
   }
 
@@ -44,16 +45,27 @@ class _NumberInputState extends State<NumberInput> {
       setState(() {
         _value--;
       });
-      // widget.onValueChanged(_value);
+      widget.onValueChanged(_value);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.title),
-        Container(
+      Text(
+        widget.title,
+        style: const TextStyle(
+            fontFamily: AppTextStyles.kumbhSans,
+            fontSize: AppTextStyles.body2FontSize,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkBlue,
+            height: AppTextStyles.body2LineSpacing),
+      ),
+      const SizedBox(height: 10),
+      Container(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
           width: 140,
           decoration: BoxDecoration(

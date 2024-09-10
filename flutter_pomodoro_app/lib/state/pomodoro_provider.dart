@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +18,7 @@ enum TimerMode {
 class TimerState {
   static const int pomodoroDefaut = 1500;
   static const int longBreakDefaut = 900;
-  static const int shortBreakDefaut = 600;
+  static const int shortBreakDefaut = 300;
   final int timeRemaining;
   final bool isRunning;
   final TimerMode mode;
@@ -24,6 +26,7 @@ class TimerState {
   final int initShortBreak;
   final int initLongBreak;
   final String fontFamily;
+  final Color color;
 
   TimerState(
       {required this.timeRemaining,
@@ -32,7 +35,8 @@ class TimerState {
       required this.initLongBreak,
       required this.initShortBreak,
       required this.initPomodoro,
-      required this.fontFamily});
+      required this.fontFamily,
+      required this.color});
 
   TimerState copyWith(
       {int? timeRemaining,
@@ -41,15 +45,17 @@ class TimerState {
       int? initLongBreak,
       int? initPomodoro,
       int? initShortBreak,
-      String? fontFamily}) {
+      String? fontFamily,
+      Color? color}) {
     return TimerState(
         timeRemaining: timeRemaining ?? this.timeRemaining,
         isRunning: isRunning ?? this.isRunning,
         mode: mode ?? this.mode,
-        initLongBreak: initLongBreak ?? longBreakDefaut,
-        initPomodoro: initPomodoro ?? pomodoroDefaut,
-        initShortBreak: initShortBreak ?? shortBreakDefaut,
-        fontFamily: fontFamily ?? AppTextStyles.kumbhSans);
+        initLongBreak: initLongBreak ?? this.initLongBreak,
+        initPomodoro: initPomodoro ?? this.initPomodoro,
+        initShortBreak: initShortBreak ?? this.initShortBreak,
+        fontFamily: fontFamily ?? this.fontFamily,
+        color: color ?? this.color);
   }
 }
 
@@ -63,7 +69,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
             initLongBreak: TimerState.longBreakDefaut,
             initPomodoro: TimerState.pomodoroDefaut,
             initShortBreak: TimerState.shortBreakDefaut,
-            fontFamily: AppTextStyles.kumbhSans));
+            fontFamily: AppTextStyles.kumbhSans,
+            color: AppColors.orangeRed));
 
   void startTimer() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -95,7 +102,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
   void setMode(TimerMode mode) {
     state = state.copyWith(
       mode: mode,
-      timeRemaining: getInitialDuration(),
+      timeRemaining: getInitialDuration(mode),
       isRunning: false,
     );
   }
@@ -114,8 +121,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
     return (time ~/ sixty).toString().padLeft(2, '0');
   }
 
-  int getInitialDuration() {
-    switch (state.mode) {
+  int getInitialDuration(TimerMode mode) {
+    switch (mode) {
       case TimerMode.pomodoro:
         return state.initPomodoro;
       case TimerMode.shortBreak:
@@ -128,7 +135,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   updatePomodoroDuration(int value) {
-    state = state.copyWith(initPomodoro: value * 60);
+    state = state.copyWith(initPomodoro: value);
   }
 
   updateShortBreakDuration(int value) {
@@ -137,5 +144,13 @@ class TimerNotifier extends StateNotifier<TimerState> {
 
   updateLongBreakDuration(int value) {
     state = state.copyWith(initLongBreak: value);
+  }
+
+  updateFontFamily(String font){
+    state = state.copyWith(fontFamily: font);
+  }
+
+  updateColor(Color color){
+    state = state.copyWith(color: color);
   }
 }
