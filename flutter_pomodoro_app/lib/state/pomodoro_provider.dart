@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
+import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
@@ -134,28 +135,13 @@ class TimerNotifier extends StateNotifier<TimerState> {
     }
   }
 
-  updatePomodoroDuration(int value) {
-    state = state.copyWith(initPomodoro: value);
+  updateSettings(LocalSettings localSettings) {
+    state = state.copyWith(
+        initPomodoro: localSettings.initPomodoro,
+        initLongBreak: localSettings.initLongBreak,
+        initShortBreak: localSettings.initShortBreak,
+        fontFamily: localSettings.fontFamily,
+        color: localSettings.color);
     setMode(state.mode);
-  }
-
-  updateShortBreakDuration(int value) {
-    state = state.copyWith(initShortBreak: value);
-    setMode(state.mode);
-  }
-
-  updateLongBreakDuration(int value) {
-    state = state.copyWith(initLongBreak: value);
-    setMode(state.mode);
-  }
-
-  updateFontFamily(String font){
-    state = state.copyWith(fontFamily: font);
-    // setMode(state.mode);
-  }
-
-  updateColor(Color color){
-    state = state.copyWith(color: color);
-    // setMode(state.mode);
   }
 }

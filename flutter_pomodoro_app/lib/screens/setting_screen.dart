@@ -3,49 +3,9 @@ import 'package:flutter_pomodoro_app/components/setting/divider.dart';
 import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
+import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-class LocalSettings {
-  int initPomodoro;
-  int initShortBreak;
-  int initLongBreak;
-  String fontFamily;
-  Color color;
-
-  LocalSettings({
-    required this.initPomodoro,
-    required this.initShortBreak,
-    required this.initLongBreak,
-    required this.fontFamily,
-    required this.color,
-  });
-
-  LocalSettings copyWith(
-      {int? initPomodoro,
-      int? initLongBreak,
-      int? initShortBreak,
-      String? fontFamily,
-      Color? color}) {
-    return LocalSettings(
-        initLongBreak: initLongBreak ?? this.initLongBreak,
-        initPomodoro: initPomodoro ?? this.initPomodoro,
-        initShortBreak: initShortBreak ?? this.initShortBreak,
-        fontFamily: fontFamily ?? this.fontFamily,
-        color: color ?? this.color);
-  }
-}
-
-final localSettingsProvider = StateProvider<LocalSettings>((ref) {
-  final globalSettings = ref.read(timerProvider);
-  return LocalSettings(
-    initPomodoro: globalSettings.initPomodoro,
-    initShortBreak: globalSettings.initShortBreak,
-    initLongBreak: globalSettings.initLongBreak,
-    fontFamily: globalSettings.fontFamily,
-    color: globalSettings.color,
-  );
-});
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -53,8 +13,9 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localSettings = ref.watch(localSettingsProvider);
-    final timerState = ref.read(timerProvider);
+    final localSettingsNotifier = ref.read(localSettingsProvider.notifier);
     final timerNotifier = ref.read(timerProvider.notifier);
+    final timerState = ref.read(timerProvider);
     final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Dialog(
@@ -104,8 +65,10 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 10),
               Container(
                 child: isTablet
-                    ? _buildFontRow(localSettings)
-                    : _buildFontColumn(localSettings),
+                    ? _buildFontRow(
+                        timerState, localSettings, localSettingsNotifier)
+                    : _buildFontColumn(
+                        timerState, localSettings, localSettingsNotifier),
               )
             ]),
             const CustomDivider(spaceBefore: 20, spaceAfter: 20),
@@ -123,6 +86,7 @@ class SettingsScreen extends ConsumerWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  timerNotifier.updateSettings(localSettings);
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
@@ -147,17 +111,11 @@ class SettingsScreen extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildNumberInput('Pomodoro', localSettings.initPomodoro, 25, 60,
-            (value) {
-          localSettings.initPomodoro = value * 60;
-        }),
+            localSettings.initPomodoro),
         _buildNumberInput('Short Break', localSettings.initShortBreak, 5, 15,
-            (value) {
-          localSettings.initShortBreak = value * 60;
-        }),
+            localSettings.initShortBreak),
         _buildNumberInput('Long Break', localSettings.initLongBreak, 15, 30,
-            (value) {
-          localSettings.initLongBreak = value * 60;
-        }),
+            localSettings.initLongBreak),
       ],
     );
   }
@@ -166,69 +124,51 @@ class SettingsScreen extends ConsumerWidget {
     return Column(
       children: [
         _buildNumberInput('Pomodoro', localSettings.initPomodoro, 25, 60,
-            (value) {
-          localSettings.initPomodoro = value * 60;
-        }),
+            localSettings.initPomodoro),
         _buildNumberInput('Short Break', localSettings.initShortBreak, 5, 15,
-            (value) {
-          localSettings.initShortBreak = value * 60;
-        }),
+            localSettings.initShortBreak),
         _buildNumberInput('Long Break', localSettings.initLongBreak, 15, 30,
-            (value) {
-          localSettings.initLongBreak = value * 60;
-        }),
+            localSettings.initLongBreak),
       ],
     );
   }
 
-  Widget _buildFontRow(localSettings) {
+  Widget _buildFontRow(timerState, localSettings, localSettingsNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildFontOption('Aa', AppTextStyles.kumbhSans,
-            localSettings.fontFamily == AppTextStyles.kumbhSans, () {
-          localSettings.fontFamily = AppTextStyles.kumbhSans;
-        }),
+        _buildFontOption('Aa', AppTextStyles.kumbhSans, timerState,
+            localSettings, localSettingsNotifier),
         const SizedBox(
           width: 10,
         ),
-        _buildFontOption('Aa', AppTextStyles.spaceMono,
-            localSettings.fontFamily == AppTextStyles.spaceMono, () {
-          localSettings = AppTextStyles.spaceMono;
-        }),
+        _buildFontOption('Aa', AppTextStyles.robotoSlab, timerState,
+            localSettings, localSettingsNotifier),
         const SizedBox(
           width: 10,
         ),
-        _buildFontOption('Aa', AppTextStyles.robotoSlab,
-            localSettings.fontFamily == AppTextStyles.robotoSlab, () {
-          localSettings = AppTextStyles.robotoSlab;
-        }),
+        _buildFontOption('Aa', AppTextStyles.spaceMono, timerState,
+            localSettings, localSettingsNotifier),
       ],
     );
   }
 
-  Widget _buildFontColumn(localSettings) {
+  Widget _buildFontColumn(timerState, localSettings, localSettingsNotifier) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildFontOption('Aa', AppTextStyles.kumbhSans,
-            localSettings.fontFamily == AppTextStyles.kumbhSans, () {
-          localSettings.fontFamily = AppTextStyles.kumbhSans;
-        }),
+        _buildFontOption('Aa', AppTextStyles.kumbhSans, timerState,
+            localSettings, localSettingsNotifier),
         const SizedBox(
           width: 10,
         ),
-        _buildFontOption('Aa', AppTextStyles.spaceMono,
-            localSettings.fontFamily == AppTextStyles.spaceMono, () {
-          localSettings = AppTextStyles.spaceMono;
-        }),
+        _buildFontOption('Aa', AppTextStyles.robotoSlab, timerState,
+            localSettings, localSettingsNotifier),
         const SizedBox(
           width: 10,
         ),
-        _buildFontOption('Aa', AppTextStyles.robotoSlab,
-            localSettings.fontFamily == AppTextStyles.robotoSlab, () {
-          localSettings = AppTextStyles.robotoSlab;
-        }),
+        _buildFontOption('Aa', AppTextStyles.spaceMono, timerState,
+            localSettings, localSettingsNotifier),
       ],
     );
   }
@@ -292,27 +232,34 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildNumberInput(
-      String title, int time, int min, int max, Function(int) onValueChanged) {
+      String title, int time, int min, int max, int value) {
     return NumberInput(
       title: title,
       initialValue: time ~/ 60,
       minValue: min,
       maxValue: max,
-      onValueChanged: onValueChanged,
+      onValueChanged: (value) => value * 60,
     );
   }
 
   Widget _buildFontOption(
-      String text, String fontFamily, bool isActive, VoidCallback onTap) {
+      String text,
+      String fontFamily,
+      TimerState timerState,
+      LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier) {
+    bool currentActive = timerState.fontFamily == fontFamily;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => localSettingsNotifier.updateFont(fontFamily),
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.black : Colors.transparent,
+          color: currentActive ? Colors.black : Colors.transparent,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isActive ? Colors.transparent : Colors.grey.shade300,
+            color: localSettings.fontFamily == fontFamily
+                ? Colors.transparent
+                : Colors.grey.shade300,
             width: 1.0,
           ),
         ),
@@ -321,7 +268,7 @@ class SettingsScreen extends ConsumerWidget {
           style: TextStyle(
             fontFamily: fontFamily,
             fontSize: AppTextStyles.h3FontSize,
-            color: isActive ? Colors.white : Colors.black,
+            color: currentActive ? Colors.white : Colors.black,
           ),
         ),
       ),
