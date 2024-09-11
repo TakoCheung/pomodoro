@@ -19,71 +19,89 @@ class SettingsScreen extends ConsumerWidget {
     final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-      child: Container(
-        height: 490,
-        width: 540,
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: AppTextStyles.h2FontSize,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: AppTextStyles.kumbhSans,
-                  height: AppTextStyles.h2LineSpacing,
-                  color: AppColors.darkDarkBlue,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        child: Stack(clipBehavior: Clip.none, children: [
+          Container(
+            clipBehavior: Clip.none,
+            height: 464,
+            width: 540,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Settings',
+                        style: TextStyle(
+                          fontSize: AppTextStyles.h2FontSize,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: AppTextStyles.kumbhSans,
+                          height: AppTextStyles.h2LineSpacing,
+                          color: AppColors.darkDarkBlue,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ]),
+                const CustomDivider(spaceAfter: 30, spaceBefore: 25),
+                const Text(
+                  'TIME (MINUTES)',
+                  style: AppTextStyles.h4,
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ]),
-            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
-            const Text(
-              'TIME (MINUTES)',
-              style: AppTextStyles.h4,
+                const SizedBox(height: 10),
+                isTablet
+                    ? _buildTimeRow(localSettings, localSettingsNotifier)
+                    : _buildTimeColumn(localSettings, localSettingsNotifier),
+                const CustomDivider(
+                  spaceBefore: 30,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'FONT',
+                        style: AppTextStyles.h4,
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        child: isTablet
+                            ? _buildFontRow(timerState, localSettings,
+                                localSettingsNotifier)
+                            : _buildFontColumn(timerState, localSettings,
+                                localSettingsNotifier),
+                      )
+                    ]),
+                const CustomDivider(),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'COLOR',
+                        style: AppTextStyles.h4,
+                      ),
+                      const SizedBox(height: 10),
+                      isTablet
+                          ? _buildColorRow(
+                              localSettings, localSettingsNotifier, timerState)
+                          : _buildColorColumn(
+                              localSettings, localSettingsNotifier, timerState),
+                    ]),
+              ],
             ),
-            const SizedBox(height: 10),
-            isTablet
-                ? _buildTimeRow(localSettings)
-                : _buildTimeColumn(localSettings),
-            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
-            const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text(
-                'FONT',
-                style: AppTextStyles.h4,
-              ),
-              const SizedBox(height: 10),
-              Container(
-                child: isTablet
-                    ? _buildFontRow(
-                        timerState, localSettings, localSettingsNotifier)
-                    : _buildFontColumn(
-                        timerState, localSettings, localSettingsNotifier),
-              )
-            ]),
-            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text(
-                'COLOR',
-                style: AppTextStyles.h4,
-              ),
-              const SizedBox(height: 10),
-              isTablet
-                  ? _buildColorRow(localSettings)
-                  : _buildColorColumn(localSettings),
-            ]),
-            const CustomDivider(spaceBefore: 20, spaceAfter: 20),
-            Center(
+          ),
+          Positioned(
+            bottom: -20,
+            left: 0,
+            right: 0,
+            child: Center(
               child: ElevatedButton(
                 onPressed: () {
                   timerNotifier.updateSettings(localSettings);
@@ -92,43 +110,46 @@ class SettingsScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.orangeRed,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
+                    borderRadius: BorderRadius.circular(26.5),
                   ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 ),
-                child: const Text('Apply', style: TextStyle(fontSize: 16)),
+                child: const Text('Apply',
+                    style: TextStyle(
+                        fontSize: AppTextStyles.h3FontSize,
+                        fontFamily: AppTextStyles.kumbhSans,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.white)),
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          )
+        ]));
   }
 
-  Widget _buildTimeRow(localSettings) {
+  Widget _buildTimeRow(localSettings, localSettingsNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildNumberInput('Pomodoro', localSettings.initPomodoro, 25, 60,
-            localSettings.initPomodoro),
-        _buildNumberInput('Short Break', localSettings.initShortBreak, 5, 15,
-            localSettings.initShortBreak),
-        _buildNumberInput('Long Break', localSettings.initLongBreak, 15, 30,
-            localSettings.initLongBreak),
+        _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro, 25,
+            60, localSettingsNotifier),
+        _buildNumberInput(TimerMode.shortBreak, localSettings.initShortBreak, 5,
+            15, localSettingsNotifier),
+        _buildNumberInput(TimerMode.longBreak, localSettings.initLongBreak, 15,
+            30, localSettingsNotifier),
       ],
     );
   }
 
-  Widget _buildTimeColumn(localSettings) {
+  Widget _buildTimeColumn(localSettings, localSettingsNotifier) {
     return Column(
       children: [
-        _buildNumberInput('Pomodoro', localSettings.initPomodoro, 25, 60,
-            localSettings.initPomodoro),
-        _buildNumberInput('Short Break', localSettings.initShortBreak, 5, 15,
-            localSettings.initShortBreak),
-        _buildNumberInput('Long Break', localSettings.initLongBreak, 15, 30,
-            localSettings.initLongBreak),
+        _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro, 25,
+            60, localSettingsNotifier),
+        _buildNumberInput(TimerMode.shortBreak, localSettings.initShortBreak, 5,
+            15, localSettingsNotifier),
+        _buildNumberInput(TimerMode.longBreak, localSettings.initLongBreak, 15,
+            30, localSettingsNotifier),
       ],
     );
   }
@@ -140,12 +161,12 @@ class SettingsScreen extends ConsumerWidget {
         _buildFontOption('Aa', AppTextStyles.kumbhSans, timerState,
             localSettings, localSettingsNotifier),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
         _buildFontOption('Aa', AppTextStyles.robotoSlab, timerState,
             localSettings, localSettingsNotifier),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
         _buildFontOption('Aa', AppTextStyles.spaceMono, timerState,
             localSettings, localSettingsNotifier),
@@ -160,12 +181,12 @@ class SettingsScreen extends ConsumerWidget {
         _buildFontOption('Aa', AppTextStyles.kumbhSans, timerState,
             localSettings, localSettingsNotifier),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
         _buildFontOption('Aa', AppTextStyles.robotoSlab, timerState,
             localSettings, localSettingsNotifier),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
         _buildFontOption('Aa', AppTextStyles.spaceMono, timerState,
             localSettings, localSettingsNotifier),
@@ -173,72 +194,54 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildColorRow(localSettings) {
+  Widget _buildColorRow(localSettings, localSettingsNotifier, timerState) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildColorOption(
-            AppColors.orangeRed, localSettings.color == AppColors.orangeRed,
-            () {
-          localSettings.color = AppColors.orangeRed;
-        }),
+        _buildColorOption(AppColors.orangeRed, localSettings,
+            localSettingsNotifier, timerState),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
-        _buildColorOption(
-            AppColors.lightBlue, localSettings.color == AppColors.lightBlue,
-            () {
-          localSettings = AppColors.lightBlue;
-        }),
+        _buildColorOption(AppColors.lightBlue, localSettings,
+            localSettingsNotifier, timerState),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
-        _buildColorOption(
-            AppColors.lightPurle, localSettings.color == AppColors.lightPurle,
-            () {
-          localSettings = AppColors.lightPurle;
-        }),
+        _buildColorOption(AppColors.lightPurle, localSettings,
+            localSettingsNotifier, timerState),
       ],
     );
   }
 
-  Widget _buildColorColumn(localSettings) {
+  Widget _buildColorColumn(localSettings, localSettingsNotifier, timerState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildColorOption(
-            AppColors.orangeRed, localSettings.color == AppColors.orangeRed,
-            () {
-          localSettings.color = AppColors.orangeRed;
-        }),
+        _buildColorOption(AppColors.orangeRed, localSettings,
+            localSettingsNotifier, timerState),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
-        _buildColorOption(
-            AppColors.lightBlue, localSettings.color == AppColors.lightBlue,
-            () {
-          localSettings = AppColors.lightBlue;
-        }),
+        _buildColorOption(AppColors.lightBlue, localSettings,
+            localSettingsNotifier, timerState),
         const SizedBox(
-          width: 10,
+          width: 16,
         ),
-        _buildColorOption(
-            AppColors.lightPurle, localSettings.color == AppColors.lightPurle,
-            () {
-          localSettings = AppColors.lightPurle;
-        }),
+        _buildColorOption(AppColors.lightPurle, localSettings,
+            localSettingsNotifier, timerState),
       ],
     );
   }
 
   Widget _buildNumberInput(
-      String title, int time, int min, int max, int value) {
+      TimerMode mode, int timeInSec, int min, int max, localSettingsNotifier) {
     return NumberInput(
-      title: title,
-      initialValue: time ~/ 60,
+      title: localSettingsNotifier.getName(mode),
+      initialValue: timeInSec ~/ 60,
       minValue: min,
       maxValue: max,
-      onValueChanged: (value) => value * 60,
+      onValueChanged: (value) => localSettingsNotifier.updateTime(mode, value),
     );
   }
 
@@ -252,14 +255,17 @@ class SettingsScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: () => localSettingsNotifier.updateFont(fontFamily),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        width: 40,
+        height: 40,
+        padding: const EdgeInsets.all(12.5),
         decoration: BoxDecoration(
           color: currentActive ? Colors.black : Colors.transparent,
           shape: BoxShape.circle,
           border: Border.all(
-            color: localSettings.fontFamily == fontFamily
+            strokeAlign: 9,
+            color: localSettings.fontFamily != fontFamily
                 ? Colors.transparent
-                : Colors.grey.shade300,
+                : AppColors.lightGray,
             width: 1.0,
           ),
         ),
@@ -275,15 +281,31 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildColorOption(Color color, bool isActive, VoidCallback onTap) {
+  Widget _buildColorOption(Color color, LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier, TimerState timerState) {
     return GestureDetector(
-      onTap: onTap,
-      child: CircleAvatar(
-        backgroundColor: color,
-        radius: 25,
-        child: isActive ? const Icon(Icons.check, color: Colors.white) : null,
-      ),
-    );
+        onTap: () => localSettingsNotifier.updateColor(color),
+        child: Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: localSettings.color != color
+                  ? Colors.transparent
+                  : AppColors.lightGray,
+              width: 1.0,
+            ),
+          ),
+          child: CircleAvatar(
+            backgroundColor: color,
+            // radius: 20,
+            child: timerState.color == color
+                ? const Icon(Icons.check, color: Colors.white)
+                : null,
+          ),
+        ));
   }
 }
 

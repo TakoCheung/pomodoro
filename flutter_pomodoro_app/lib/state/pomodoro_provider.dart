@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
+import 'package:flutter_pomodoro_app/design/app_magic_number.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,7 +62,6 @@ class TimerState {
 }
 
 class TimerNotifier extends StateNotifier<TimerState> {
-  static const int sixty = 60;
   TimerNotifier()
       : super(TimerState(
             timeRemaining: TimerState.pomodoroDefaut,
@@ -109,17 +109,17 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   double progress() {
-    return state.timeRemaining % sixty / sixty;
+    return state.timeRemaining % AppMagicNumber.sixty / AppMagicNumber.sixty;
   }
 
   String timeFormatted(int time) {
-    final minutes = (time ~/ sixty).toString().padLeft(2, '0');
-    final secs = (time % sixty).toString().padLeft(2, '0');
+    final minutes = (time ~/ AppMagicNumber.sixty).toString().padLeft(2, '0');
+    final secs = (time % AppMagicNumber.sixty).toString().padLeft(2, '0');
     return '$minutes:$secs';
   }
 
   String minuteFormatted(int time) {
-    return (time ~/ sixty).toString().padLeft(2, '0');
+    return (time ~/ AppMagicNumber.sixty).toString().padLeft(2, '0');
   }
 
   int getInitialDuration(TimerMode mode) {
