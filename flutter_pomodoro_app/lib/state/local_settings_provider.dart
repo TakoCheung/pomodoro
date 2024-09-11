@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_magic_number.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,5 +56,30 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
 
   void updateColor(Color color) {
     state = state.copyWith(color: color);
+  }
+
+  void updateTime(TimerMode mode, int timeInMin){
+    switch (mode) {
+      case TimerMode.pomodoro:
+        state = state.copyWith(initPomodoro: timeInMin * AppMagicNumber.sixty);
+        break;
+      case TimerMode.shortBreak:
+        state = state.copyWith(initShortBreak: timeInMin * AppMagicNumber.sixty);
+        break;
+      case TimerMode.longBreak:
+        state = state.copyWith(initLongBreak: timeInMin * AppMagicNumber.sixty);
+        break;
+    }
+  }
+
+  String getName(TimerMode mode){
+    switch (mode) {
+      case TimerMode.pomodoro:
+        return "Pomodoro";
+      case TimerMode.shortBreak:
+        return "Short Break";
+      case TimerMode.longBreak:
+        return "Long Break";
+    }
   }
 }

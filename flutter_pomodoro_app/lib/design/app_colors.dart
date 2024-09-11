@@ -15,4 +15,5 @@ class AppColors {
   static const Color cobalt =Color(0xFF161932);
   static const Color backgroundColor = Color(0xFF1E1E2E);
   static const Color divider = Color(0xFF979797);
+  static const Color white = Color(0xFFFFFFFF);
 }

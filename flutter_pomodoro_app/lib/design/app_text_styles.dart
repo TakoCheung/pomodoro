@@ -25,10 +25,6 @@ class AppTextStyles {
   static const String robotoSlab = 'RobotoSlab';
   static const String spaceMono = 'SpaceMono';
 
-  static const String pomodoro = 'pomodoro';
-  static const String shortBreak = 'short break';
-  static const String longBreak = 'long break';
-
   static const TextStyle h4 = TextStyle(
     fontSize: AppTextStyles.h4FontSize,
     fontWeight: FontWeight.bold,
