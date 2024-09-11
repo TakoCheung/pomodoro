@@ -316,10 +316,10 @@ packages:
     dependency: "direct dev"
     description:
       name: golden_toolkit
-      sha256: f032dfaf996c3d919dff89cb2a5a306d20519f0f500badc73be7f8f464c2206d
+      sha256: "8f74adab33154fe7b731395782797021f97d2edc52f7bfb85ff4f1b5c4a215f0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.0"
+    version: "0.15.0"
   graphs:
     dependency: transitive
     description:

@@ -72,9 +72,9 @@ class TimerNotifier extends StateNotifier<TimerState> {
             initShortBreak: TimerState.shortBreakDefaut,
             fontFamily: AppTextStyles.kumbhSans,
             color: AppColors.orangeRed));
-
+  Timer? _timer;
   void startTimer() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!state.isRunning) {
         timer.cancel();
       } else if (state.timeRemaining > 0) {
@@ -143,5 +143,11 @@ class TimerNotifier extends StateNotifier<TimerState> {
         fontFamily: localSettings.fontFamily,
         color: localSettings.color);
     setMode(state.mode);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 }
