@@ -8,18 +8,24 @@ class NumberInput extends StatefulWidget {
   final int maxValue;
   final String title;
   final void Function(int) onValueChanged;
+  final bool isTablet;
 
-  const NumberInput({
-    super.key,
-    required this.initialValue,
-    required this.title,
-    this.minValue = 0,
-    this.maxValue = 60,
-    required this.onValueChanged,
-  });
+  const NumberInput(
+      {super.key,
+      required this.initialValue,
+      required this.title,
+      this.minValue = 0,
+      this.maxValue = 60,
+      required this.onValueChanged,
+      required this.isTablet});
 
   @override
-  _NumberInputState createState() => _NumberInputState();
+  State<StatefulWidget> createState() {
+    return _NumberInputState();
+  }
+
+  // @override
+  // _NumberInputState createState() => _NumberInputState();
 }
 
 class _NumberInputState extends State<NumberInput> {
@@ -51,10 +57,25 @@ class _NumberInputState extends State<NumberInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return widget.isTablet
+        ? LayoutBuilder(builder: (context, constraints) {
+            return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _getWidgets());
+          })
+        : LayoutBuilder(builder: (context, constraints) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Align vertically center
+              children: _getWidgets(),
+            );
+          });
+  }
+
+  List<Widget> _getWidgets() {
+    return [
       Text(
         widget.title,
         style: const TextStyle(
@@ -66,45 +87,53 @@ class _NumberInputState extends State<NumberInput> {
       ),
       const SizedBox(height: 10),
       Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           width: 140,
+          height: 40,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-              color: Colors.grey.shade300,
-              width: 1.0,
-            ),
+            borderRadius: BorderRadius.circular(15.0),
             color: AppColors.lightGray,
           ),
-          child: SizedBox(
-            height: 40,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('$_value'),
-                Column(mainAxisSize: MainAxisSize.min, children: [
-                  IconButton(
-                      icon: const Icon(Icons.keyboard_arrow_up),
-                      onPressed: _increment,
-                      constraints: const BoxConstraints(maxHeight: 20),
-                      padding: const EdgeInsets.all(0),
-                      style: const ButtonStyle(
-                        iconSize: WidgetStatePropertyAll(20),
-                      )),
-                  IconButton(
-                    icon: const Icon(Icons.keyboard_arrow_down),
-                    onPressed: _decrement,
-                    constraints: const BoxConstraints(maxHeight: 20),
-                    padding: const EdgeInsets.all(0),
-                    style: const ButtonStyle(
-                      iconSize: WidgetStatePropertyAll(20),
-                    ),
-                  ),
-                ])
-              ],
-            ),
-          ))
-    ]);
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(
+                  '$_value',
+                  style: const TextStyle(
+                      fontSize: AppTextStyles.bodyFontSize,
+                      fontFamily: AppTextStyles.kumbhSans,
+                      fontWeight: FontWeight.bold,
+                      height: AppTextStyles
+                          .body2LineSpacing), // Adjust font size to fit
+                ),
+              ),
+              Container(
+                  margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        flex: 1,
+                        child: IconButton(
+                          icon: const Icon(Icons.keyboard_arrow_up),
+                          onPressed: _increment,
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                      Flexible(
+                        flex: 1,
+                        child: IconButton(
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          onPressed: _decrement,
+                          padding: EdgeInsets.zero,
+                        ),
+                      )
+                    ],
+                  )),
+            ],
+          )),
+    ];
   }
 }
