@@ -19,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
     final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Dialog(
+        key: const Key('SettingsScreen'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         child: Stack(clipBehavior: Clip.none, children: [
           Container(
@@ -102,6 +103,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildTimeRow(localSettings, localSettingsNotifier, isTablet) {
     return Row(
+      key: const Key('timeSection'),
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro, 25,
@@ -116,6 +118,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildTimeColumn(localSettings, localSettingsNotifier, isTablet) {
     return Column(
+      key: const Key('timeSection'),
       children: [
         _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro, 25,
             60, localSettingsNotifier, isTablet),
@@ -132,26 +135,32 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildFonts(
       timerState, localSettings, localSettingsNotifier, isTablet) {
     return isTablet
-        ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text(
-              'FONT',
-              style: AppTextStyles.h4,
-            ),
-            const SizedBox(height: 10),
-            Container(
-                child: _buildFontRow(
-                    timerState, localSettings, localSettingsNotifier))
-          ])
-        : Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text(
-              'FONT',
-              style: AppTextStyles.h4,
-            ),
-            const SizedBox(height: 10),
-            Container(
-                child: _buildFontRow(
-                    timerState, localSettings, localSettingsNotifier))
-          ]);
+        ? Row(
+            key: const Key('fontSection'),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+                const Text(
+                  'FONT',
+                  style: AppTextStyles.h4,
+                ),
+                const SizedBox(height: 10),
+                Container(
+                    child: _buildFontRow(
+                        timerState, localSettings, localSettingsNotifier))
+              ])
+        : Column(
+            key: const Key('fontSection'),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+                const Text(
+                  'FONT',
+                  style: AppTextStyles.h4,
+                ),
+                const SizedBox(height: 10),
+                Container(
+                    child: _buildFontRow(
+                        timerState, localSettings, localSettingsNotifier))
+              ]);
   }
 
   Widget _buildFontRow(timerState, localSettings, localSettingsNotifier) {
@@ -177,22 +186,30 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildColor(
       timerState, localSettings, localSettingsNotifier, isTablet) {
     return isTablet
-        ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text(
-              'COLOR',
-              style: AppTextStyles.h4,
-            ),
-            const SizedBox(height: 10),
-            _buildColorRow(localSettings, localSettingsNotifier, timerState),
-          ])
-        : Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text(
-              'COLOR',
-              style: AppTextStyles.h4,
-            ),
-            const SizedBox(height: 10),
-            _buildColorRow(localSettings, localSettingsNotifier, timerState),
-          ]);
+        ? Row(
+            key: const Key('colorSection'),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+                const Text(
+                  'COLOR',
+                  style: AppTextStyles.h4,
+                ),
+                const SizedBox(height: 10),
+                _buildColorRow(
+                    localSettings, localSettingsNotifier, timerState),
+              ])
+        : Column(
+            key: const Key('colorSection'),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+                const Text(
+                  'COLOR',
+                  style: AppTextStyles.h4,
+                ),
+                const SizedBox(height: 10),
+                _buildColorRow(
+                    localSettings, localSettingsNotifier, timerState),
+              ]);
   }
 
   Widget _buildColorRow(localSettings, localSettingsNotifier, timerState) {
