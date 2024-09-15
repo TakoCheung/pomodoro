@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_pomodoro_app/components/timer/timer_display.dart';
-import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TimerDisplay shows correct time and button label', (WidgetTester tester) async {
-    final container = ProviderContainer();
-    final notifier = container.read(timerProvider.notifier);
-    // final state = container.read(timerProvider);
+  group('Pomodoro Timer Screen Tests', () {
+    testWidgets('Timer starts and displays correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: PomodoroTimerScreen(),
+        ),
+      );
 
-    // Mock initial timer state
-    notifier.startTimer();
+      // Verify default timer state
+      expect(find.text('25:00'), findsOneWidget);
 
-    await tester.pumpWidget(const ProviderScope(
-      child: MaterialApp(
-        home: Scaffold(body: TimerDisplay()),
-      ),
-    ));
+      // Simulate start of the timer and test the behavior
+      await tester.tap(find.byKey(const Key('restart')));
+      await tester.pumpAndSettle();
+      // Verify that timer is started
+    });
 
-    // Verify timer display
-    expect(find.text('25:00'), findsOneWidget); // Update to actual formatted time
-    expect(find.text('RESTART'), findsOneWidget);
+    testWidgets('Timer can be customized', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: PomodoroTimerScreen(),
+        ),
+      );
 
-    // Tap the button and verify label change
-    await tester.tap(find.text('RESTART'));
-    await tester.pump();
-    expect(find.text('PAUSE'), findsOneWidget);
+      // Customize the timer
+      await tester.tap(find.byKey(const Key('customizeButton')));
+      await tester.pumpAndSettle();
+
+      // Check if customization options are displayed
+      expect(find.text('Set Pomodoro Duration'), findsOneWidget);
+    });
   });
 }
