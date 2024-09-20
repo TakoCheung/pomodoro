@@ -8,6 +8,7 @@ class GearIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      key: const Key('settingsButton'),
       iconSize: 28,
       icon: const Icon(
         Icons.settings,
