@@ -37,11 +37,11 @@ void main() {
       );
 
       // Customize the timer
-      await tester.tap(find.byKey(const Key('customizeButton')));
+      await tester.tap(find.byKey(const Key('settingsButton')));
       await tester.pumpAndSettle();
 
       // Check if customization options are displayed
-      expect(find.text('Set Pomodoro Duration'), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
     });
   });
 }
