@@ -91,6 +91,7 @@ class TimerDisplay extends ConsumerWidget {
                     }
                   },
                   child: Text(
+                    key: const Key('pauseRestart'),
                     timerState.isRunning ? 'PAUSE' : 'RESTART',
                     style: TextStyle(
                         fontSize: AppTextStyles.h3FontSize,
