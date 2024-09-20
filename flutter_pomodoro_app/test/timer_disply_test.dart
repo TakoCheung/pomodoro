@@ -1,14 +1,19 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   group('Pomodoro Timer Screen Tests', () {
-    testWidgets('Timer starts and displays correctly', (WidgetTester tester) async {
+    testWidgets('Timer starts and displays correctly',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
-          child: PomodoroTimerScreen(),
+          child: MaterialApp(
+            home: PomodoroTimerScreen(),
+          ),
         ),
       );
 
@@ -16,7 +21,8 @@ void main() {
       expect(find.text('25:00'), findsOneWidget);
 
       // Simulate start of the timer and test the behavior
-      await tester.tap(find.byKey(const Key('restart')));
+      const key = Key('pauseRestart');
+      await tester.tap(find.byKey(key));
       await tester.pumpAndSettle();
       // Verify that timer is started
     });
@@ -24,7 +30,9 @@ void main() {
     testWidgets('Timer can be customized', (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
-          child: PomodoroTimerScreen(),
+          child: MaterialApp(
+            home: PomodoroTimerScreen(),
+          ),
         ),
       );
 
