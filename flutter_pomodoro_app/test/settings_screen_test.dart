@@ -9,7 +9,11 @@ void main() {
     testWidgets('Settings screen layout adjusts for mobile', (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
-          child: SettingsScreen(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: SettingsScreen(),
+            ),
+          ),
         ),
       );
 
@@ -23,7 +27,11 @@ void main() {
       tester.binding.window.physicalSizeTestValue = const Size(1024, 768); // Set to tablet size
       await tester.pumpWidget(
         const ProviderScope(
-          child: SettingsScreen(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: SettingsScreen(),
+            ),
+          ),
         ),
       );
 
