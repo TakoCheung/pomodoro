@@ -1,0 +1,38 @@
+name: Flutter tests & coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-coverage:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: stable
+
+      - name: Install dependencies
+        run: |
+          cd flutter_pomodoro_app
+          flutter pub get
+
+      - name: Run tests with coverage
+        run: |
+          cd flutter_pomodoro_app
+          flutter test --coverage -r expanded
+        env:
+          CI: true
+
+      - name: Upload coverage to Codecov
+        if: secrets.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v4
+        with:
+          files: flutter_pomodoro_app/coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
