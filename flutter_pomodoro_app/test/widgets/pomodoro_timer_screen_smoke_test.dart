@@ -5,17 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   testWidgets('PomodoroTimerScreen smoke test hits build tree', (tester) async {
-    // enlarge headless window so the column spacing does not overflow
-    tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
-    tester.binding.window.devicePixelRatioTestValue = 3.0;
-    addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
-    });
+  // no special window sizing required for this smoke test
 
     await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen())));
-  // Ensure title and gear button exist which touches the build and the small missing line
+  // Ensure title and gear button exist which touches the build
   expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
-    expect(find.byType(Scaffold), findsOneWidget);
+  expect(find.byType(Scaffold), findsOneWidget);
   });
 }

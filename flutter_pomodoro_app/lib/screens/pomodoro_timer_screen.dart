@@ -10,7 +10,6 @@ import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/timer_model.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
@@ -19,16 +18,13 @@ class PomodoroTimerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showScripture = ref.watch(scriptureOverlayVisibleProvider);
-    // Access to dotenv.env can throw if dotenv wasn't initialized (e.g. some tests).
-    // Read it safely so the widget can build in those environments.
-    bool enableDebugFab = false;
-    try {
-      enableDebugFab = dotenv.env['ENABLE_DEBUG_FAB']?.toLowerCase() == 'true';
-    } catch (_) {
-      enableDebugFab = false;
-    }
+  // Read debug FAB flag from provider (which safely reads dotenv). Tests can
+  // override this provider when needed.
+  final enableDebugFab = ref.watch(enableDebugFabProvider);
 
-    return Scaffold(
+  // Log debug info to help diagnose why the debug FAB may not appear.
+  debugPrint('PomodoroTimerScreen: kDebugMode=$kDebugMode, enableDebugFab=$enableDebugFab');
+  return Scaffold(
       backgroundColor: AppColors.darkBlue,
       body: Stack(
         children: [

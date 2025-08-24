@@ -9,10 +9,20 @@ import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/timer_model.dart';
 export 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
+
+/// Whether to show the debug FAB. Read from .env if available; tests can override.
+final enableDebugFabProvider = Provider<bool>((ref) {
+  try {
+    return dotenv.env['ENABLE_DEBUG_FAB']?.toLowerCase() == 'true';
+  } catch (_) {
+    return false;
+  }
+});
 
 /// The currently shown scripture passage (if any).
 final shownScriptureProvider = StateProvider<Passage?>((ref) => null);
@@ -180,7 +190,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
     }
   }
 
-  updateSettings(LocalSettings localSettings) {
+  void updateSettings(LocalSettings localSettings) {
     state = state.copyWith(
         initPomodoro: localSettings.initPomodoro,
         initLongBreak: localSettings.initLongBreak,
