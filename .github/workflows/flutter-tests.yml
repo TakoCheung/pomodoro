@@ -58,15 +58,30 @@ jobs:
 
   integration-tests:
     if: ${{ github.event.inputs.run_integration == 'true' }}
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.1'
+
+      - name: Start Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86
+          force-avd-creation: true
+          emulator-options: '-no-window -no-audio -no-boot-anim'
 
       - name: Verify Flutter
         run: |
@@ -77,7 +92,25 @@ jobs:
           cd flutter_pomodoro_app
           flutter pub get
 
-      - name: Run integration tests (placeholder)
+      - name: Run integration tests
         run: |
           cd flutter_pomodoro_app
-          echo "Integration tests require an emulator/device; run manually with run_integration=true"
+          flutter test integration_test -r expanded
+        env:
+          CI: true
+
+      - name: Convert coverage to CSV & MD (best-effort)
+        run: |
+          cd flutter_pomodoro_app
+          dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
+          dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
+
+      - name: Upload to Codecov (if token set)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          if [ -n "$CODECOV_TOKEN" ]; then
+            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "$CODECOV_TOKEN"
+          else
+            echo "No CODECOV_TOKEN set; skipping upload"
+          fi
