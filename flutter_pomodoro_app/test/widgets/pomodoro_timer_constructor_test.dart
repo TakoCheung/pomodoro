@@ -14,6 +14,6 @@ void main() {
 
     await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen(key: Key('pt')))));
     expect(find.byKey(const Key('pt')), findsOneWidget);
-    expect(find.text('pomodoro'), findsOneWidget);
+  expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
   });
 }
