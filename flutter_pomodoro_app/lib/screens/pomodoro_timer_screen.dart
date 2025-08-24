@@ -60,6 +60,9 @@ class PomodoroTimerScreen extends ConsumerWidget {
       ),
     // Debug-only quick trigger to set debug settings and mark the timer complete.
     // Controlled by `.env` flag `ENABLE_DEBUG_FAB=true` to allow CI/dev toggle.
+  // NOTE: previously this also required `kDebugMode` which hides the FAB in
+  // profile/release builds even when the env flag is set. Use only the env flag
+  // so CI/devs can enable the FAB regardless of build mode.
   floatingActionButton: (kDebugMode && enableDebugFab)
       ? Consumer(builder: (context, ref, _) {
               return FloatingActionButton(
