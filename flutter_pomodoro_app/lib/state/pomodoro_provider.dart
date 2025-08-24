@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+// ...existing code...
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
+// ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
 
@@ -31,9 +32,13 @@ typedef BoolCallback = bool Function();
 
 /// Decides whether to show scripture on timer completion. By default this is
 /// randomized, but tests can override this provider to force deterministic behavior.
+
+// Always show scripture on timer completion — this is an app feature, not a
+// debug-only behavior. The provider returns true unconditionally so the
+// onComplete handler will display the scripture overlay (and attempt to
+// fetch a passage, falling back to a local passage when needed).
 final scriptureShowDeciderProvider = Provider<BoolCallback>((ref) {
-  final rng = Random();
-  return () => rng.nextBool();
+  return () => true;
 });
 
 final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
@@ -45,13 +50,25 @@ final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
     // fail at provider creation.
   final show = ref.read(scriptureShowDeciderProvider)();
     if (!show) return;
+    debugPrint('TimerNotifier: onComplete triggered');
     try {
       final repo = ref.read(scriptureRepositoryProvider);
       final passage = await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: ['GEN.1.1']);
+      debugPrint('TimerNotifier: fetched passage ${passage.reference}');
       ref.read(shownScriptureProvider.notifier).state = passage;
       ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
-    } catch (_) {
-      // ignore fetch errors for now
+    } catch (e) {
+      debugPrint('TimerNotifier: fetch failed, using fallback: $e');
+      // If fetching fails (missing API key or network), fall back to a
+      // local passage so the overlay is still shown in dev/debug.
+      final fallback = Passage(
+        reference: 'Genesis 1:1',
+        text: 'In the beginning God created the heavens and the earth.',
+        verses: [],
+      );
+      debugPrint('TimerNotifier: using fallback passage ${fallback.reference}');
+      ref.read(shownScriptureProvider.notifier).state = fallback;
+      ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
     }
   });
 });
