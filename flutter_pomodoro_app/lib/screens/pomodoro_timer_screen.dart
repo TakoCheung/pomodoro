@@ -19,6 +19,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
           children: [
             Text(
               'pomodoro',
+              key: Key('pomodoro_title'),
               style: TextStyle(
                 fontSize: AppTextStyles.title,
                 color: AppColors.lightBlueGray,

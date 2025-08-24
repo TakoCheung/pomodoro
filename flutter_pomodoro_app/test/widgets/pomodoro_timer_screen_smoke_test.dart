@@ -14,8 +14,8 @@ void main() {
     });
 
     await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen())));
-    // Ensure title and gear button exist which touches the build and the small missing line
-    expect(find.text('pomodoro'), findsOneWidget);
+  // Ensure title and gear button exist which touches the build and the small missing line
+  expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
     expect(find.byType(Scaffold), findsOneWidget);
   });
 }
