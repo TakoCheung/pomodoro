@@ -16,7 +16,8 @@ jobs:
   unit-tests:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -35,114 +36,33 @@ jobs:
         env:
           CI: true
 
-      - name: Convert lcov to CSV
+      - name: Convert coverage to CSV & MD (best-effort)
         run: |
           cd flutter_pomodoro_app
           dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
-
-      - name: Convert CSV to Markdown
-        run: |
-          cd flutter_pomodoro_app
           dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
 
-      - name: Upload coverage to Codecov (if token set)
+      - name: Upload to Codecov (if token set)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
-          if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
-            echo "Uploading coverage to Codecov..."
-            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "${{ secrets.CODECOV_TOKEN }}"
+          if [ -n "$CODECOV_TOKEN" ]; then
+            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "$CODECOV_TOKEN"
           else
-            echo "CODECOV_TOKEN not set; skipping Codecov upload."
+            echo "No CODECOV_TOKEN set; skipping upload"
           fi
 
   integration-tests:
     if: ${{ github.event.inputs.run_integration == 'true' }}
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.10.6'
-
-      - name: Install dependencies
-        run: |
-          cd flutter_pomodoro_app
-          flutter pub get
-
-      - name: Run integration tests (manual)
-        run: |
-          cd flutter_pomodoro_app
-          echo "Integration tests require an emulator/device; run manually with workflow_dispatch run_integration=true"
-name: "Flutter tests & coverage"
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      run_integration:
-        description: 'Set to true to run integration tests'
-        required: false
-        default: 'false'
-
-jobs:
-  unit-tests:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        flutter-version: ['3.10.6']
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ matrix.flutter-version }}
-
-      - name: Install dependencies
-        run: |
-          cd flutter_pomodoro_app
-          flutter pub get
-
-      - name: Run unit/widget tests with coverage
-        run: |
-          cd flutter_pomodoro_app
-          flutter test --coverage -r expanded
-        env:
-          CI: true
-
-      - name: Convert lcov to CSV
-        run: |
-          cd flutter_pomodoro_app
-          dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
-
-      - name: Convert CSV to Markdown
-        run: |
-          cd flutter_pomodoro_app
-          dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
-
-      - name: Upload coverage to Codecov (if token set)
-        run: |
-          if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
-            echo "Uploading coverage to Codecov..."
-            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "${{ secrets.CODECOV_TOKEN }}"
-          else
-            echo "CODECOV_TOKEN not set; skipping Codecov upload."
-          fi
-
-  integration-tests:
-    if: ${{ github.event.inputs.run_integration == 'true' }}
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.10.6
 
       - name: Install dependencies
         run: |
@@ -152,145 +72,4 @@ jobs:
       - name: Run integration tests (placeholder)
         run: |
           cd flutter_pomodoro_app
-          echo "Integration tests require emulator/device; this job runs only when manually triggered with run_integration=true"
-          # To run real integration tests, add emulator setup steps and run `flutter test integration_test` here.
-name: "Flutter tests & coverage"
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      run_integration:
-        description: 'Set to true to run integration tests'
-        required: false
-        default: 'false'
-
-jobs:
-  unit-tests:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        flutter-version: ['3.10.6']
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ matrix.flutter-version }}
-
-      - name: Ensure Flutter/Dart version >= 3.5.2
-        run: |
-          echo "Checking Dart SDK version..."
-          DART_VER=$(dart --version 2>&1 | awk '{print $4}' | sed 's/v//') || true
-          echo "Dart version: $DART_VER"
-          python3 - <<'PY'
-import os,sys
-v=os.getenv('DART_VER','0.0.0')
-req=(3,5,2)
-try:
-  cur=tuple(int(x) for x in v.split('.')[:3])
-except:
-  cur=(0,0,0)
-if cur < req:
-  sys.exit(1)
-else:
-  sys.exit(0)
-PY
-          if [ $? -ne 0 ]; then
-            echo "Dart < 3.5.2 detected; running flutter upgrade to get a newer SDK..."
-            flutter upgrade --force || true
-            flutter --version
-          else
-            echo "Dart >= 3.5.2 present; continuing."
-          fi
-
-      - name: Install dependencies
-        run: |
-          cd flutter_pomodoro_app
-          flutter pub get
-
-      - name: Run unit/widget tests with coverage
-        run: |
-          cd flutter_pomodoro_app
-          flutter test --coverage -r expanded
-        env:
-          CI: true
-
-      - name: Convert lcov to CSV
-        run: |
-          cd flutter_pomodoro_app
-          dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
-
-      - name: Convert CSV to Markdown
-        run: |
-          cd flutter_pomodoro_app
-          dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
-
-      - name: Upload coverage to Codecov (if token set)
-        run: |
-          if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
-            echo "Uploading coverage to Codecov..."
-            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "${{ secrets.CODECOV_TOKEN }}"
-          else
-            echo "CODECOV_TOKEN not set; skipping Codecov upload."
-          fi
-
-  integration-tests:
-    if: ${{ github.event.inputs.run_integration == 'true' }}
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.10.6
-
-      - name: Ensure Flutter/Dart version >= 3.5.2
-        run: |
-          echo "Checking Dart SDK version..."
-          DART_VER=$(dart --version 2>&1 | awk '{print $4}' | sed 's/v//') || true
-          echo "Dart version: $DART_VER"
-          python3 - <<'PY'
-import os,sys
-v=os.getenv('DART_VER','0.0.0')
-req=(3,5,2)
-try:
-  cur=tuple(int(x) for x in v.split('.')[:3])
-except:
-  cur=(0,0,0)
-if cur < req:
-  sys.exit(1)
-else:
-  sys.exit(0)
-PY
-          if [ $? -ne 0 ]; then
-            echo "Dart < 3.5.2 detected; running flutter upgrade to get a newer SDK..."
-            flutter upgrade --force || true
-            flutter --version
-          else
-            echo "Dart >= 3.5.2 present; continuing."
-          fi
-
-      - name: Install dependencies
-        run: |
-          cd flutter_pomodoro_app
-          flutter pub get
-
-      - name: Start emulator (macos gives access to simulators) - placeholder
-        run: |
-          echo "Attempting to start Android emulator (if available)."
-          # Best-effort: create and start an Android emulator named 'ci_emulator'
-          sudo apt-get update || true
-          echo "Note: starting an emulator depends on runner; this is a placeholder."
-
-      - name: Run integration tests
-        run: |
-          cd flutter_pomodoro_app
-          flutter test integration_test --concurrency=1
+          echo "Integration tests require an emulator/device; run manually with run_integration=true"
