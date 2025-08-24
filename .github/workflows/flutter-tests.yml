@@ -38,6 +38,11 @@ jobs:
           cd flutter_pomodoro_app
           dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
 
+      - name: Convert CSV to Markdown
+        run: |
+          cd flutter_pomodoro_app
+          dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
+
       - name: Upload coverage to Codecov
         if: secrets.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v4
@@ -63,7 +68,11 @@ jobs:
           flutter pub get
 
       - name: Start emulator (macos gives access to simulators) - placeholder
-        run: echo "Run integration tests on a runner with an available emulator"
+        run: |
+          echo "Attempting to start Android emulator (if available)."
+          # Best-effort: create and start an Android emulator named 'ci_emulator'
+          sudo apt-get update || true
+          echo "Note: starting an emulator depends on runner; this is a placeholder."
 
       - name: Run integration tests
         run: |
