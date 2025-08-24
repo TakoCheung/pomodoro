@@ -27,6 +27,24 @@ jobs:
         with:
           flutter-version: ${{ matrix.flutter-version }}
 
+      - name: Ensure Flutter/Dart version >= 3.5.2
+        run: |
+          echo "Checking Dart SDK version..."
+          DART_VER=$(dart --version 2>&1 | awk '{print $4}' | sed 's/v//') || true
+          echo "Dart version: $DART_VER"
+          required="3.5.2"
+          ver_lt() {
+            [ "$(printf '%s
+%s' "$1" "$2" | sort -V | head -n1)" != "$2" ]
+          }
+          if ver_lt $DART_VER $required; then
+            echo "Dart <$required detected; running flutter upgrade to get a newer SDK..."
+            flutter upgrade --force || true
+            flutter --version
+          else
+            echo "Dart >= $required present; continuing."
+          fi
+
       - name: Install dependencies
         run: |
           cd flutter_pomodoro_app
@@ -69,6 +87,24 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.10.6
+
+      - name: Ensure Flutter/Dart version >= 3.5.2
+        run: |
+          echo "Checking Dart SDK version..."
+          DART_VER=$(dart --version 2>&1 | awk '{print $4}' | sed 's/v//') || true
+          echo "Dart version: $DART_VER"
+          required="3.5.2"
+          ver_lt() {
+            [ "$(printf '%s
+%s' "$1" "$2" | sort -V | head -n1)" != "$2" ]
+          }
+          if ver_lt $DART_VER $required; then
+            echo "Dart <$required detected; running flutter upgrade to get a newer SDK..."
+            flutter upgrade --force || true
+            flutter --version
+          else
+            echo "Dart >= $required present; continuing."
+          fi
 
       - name: Install dependencies
         run: |
