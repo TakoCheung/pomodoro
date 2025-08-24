@@ -123,7 +123,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeRow(localSettings, localSettingsNotifier, isTablet) {
+  Widget _buildTimeRow(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return Row(
       key: const Key('timeSection'),
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,7 +138,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeColumn(localSettings, localSettingsNotifier, isTablet) {
+  Widget _buildTimeColumn(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return Column(
       key: const Key('timeSection'),
       children: [
@@ -155,7 +155,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildFonts(
-      timerState, localSettings, localSettingsNotifier, isTablet) {
+      TimerState timerState, LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return isTablet
         ? Row(
             key: const Key('fontSection'),
@@ -185,7 +185,7 @@ class SettingsScreen extends ConsumerWidget {
               ]);
   }
 
-  Widget _buildFontRow(timerState, localSettings, localSettingsNotifier) {
+  Widget _buildFontRow(TimerState timerState, LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -206,7 +206,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildColor(
-      timerState, localSettings, localSettingsNotifier, isTablet) {
+      TimerState timerState, LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return isTablet
         ? Row(
             key: const Key('colorSection'),
@@ -234,7 +234,7 @@ class SettingsScreen extends ConsumerWidget {
               ]);
   }
 
-  Widget _buildColorRow(localSettings, localSettingsNotifier, timerState) {
+  Widget _buildColorRow(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, TimerState timerState) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -255,7 +255,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildNumberInput(
-      mode, timeInSec, min, max, localSettingsNotifier, isTablet) {
+      TimerMode mode, int timeInSec, int min, int max, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return NumberInput(
         title: localSettingsNotifier.getName(mode),
         initialValue: timeInSec ~/ 60,

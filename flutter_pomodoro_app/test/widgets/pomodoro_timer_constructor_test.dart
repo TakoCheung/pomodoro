@@ -5,15 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   testWidgets('PomodoroTimerScreen constructor + build', (tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
-    tester.binding.window.devicePixelRatioTestValue = 3.0;
-    addTearDown((){
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
-    });
-
-    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen(key: Key('pt')))));
+  // no special window sizing required for this constructor test
+  await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen(key: Key('pt')))));
     expect(find.byKey(const Key('pt')), findsOneWidget);
-  expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
+    expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
   });
 }

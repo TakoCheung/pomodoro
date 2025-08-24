@@ -14,4 +14,12 @@ class Passage {
       verses: versesJson is List ? versesJson : const [],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'reference': reference,
+      'content': text,
+      'verses': verses,
+    };
+  }
 }
