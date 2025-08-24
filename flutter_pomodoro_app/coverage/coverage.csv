@@ -1,0 +1,11 @@
+file,lines_found,lines_hit,percent
+lib/components/setting/divider.dart,7,7,100.0
+lib/components/setting/number_input.dart,45,45,100.0
+lib/components/timer/timer_display.dart,34,34,100.0
+lib/state/pomodoro_provider.dart,60,56,93.3
+lib/components/timer/timer_gearicon_button.dart,5,5,100.0
+lib/screens/setting_screen.dart,100,93,93.0
+lib/components/timer/timer_mode_switch_ui.dart,28,27,96.4
+lib/screens/pomodoro_timer_screen.dart,2,1,50.0
+lib/state/local_settings_provider.dart,34,34,100.0
+lib/main.dart,4,4,100.0
