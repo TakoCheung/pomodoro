@@ -49,12 +49,14 @@ jobs:
           cd flutter_pomodoro_app
           dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
 
-      - name: Upload coverage to Codecov
-        if: secrets.CODECOV_TOKEN != ''
-        uses: codecov/codecov-action@v4
-        with:
-          files: flutter_pomodoro_app/coverage/lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage to Codecov (if token set)
+        run: |
+          if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
+            echo "Uploading coverage to Codecov..."
+            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "${{ secrets.CODECOV_TOKEN }}"
+          else
+            echo "CODECOV_TOKEN not set; skipping Codecov upload."
+          fi
 
   integration-tests:
     if: ${{ github.event.inputs.run_integration == 'true' }}
