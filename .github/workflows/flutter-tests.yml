@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: 'Set to true to run integration tests'
+        required: false
+        default: 'false'
 
 jobs:
   unit-tests:
@@ -51,7 +57,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   integration-tests:
-    if: ${{ github.event.inputs.run_integration == 'true' || env.RUN_INTEGRATION == 'true' }}
+    if: ${{ github.event.inputs.run_integration == 'true' }}
     runs-on: macos-latest
     steps:
       - name: Checkout
