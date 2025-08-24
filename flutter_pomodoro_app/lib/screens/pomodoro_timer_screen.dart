@@ -5,36 +5,95 @@ import 'package:flutter_pomodoro_app/components/timer/timer_mode_switch_ui.dart'
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pomodoro_app/widgets/scripture_overlay.dart';
+import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
+import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
+import 'package:flutter_pomodoro_app/models/passage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pomodoro_app/state/timer_model.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
   const PomodoroTimerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Scaffold(
+    final showScripture = ref.watch(scriptureOverlayVisibleProvider);
+    // Access to dotenv.env can throw if dotenv wasn't initialized (e.g. some tests).
+    // Read it safely so the widget can build in those environments.
+    bool enableDebugFab = false;
+    try {
+      enableDebugFab = dotenv.env['ENABLE_DEBUG_FAB']?.toLowerCase() == 'true';
+    } catch (_) {
+      enableDebugFab = false;
+    }
+
+    return Scaffold(
       backgroundColor: AppColors.darkBlue,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'pomodoro',
-              key: Key('pomodoro_title'),
-              style: TextStyle(
-                fontSize: AppTextStyles.title,
-                color: AppColors.lightBlueGray,
-                fontWeight: FontWeight.bold
-              ),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'pomodoro',
+                  key: Key('pomodoro_title'),
+                  style: TextStyle(
+                    fontSize: AppTextStyles.title,
+                    color: AppColors.lightBlueGray,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+                Flexible(child:  SizedBox(height: 45,)),
+                TimerModeSwitcherUI(),
+                Flexible(child: SizedBox(height: 48)),
+                TimerDisplay(),
+                Flexible(child: SizedBox(height: 40)),
+                GearIconButton(),
+              ],
             ),
-            Flexible(child:  SizedBox(height: 45,)),
-            TimerModeSwitcherUI(),
-            Flexible(child: SizedBox(height: 48)),
-            TimerDisplay(),
-            Flexible(child: SizedBox(height: 40)),
-            GearIconButton(),
-          ],
-        ),
+          ),
+          // Overlay the scripture on top of main content when visible
+          if (showScripture)
+            Align(
+              alignment: Alignment.center,
+              child: const ScriptureOverlay(bibleId: 'eng-ESV', passageId: 'GEN.1.1'),
+            ),
+        ],
       ),
+    // Debug-only quick trigger to set debug settings and mark the timer complete.
+    // Controlled by `.env` flag `ENABLE_DEBUG_FAB=true` to allow CI/dev toggle.
+  floatingActionButton: (kDebugMode && enableDebugFab)
+      ? Consumer(builder: (context, ref, _) {
+              return FloatingActionButton(
+                key: const Key('debug_trigger_complete'),
+                onPressed: () {
+                  // Force debug mode and set pomodoro to 1 second for quick testing
+                  final localSettingsNotifier = ref.read(localSettingsProvider.notifier);
+                  localSettingsNotifier.updateDebugMode(true);
+                  localSettingsNotifier.updateTime(TimerMode.pomodoro, 1);
+                  // Apply to the timer notifier
+                  ref.read(timerProvider.notifier).updateSettings(ref.read(localSettingsProvider));
+                  // For simulator/debugging: directly set a fake Passage and show the overlay
+                  final testPassage = Passage(
+                    reference: 'Genesis 1:1',
+                    text: 'In the beginning God created the heavens and the earth.',
+                    verses: [],
+                  );
+                  ref.read(shownScriptureProvider.notifier).state = testPassage;
+                  // Log for debug verification
+                  debugPrint('Debug: set shownScriptureProvider -> ${testPassage.reference}');
+                  ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
+                  // Also call the completion hook so any other side-effects run
+                  // debug-only test helper: trigger timer completion.
+                  // ignore: invalid_use_of_visible_for_testing_member
+                  ref.read(timerProvider.notifier).triggerComplete();
+                },
+                child: const Icon(Icons.bolt),
+              );
+            })
+          : null,
     );
   }
 }

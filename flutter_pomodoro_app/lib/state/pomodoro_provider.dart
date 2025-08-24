@@ -1,26 +1,56 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_magic_number.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
+import 'package:flutter_pomodoro_app/state/timer_model.dart';
+export 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
+import 'package:flutter_pomodoro_app/models/passage.dart';
 
-final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
-  return TimerNotifier();
+final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
+
+/// The currently shown scripture passage (if any).
+final shownScriptureProvider = StateProvider<Passage?>((ref) => null);
+
+typedef BoolCallback = bool Function();
+
+/// Decides whether to show scripture on timer completion. By default this is
+/// randomized, but tests can override this provider to force deterministic behavior.
+final scriptureShowDeciderProvider = Provider<BoolCallback>((ref) {
+  final rng = Random();
+  return () => rng.nextBool();
 });
 
-enum TimerMode {
-  pomodoro,
-  shortBreak,
-  longBreak,
-}
+final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
+  // Note: randomness and repository are part of the onComplete behavior. We capture
+  // them here so the TimerNotifier can trigger the side-effect when the timer ends.
+  return TimerNotifier(onComplete: () async {
+    // Randomly decide whether to show scripture on timer end. Read repository lazily
+    // at callback time so tests or environments without SCRIPTURE_API_KEY don't
+    // fail at provider creation.
+  final show = ref.read(scriptureShowDeciderProvider)();
+    if (!show) return;
+    try {
+      final repo = ref.read(scriptureRepositoryProvider);
+      final passage = await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: ['GEN.1.1']);
+      ref.read(shownScriptureProvider.notifier).state = passage;
+      ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
+    } catch (_) {
+      // ignore fetch errors for now
+    }
+  });
+});
 
 class TimerState {
-  static const int pomodoroDefaut = 1500;
-  static const int longBreakDefaut = 900;
-  static const int shortBreakDefaut = 300;
+  // Backwards-compatible constants used by existing tests.
+  static const int pomodoroDefaut = TimerDefaults.pomodoroDefault;
+  static const int shortBreakDefaut = TimerDefaults.shortBreakDefault;
+  static const int longBreakDefaut = TimerDefaults.longBreakDefault;
   final int timeRemaining;
   final bool isRunning;
   final TimerMode mode;
@@ -62,17 +92,20 @@ class TimerState {
 }
 
 class TimerNotifier extends StateNotifier<TimerState> {
-  TimerNotifier()
+  final void Function()? onComplete;
+
+  TimerNotifier({this.onComplete})
       : super(TimerState(
-            timeRemaining: TimerState.pomodoroDefaut,
+            timeRemaining: TimerDefaults.pomodoroDefault,
             isRunning: false,
             mode: TimerMode.pomodoro,
-            initLongBreak: TimerState.longBreakDefaut,
-            initPomodoro: TimerState.pomodoroDefaut,
-            initShortBreak: TimerState.shortBreakDefaut,
+            initLongBreak: TimerDefaults.longBreakDefault,
+            initPomodoro: TimerDefaults.pomodoroDefault,
+            initShortBreak: TimerDefaults.shortBreakDefault,
             fontFamily: AppTextStyles.kumbhSans,
             color: AppColors.orangeRed));
   Timer? _timer;
+
   void startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!state.isRunning) {
@@ -87,8 +120,22 @@ class TimerNotifier extends StateNotifier<TimerState> {
 
   void decrementTimer() {
     if (state.timeRemaining > 0) {
-      state = state.copyWith(timeRemaining: state.timeRemaining - 1);
+      final newRemaining = state.timeRemaining - 1;
+      state = state.copyWith(timeRemaining: newRemaining);
+      if (newRemaining == 0) {
+        try {
+          onComplete?.call();
+        } catch (_) {}
+      }
     }
+  }
+
+  /// Test helper: trigger the onComplete callback synchronously.
+  @visibleForTesting
+  void triggerComplete() {
+    try {
+      onComplete?.call();
+    } catch (_) {}
   }
 
   void pauseTimer() {
@@ -130,8 +177,6 @@ class TimerNotifier extends StateNotifier<TimerState> {
         return state.initShortBreak;
       case TimerMode.longBreak:
         return state.initLongBreak;
-      default:
-        return state.initPomodoro;
     }
   }
 

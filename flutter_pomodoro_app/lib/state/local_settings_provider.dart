@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_magic_number.dart';
-import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
+import 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
+import 'package:flutter_pomodoro_app/design/app_colors.dart';
 
+/// Local settings live in their own provider and start from safe defaults.
+/// We avoid reading `timerProvider` at provider creation time to prevent
+/// NotInitializedError (ProviderScope initialization ordering issues).
 final localSettingsProvider =
     StateNotifierProvider<LocalSettingsNotifier, LocalSettings>((ref) {
-  final globalSettings = ref.read(timerProvider);
   return LocalSettingsNotifier(
     LocalSettings(
-      initPomodoro: globalSettings.initPomodoro,
-      initShortBreak: globalSettings.initShortBreak,
-      initLongBreak: globalSettings.initLongBreak,
-      fontFamily: globalSettings.fontFamily,
-      color: globalSettings.color,
+      initPomodoro: TimerDefaults.pomodoroDefault,
+      initShortBreak: TimerDefaults.shortBreakDefault,
+      initLongBreak: TimerDefaults.longBreakDefault,
+      fontFamily: AppTextStyles.kumbhSans,
+      color: AppColors.orangeRed,
     ),
   );
 });
@@ -23,13 +27,15 @@ class LocalSettings {
   int initLongBreak;
   String fontFamily;
   Color color;
+  bool debugMode;
 
   LocalSettings({
     required this.initPomodoro,
     required this.initShortBreak,
     required this.initLongBreak,
     required this.fontFamily,
-    required this.color,
+  required this.color,
+  this.debugMode = false,
   });
 
   LocalSettings copyWith(
@@ -37,13 +43,15 @@ class LocalSettings {
       int? initLongBreak,
       int? initShortBreak,
       String? fontFamily,
-      Color? color}) {
+      Color? color,
+      bool? debugMode}) {
     return LocalSettings(
         initLongBreak: initLongBreak ?? this.initLongBreak,
         initPomodoro: initPomodoro ?? this.initPomodoro,
         initShortBreak: initShortBreak ?? this.initShortBreak,
         fontFamily: fontFamily ?? this.fontFamily,
-        color: color ?? this.color);
+        color: color ?? this.color,
+        debugMode: debugMode ?? this.debugMode);
   }
 }
 
@@ -61,15 +69,25 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
   void updateTime(TimerMode mode, int timeInMin){
     switch (mode) {
       case TimerMode.pomodoro:
-        state = state.copyWith(initPomodoro: timeInMin * AppMagicNumber.sixty);
+        state = state.copyWith(initPomodoro: _calcSeconds(timeInMin));
         break;
       case TimerMode.shortBreak:
-        state = state.copyWith(initShortBreak: timeInMin * AppMagicNumber.sixty);
+        state = state.copyWith(initShortBreak: _calcSeconds(timeInMin));
         break;
       case TimerMode.longBreak:
-        state = state.copyWith(initLongBreak: timeInMin * AppMagicNumber.sixty);
+        state = state.copyWith(initLongBreak: _calcSeconds(timeInMin));
         break;
     }
+  }
+
+  int _calcSeconds(int timeInMin) {
+    // If debug mode is enabled and user sets minutes to 0, treat as 1 second for fast debugging.
+    if (state.debugMode && timeInMin == 0) return 1;
+    return timeInMin * AppMagicNumber.sixty;
+  }
+
+  void updateDebugMode(bool enabled) {
+    state = state.copyWith(debugMode: enabled);
   }
 
   String getName(TimerMode mode){
