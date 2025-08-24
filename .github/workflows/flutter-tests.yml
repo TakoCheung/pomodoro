@@ -15,6 +15,82 @@ on:
 jobs:
   unit-tests:
     runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.6'
+
+      - name: Install dependencies
+        run: |
+          cd flutter_pomodoro_app
+          flutter pub get
+
+      - name: Run unit/widget tests with coverage
+        run: |
+          cd flutter_pomodoro_app
+          flutter test --coverage -r expanded
+        env:
+          CI: true
+
+      - name: Convert lcov to CSV
+        run: |
+          cd flutter_pomodoro_app
+          dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
+
+      - name: Convert CSV to Markdown
+        run: |
+          cd flutter_pomodoro_app
+          dart run tool/csv_to_md.dart coverage/coverage.csv coverage/README.md || true
+
+      - name: Upload coverage to Codecov (if token set)
+        run: |
+          if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
+            echo "Uploading coverage to Codecov..."
+            bash <(curl -s https://codecov.io/bash) -f flutter_pomodoro_app/coverage/lcov.info -t "${{ secrets.CODECOV_TOKEN }}"
+          else
+            echo "CODECOV_TOKEN not set; skipping Codecov upload."
+          fi
+
+  integration-tests:
+    if: ${{ github.event.inputs.run_integration == 'true' }}
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.6'
+
+      - name: Install dependencies
+        run: |
+          cd flutter_pomodoro_app
+          flutter pub get
+
+      - name: Run integration tests (manual)
+        run: |
+          cd flutter_pomodoro_app
+          echo "Integration tests require an emulator/device; run manually with workflow_dispatch run_integration=true"
+name: "Flutter tests & coverage"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: 'Set to true to run integration tests'
+        required: false
+        default: 'false'
+
+jobs:
+  unit-tests:
+    runs-on: macos-latest
     strategy:
       matrix:
         flutter-version: ['3.10.6']
