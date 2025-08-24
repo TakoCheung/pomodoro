@@ -30,7 +30,6 @@ jobs:
       - name: Ensure Flutter/Dart version >= 3.5.2
         run: |
           echo "Checking Dart SDK version..."
-%s' "$1" "$2" | sort -V | head -n1)" != "$2" ]
           DART_VER=$(dart --version 2>&1 | awk '{print $4}' | sed 's/v//') || true
           echo "Dart version: $DART_VER"
           python3 - <<'PY'
@@ -100,7 +99,6 @@ PY
       - name: Ensure Flutter/Dart version >= 3.5.2
         run: |
           echo "Checking Dart SDK version..."
-%s' "$1" "$2" | sort -V | head -n1)" != "$2" ]
           DART_VER=$(dart --version 2>&1 | awk '{print $4}' | sed 's/v//') || true
           echo "Dart version: $DART_VER"
           python3 - <<'PY'
