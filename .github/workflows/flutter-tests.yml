@@ -7,7 +7,46 @@ on:
     branches: [ main ]
 
 jobs:
-  test-and-coverage:
+  unit-tests:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        flutter-channel: [stable]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ matrix.flutter-channel }}
+
+      - name: Install dependencies
+        run: |
+          cd flutter_pomodoro_app
+          flutter pub get
+
+      - name: Run unit/widget tests with coverage
+        run: |
+          cd flutter_pomodoro_app
+          flutter test --coverage -r expanded
+        env:
+          CI: true
+
+      - name: Convert lcov to CSV
+        run: |
+          cd flutter_pomodoro_app
+          dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv || true
+
+      - name: Upload coverage to Codecov
+        if: secrets.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v4
+        with:
+          files: flutter_pomodoro_app/coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  integration-tests:
+    if: ${{ github.event.inputs.run_integration == 'true' || env.RUN_INTEGRATION == 'true' }}
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -23,16 +62,10 @@ jobs:
           cd flutter_pomodoro_app
           flutter pub get
 
-      - name: Run tests with coverage
+      - name: Start emulator (macos gives access to simulators) - placeholder
+        run: echo "Run integration tests on a runner with an available emulator"
+
+      - name: Run integration tests
         run: |
           cd flutter_pomodoro_app
-          flutter test --coverage -r expanded
-        env:
-          CI: true
-
-      - name: Upload coverage to Codecov
-        if: secrets.CODECOV_TOKEN != ''
-        uses: codecov/codecov-action@v4
-        with:
-          files: flutter_pomodoro_app/coverage/lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
+          flutter test integration_test --concurrency=1
