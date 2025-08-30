@@ -6,6 +6,9 @@ import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pomodoro_app/data/bible_versions.dart';
+import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
+import 'package:flutter_pomodoro_app/models/bible_version.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -79,6 +82,45 @@ class SettingsScreen extends ConsumerWidget {
                         ],
                       ),
                       const CustomDivider(spaceBefore: 30),
+                      // Bible Version selector
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Bible Version', style: AppTextStyles.h4),
+                          Consumer(builder: (context, ref, _) {
+                            final AsyncValue<List<BibleVersion>> versionsAsync = ref.watch(bibleVersionsProvider);
+                            final values = versionsAsync.when<List<String>>(
+                              data: (list) => list.map((v) => v.displayName).toList(growable: false),
+                              loading: () => kBibleVersions.keys.toList(growable: false),
+                              error: (_, __) => kBibleVersions.keys.toList(growable: false),
+                            );
+                            final items = values
+                                .map((name) => DropdownMenuItem<String>(value: name, child: Text(name)))
+                                .toList(growable: false);
+                            // Ensure current value is in the list
+                            final current = localSettings.bibleVersionName;
+                            final dropdownValue = values.contains(current) ? current : (values.isNotEmpty ? values.first : current);
+                            return Flexible(
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: SizedBox(
+                                  width: isTablet ? 240 : 180,
+                                  child: DropdownButton<String>(
+                                    key: const Key('bible_version_dropdown'),
+                                    isExpanded: true,
+                                    value: dropdownValue,
+                                    items: items,
+                                    onChanged: (v) {
+                                      if (v != null) localSettingsNotifier.updateBibleVersionName(v);
+                                    },
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                      const CustomDivider(),
                       _buildFonts(timerState, localSettings, localSettingsNotifier, isTablet),
                       const CustomDivider(),
                       _buildColor(timerState, localSettings, localSettingsNotifier, isTablet),

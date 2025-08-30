@@ -1,5 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
+import 'package:flutter_pomodoro_app/data/bible_versions.dart';
+import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter_pomodoro_app/models/scripture_request.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
@@ -7,6 +10,27 @@ import 'package:flutter/foundation.dart';
 
 /// Configurable Bible ID, defaults to '32664dc3288a28df-01' for tests/backwards-compat.
 final bibleIdProvider = Provider<String>((ref) {
+  // If user selected a version in LocalSettings, prefer it.
+  final name = ref.watch(localSettingsProvider).bibleVersionName;
+  // dynamic mapping from fetched list
+  try {
+    final asyncList = ref.watch(bibleVersionsProvider);
+    final fromRemote = asyncList.maybeWhen<String?>(
+      data: (versions) {
+        if (versions.isEmpty) return null;
+        final match = versions.firstWhere(
+          (v) => v.displayName == name || v.name == name || v.abbreviation == name,
+          orElse: () => versions.first,
+        );
+        return match.id;
+      },
+      orElse: () => null,
+    );
+    if (fromRemote != null) return fromRemote;
+  } catch (_) {}
+  // fallback to static map
+  final mapped = kBibleVersions[name];
+  if (mapped != null && mapped.isNotEmpty) return mapped;
   try {
     final id = dotenv.env['BIBLE_ID'];
     if (id != null && id.isNotEmpty) return id;

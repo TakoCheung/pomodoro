@@ -26,7 +26,8 @@ Simulator validation screenshots are saved under `artifacts/ios/`, e.g. `scriptu
 
 - Copy `.env.example` to `.env` for local overrides.
 - Keys:
-	- `SCRIPTURE_API_KEY`: optional key for live fetching. Tests mock HTTP and don't need it.
+	- `SCRIPTURE_API_KEY`: API key for the Scripture API. Required at runtime to fetch live passages and the Bible catalog. Tests mock HTTP and don't need it.
+	- `BIBLE_ID` (optional): explicit Bible ID override. Normally not needed; the app maps from the selected Bible version using the fetched catalog or a static fallback.
 - Build-time `lib/env_config.dart` may set safe defaults; `.env` overrides are read at runtime when available.
 --------------------
 
@@ -49,3 +50,10 @@ The app will now always show a scripture overlay when the timer reaches the
 end; if fetching from the remote scripture API fails (for example, missing
 `SCRIPTURE_API_KEY`), the app will fall back to a bundled passage so the
 overlay still appears for users.
+
+Bible Versions
+--------------
+- Settings includes a "Bible Version" dropdown.
+- The list is populated from the Scripture API catalog (`/v1/bibles`) and cached in SharedPreferences for fast subsequent loads. If the catalog isn't available, a small built-in fallback list is used.
+- The selected display name is mapped to a Bible ID via the fetched catalog. Fallback order: fetched catalog → static map → `BIBLE_ID` env → default (`32664dc3288a28df-01`).
+- Tests use provider overrides and a mocked catalog service; no real network calls.

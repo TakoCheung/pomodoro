@@ -4,6 +4,7 @@ import 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
+import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 
 /// Local settings live in their own provider and start from safe defaults.
 /// We avoid reading `timerProvider` at provider creation time to prevent
@@ -17,6 +18,7 @@ final localSettingsProvider =
       initLongBreak: TimerDefaults.longBreakDefault,
       fontFamily: AppTextStyles.kumbhSans,
       color: AppColors.orangeRed,
+  bibleVersionName: kDefaultBibleVersionName,
     ),
   );
 });
@@ -28,6 +30,7 @@ class LocalSettings {
   String fontFamily;
   Color color;
   bool debugMode;
+  String bibleVersionName;
 
   LocalSettings({
     required this.initPomodoro,
@@ -36,6 +39,7 @@ class LocalSettings {
     required this.fontFamily,
   required this.color,
   this.debugMode = false,
+  this.bibleVersionName = kDefaultBibleVersionName,
   });
 
   LocalSettings copyWith(
@@ -44,14 +48,16 @@ class LocalSettings {
       int? initShortBreak,
       String? fontFamily,
       Color? color,
-      bool? debugMode}) {
+      bool? debugMode,
+      String? bibleVersionName}) {
     return LocalSettings(
         initLongBreak: initLongBreak ?? this.initLongBreak,
         initPomodoro: initPomodoro ?? this.initPomodoro,
         initShortBreak: initShortBreak ?? this.initShortBreak,
         fontFamily: fontFamily ?? this.fontFamily,
         color: color ?? this.color,
-        debugMode: debugMode ?? this.debugMode);
+        debugMode: debugMode ?? this.debugMode,
+        bibleVersionName: bibleVersionName ?? this.bibleVersionName);
   }
 }
 
@@ -64,6 +70,10 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
 
   void updateColor(Color color) {
     state = state.copyWith(color: color);
+  }
+
+  void updateBibleVersionName(String name) {
+    state = state.copyWith(bibleVersionName: name);
   }
 
   void updateTime(TimerMode mode, int timeInMin){
