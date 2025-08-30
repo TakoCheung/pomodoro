@@ -118,7 +118,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final newRemaining = state.timeRemaining - 1;
       state = state.copyWith(timeRemaining: newRemaining);
       if (newRemaining == 0) {
-  unawaited(_handleComplete());
+        unawaited(_handleComplete());
       }
     }
   }
@@ -126,7 +126,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
   /// Test helper: trigger the onComplete callback synchronously.
   @visibleForTesting
   void triggerComplete() {
-  unawaited(_handleComplete());
+    unawaited(_handleComplete());
   }
 
   void pauseTimer() {
@@ -178,13 +178,13 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   void updateSettings(LocalSettings localSettings) {
-  // If debug mode is enabled and settings were zeroed, keep zero seconds.
-  state = state.copyWith(
-    initPomodoro: localSettings.initPomodoro,
-    initLongBreak: localSettings.initLongBreak,
-    initShortBreak: localSettings.initShortBreak,
-    fontFamily: localSettings.fontFamily,
-    color: localSettings.color);
+    // If debug mode is enabled and settings were zeroed, keep zero seconds.
+    state = state.copyWith(
+        initPomodoro: localSettings.initPomodoro,
+        initLongBreak: localSettings.initLongBreak,
+        initShortBreak: localSettings.initShortBreak,
+        fontFamily: localSettings.fontFamily,
+        color: localSettings.color);
     setMode(state.mode);
   }
 
@@ -217,12 +217,14 @@ class TimerNotifier extends StateNotifier<TimerState> {
         }
         return id;
       }
-  final mode = state.mode;
+
+      final mode = state.mode;
       Passage passage;
       switch (mode) {
         case TimerMode.pomodoro:
           final generatedId = generateIdAvoidingRepeat();
-          passage = await repo.fetchAndCacheRandomPassage(bibleId: bibleId, passageIds: [generatedId]);
+          passage = await repo.fetchAndCacheRandomPassage(
+              bibleId: bibleId, passageIds: [generatedId]);
           // Persist the id we used to reduce immediate repeats.
           r.read(lastPassageIdProvider.notifier).state = generatedId;
           break;
@@ -230,12 +232,15 @@ class TimerNotifier extends StateNotifier<TimerState> {
         case TimerMode.longBreak:
           final cached = repo.cachedPassageForBible(bibleId);
           if (cached != null) {
-            debugPrint('TimerNotifier: using cached passage ${cached.reference} for break');
+            debugPrint(
+                'TimerNotifier: using cached passage ${cached.reference} for break');
             passage = cached;
           } else {
-            debugPrint('TimerNotifier: no cache for today; fetching once for break');
+            debugPrint(
+                'TimerNotifier: no cache for today; fetching once for break');
             final generatedId = generateIdAvoidingRepeat();
-            passage = await repo.getRandomPassageOncePerDay(bibleId: bibleId, passageIds: [generatedId]);
+            passage = await repo.getRandomPassageOncePerDay(
+                bibleId: bibleId, passageIds: [generatedId]);
             r.read(lastPassageIdProvider.notifier).state = generatedId;
           }
           break;

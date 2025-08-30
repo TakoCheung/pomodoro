@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
 
-void main(){
-  testWidgets('NumberInput increments and decrements within bounds', (tester) async{
+void main() {
+  testWidgets('NumberInput increments and decrements within bounds',
+      (tester) async {
     int changed = 0;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(

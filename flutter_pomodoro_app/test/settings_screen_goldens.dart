@@ -13,15 +13,15 @@ void main() async {
       return Future<void>.value();
     }
 
-  // Wrap SettingsScreen with the expected app scaffolding so providers and
-  // MediaQuery are available. Constrain the surfaceSize to avoid overflow
-  // during golden rendering. Also set devicePixelRatio so logical size
-  // calculations are stable in headless runs.
-  // Use a wider surface to accommodate SettingsScreen layout and avoid
-  // small render overflows during golden rendering.
-  final width = 540.0;
-  // Set DPR for stable logical size calculations in headless runs
-  tester.binding.window.devicePixelRatioTestValue = 1.0;
+    // Wrap SettingsScreen with the expected app scaffolding so providers and
+    // MediaQuery are available. Constrain the surfaceSize to avoid overflow
+    // during golden rendering. Also set devicePixelRatio so logical size
+    // calculations are stable in headless runs.
+    // Use a wider surface to accommodate SettingsScreen layout and avoid
+    // small render overflows during golden rendering.
+    final width = 540.0;
+    // Set DPR for stable logical size calculations in headless runs
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     final widget = ProviderScope(
       child: MaterialApp(
         home: Scaffold(
@@ -40,7 +40,7 @@ void main() async {
 
     await screenMatchesGolden(tester, 'setting_screen_mobile');
 
-    addTearDown((){
+    addTearDown(() {
       tester.binding.window.clearPhysicalSizeTestValue();
       tester.binding.window.clearDevicePixelRatioTestValue();
     });

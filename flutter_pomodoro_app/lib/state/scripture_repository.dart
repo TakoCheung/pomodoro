@@ -23,18 +23,23 @@ class ScriptureRepository {
   final Random _rng;
   final List<Passage> _history = <Passage>[];
 
-  ScriptureRepository({required this.service, DateTime Function()? now, Random? rng, SharedPreferences? prefs})
+  ScriptureRepository(
+      {required this.service,
+      DateTime Function()? now,
+      Random? rng,
+      SharedPreferences? prefs})
       : now = now ?? DateTime.now,
         _rng = rng ?? Random(),
         _prefs = prefs {
     // Attempt to hydrate from SharedPreferences if available.
     if (_prefs != null) {
-  final jsonStr = _prefs.getString(_prefsKeyCachedPassage);
-  final dateStr = _prefs.getString(_prefsKeyCachedDate);
-  final cachedId = _prefs.getString(_prefsKeyCachedBibleId);
+      final jsonStr = _prefs.getString(_prefsKeyCachedPassage);
+      final dateStr = _prefs.getString(_prefsKeyCachedDate);
+      final cachedId = _prefs.getString(_prefsKeyCachedBibleId);
       if (jsonStr != null && dateStr != null) {
         try {
-          _cached = Passage.fromJson(json.decode(jsonStr) as Map<String, dynamic>);
+          _cached =
+              Passage.fromJson(json.decode(jsonStr) as Map<String, dynamic>);
           _cachedDate = DateTime.parse(dateStr);
           _cachedBibleId = cachedId;
         } catch (_) {
@@ -69,7 +74,8 @@ class ScriptureRepository {
   Passage? get cachedPassage {
     if (_cached == null || _cachedDate == null) return null;
     final today = DateTime(now().year, now().month, now().day);
-    final cachedDay = DateTime(_cachedDate!.year, _cachedDate!.month, _cachedDate!.day);
+    final cachedDay =
+        DateTime(_cachedDate!.year, _cachedDate!.month, _cachedDate!.day);
     return cachedDay == today ? _cached : null;
   }
 
@@ -83,31 +89,35 @@ class ScriptureRepository {
     return _cachedBibleId == bibleId ? p : null;
   }
 
-  Future<Passage> getRandomPassageOncePerDay({required String bibleId, required List<String> passageIds}) async {
+  Future<Passage> getRandomPassageOncePerDay(
+      {required String bibleId, required List<String> passageIds}) async {
     final today = DateTime(now().year, now().month, now().day);
     if (_cached != null && _cachedDate != null) {
-      final cachedDay = DateTime(_cachedDate!.year, _cachedDate!.month, _cachedDate!.day);
+      final cachedDay =
+          DateTime(_cachedDate!.year, _cachedDate!.month, _cachedDate!.day);
       if (cachedDay == today) {
         return _cached!;
       }
     }
     // If caller doesn't provide candidates, pick from default curated verse IDs.
     final passageId = pickRandomVerseId(_rng, candidates: passageIds);
-  final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
-  _cached = p;
-  _cachedBibleId = bibleId;
+    final p =
+        await service.fetchPassage(bibleId: bibleId, passageId: passageId);
+    _cached = p;
+    _cachedBibleId = bibleId;
     _cachedDate = now();
     // persist if prefs available
     if (_prefs != null) {
       try {
         await _prefs.setString(_prefsKeyCachedPassage, json.encode(p.toJson()));
         if (_cachedDate != null) {
-          await _prefs.setString(_prefsKeyCachedDate, _cachedDate!.toIso8601String());
+          await _prefs.setString(
+              _prefsKeyCachedDate, _cachedDate!.toIso8601String());
         }
-    await _prefs.setString(_prefsKeyCachedBibleId, bibleId);
-    // Also append to history and persist
-    _history.add(p);
-    await _persistHistory();
+        await _prefs.setString(_prefsKeyCachedBibleId, bibleId);
+        // Also append to history and persist
+        _history.add(p);
+        await _persistHistory();
       } catch (_) {
         // ignore persistence errors
       }
@@ -117,20 +127,23 @@ class ScriptureRepository {
 
   /// Always fetches a new random passage and updates the cache for today,
   /// regardless of whether a passage has already been cached.
-  Future<Passage> fetchAndCacheRandomPassage({required String bibleId, required List<String> passageIds}) async {
+  Future<Passage> fetchAndCacheRandomPassage(
+      {required String bibleId, required List<String> passageIds}) async {
     final passageId = pickRandomVerseId(_rng, candidates: passageIds);
-  final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
-  _cached = p;
-  _cachedBibleId = bibleId;
+    final p =
+        await service.fetchPassage(bibleId: bibleId, passageId: passageId);
+    _cached = p;
+    _cachedBibleId = bibleId;
     _cachedDate = now();
     if (_prefs != null) {
       try {
         await _prefs.setString(_prefsKeyCachedPassage, json.encode(p.toJson()));
-        await _prefs.setString(_prefsKeyCachedDate, _cachedDate!.toIso8601String());
-    await _prefs.setString(_prefsKeyCachedBibleId, bibleId);
-    // Append to history and persist
-    _history.add(p);
-    await _persistHistory();
+        await _prefs.setString(
+            _prefsKeyCachedDate, _cachedDate!.toIso8601String());
+        await _prefs.setString(_prefsKeyCachedBibleId, bibleId);
+        // Append to history and persist
+        _history.add(p);
+        await _persistHistory();
       } catch (_) {}
     }
     return p;
@@ -150,7 +163,7 @@ class ScriptureRepository {
     if (_prefs == null) return;
     try {
       final list = _history.map((p) => p.toJson()).toList(growable: false);
-  await _prefs.setString(_prefsKeyHistory, json.encode(list));
+      await _prefs.setString(_prefsKeyHistory, json.encode(list));
     } catch (_) {
       // ignore persistence errors
     }
@@ -172,6 +185,7 @@ final scriptureRepositoryProvider = Provider<ScriptureRepository>((ref) {
   return ScriptureRepository(service: svc);
 });
 
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
+final sharedPreferencesProvider =
+    FutureProvider<SharedPreferences>((ref) async {
   return SharedPreferences.getInstance();
 });

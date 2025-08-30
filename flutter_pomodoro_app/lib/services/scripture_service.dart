@@ -7,7 +7,8 @@ import '../models/passage.dart';
 import 'package:flutter/foundation.dart';
 
 abstract class ScriptureServiceInterface {
-  Future<Passage> fetchPassage({required String bibleId, required String passageId});
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId});
 }
 
 class ScriptureService implements ScriptureServiceInterface {
@@ -16,15 +17,21 @@ class ScriptureService implements ScriptureServiceInterface {
   final int maxRetries;
   final Duration retryDelay;
 
-  ScriptureService({http.Client? client, required this.apiKey, this.maxRetries = 3, Duration? retryDelay})
+  ScriptureService(
+      {http.Client? client,
+      required this.apiKey,
+      this.maxRetries = 3,
+      Duration? retryDelay})
       : client = client ?? http.Client(),
         retryDelay = retryDelay ?? const Duration(milliseconds: 300);
 
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     void log(String msg) {
       if (kDebugMode) debugPrint('ScriptureService: $msg');
     }
+
     // The API docs recommend using the /verses/{verseId} endpoint for specific verses.
     // See: https://docs.api.bible/tutorials/getting-a-specific-verse
     // We validate the ID format lightly, then request via /verses.
@@ -33,14 +40,16 @@ class ScriptureService implements ScriptureServiceInterface {
       log('Invalid verse ID format: $passageId');
       throw FormatException('Invalid verse ID format: $passageId');
     }
-    final uri = Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/verses/$passageId');
+    final uri = Uri.parse(
+        'https://api.scripture.api.bible/v1/bibles/$bibleId/verses/$passageId');
     int attempt = 0;
     while (true) {
       attempt++;
       try {
         final started = DateTime.now();
         log('GET $uri (attempt $attempt)');
-        final resp = await client.get(uri, headers: {'api-key': apiKey}).timeout(const Duration(seconds: 5));
+        final resp = await client.get(uri,
+            headers: {'api-key': apiKey}).timeout(const Duration(seconds: 5));
         final elapsed = DateTime.now().difference(started).inMilliseconds;
         log('Status ${resp.statusCode} in ${elapsed}ms');
         if (resp.statusCode == 200) {
@@ -54,7 +63,9 @@ class ScriptureService implements ScriptureServiceInterface {
         } else if (resp.statusCode == 429 || resp.statusCode >= 500) {
           if (attempt > maxRetries) {
             log('Giving up after $attempt attempts; last status ${resp.statusCode}');
-            throw HttpException('Failed after $attempt attempts: ${resp.statusCode}', uri: uri);
+            throw HttpException(
+                'Failed after $attempt attempts: ${resp.statusCode}',
+                uri: uri);
           }
           final backoffMs = retryDelay.inMilliseconds * attempt;
           log('Retrying after ${backoffMs}ms');
@@ -62,16 +73,17 @@ class ScriptureService implements ScriptureServiceInterface {
           continue;
         } else {
           log('Request failed with status ${resp.statusCode}');
-          throw HttpException('Failed to fetch passage: ${resp.statusCode}', uri: uri);
+          throw HttpException('Failed to fetch passage: ${resp.statusCode}',
+              uri: uri);
         }
       } on TimeoutException catch (_) {
-  if (attempt > maxRetries) {
-    log('Timeout on attempt $attempt; giving up');
-    rethrow;
-  }
-  final backoffMs = retryDelay.inMilliseconds * attempt;
-  log('Timeout on attempt $attempt; retrying after ${backoffMs}ms');
-  await Future.delayed(Duration(milliseconds: backoffMs));
+        if (attempt > maxRetries) {
+          log('Timeout on attempt $attempt; giving up');
+          rethrow;
+        }
+        final backoffMs = retryDelay.inMilliseconds * attempt;
+        log('Timeout on attempt $attempt; retrying after ${backoffMs}ms');
+        await Future.delayed(Duration(milliseconds: backoffMs));
       }
     }
   }

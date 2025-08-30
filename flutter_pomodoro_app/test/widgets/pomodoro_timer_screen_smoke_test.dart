@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   testWidgets('PomodoroTimerScreen smoke test hits build tree', (tester) async {
-  // no special window sizing required for this smoke test
+    // no special window sizing required for this smoke test
 
-    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen())));
-  // Ensure title and gear button exist which touches the build
-  expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
-  expect(find.byType(Scaffold), findsOneWidget);
+    await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen())));
+    // Ensure title and gear button exist which touches the build
+    expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
+    expect(find.byType(Scaffold), findsOneWidget);
   });
 }

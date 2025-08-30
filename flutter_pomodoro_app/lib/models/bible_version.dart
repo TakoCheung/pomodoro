@@ -5,7 +5,12 @@ class BibleVersion {
   final String abbreviationLocal;
   final String language;
 
-  BibleVersion({required this.id, required this.name, required this.abbreviation, required this.language, this.abbreviationLocal = ''});
+  BibleVersion(
+      {required this.id,
+      required this.name,
+      required this.abbreviation,
+      required this.language,
+      this.abbreviationLocal = ''});
 
   factory BibleVersion.fromJson(Map<String, dynamic> json) {
     final abbr = json['abbreviation'] as String? ?? '';
@@ -13,9 +18,12 @@ class BibleVersion {
     return BibleVersion(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
-      abbreviation: abbr.isNotEmpty ? abbr : (abbrLocal.isNotEmpty ? abbrLocal : ''),
+      abbreviation:
+          abbr.isNotEmpty ? abbr : (abbrLocal.isNotEmpty ? abbrLocal : ''),
       abbreviationLocal: abbrLocal,
-      language: (json['language'] is Map ? (json['language']['name'] as String? ?? '') : (json['language'] as String? ?? '')),
+      language: (json['language'] is Map
+          ? (json['language']['name'] as String? ?? '')
+          : (json['language'] as String? ?? '')),
     );
   }
 
@@ -27,6 +35,9 @@ class BibleVersion {
         'language': language,
       };
 
-  String get label => abbreviationLocal.isNotEmpty ? abbreviationLocal : (abbreviation.isNotEmpty ? abbreviation : name);
-  String get displayName => abbreviation.isNotEmpty ? '$abbreviation — $name' : name;
+  String get label => abbreviationLocal.isNotEmpty
+      ? abbreviationLocal
+      : (abbreviation.isNotEmpty ? abbreviation : name);
+  String get displayName =>
+      abbreviation.isNotEmpty ? '$abbreviation — $name' : name;
 }

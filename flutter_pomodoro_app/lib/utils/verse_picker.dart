@@ -7,7 +7,8 @@ String pickRandomVerseId(Random rng, {List<String>? candidates}) {
   // If the caller provided candidates, respect them verbatim to preserve
   // backwards compatibility with existing tests that pass arbitrary IDs.
   if (candidates != null && candidates.isNotEmpty) {
-    final valid = candidates.where(isLikelyValidVerseId).toList(growable: false);
+    final valid =
+        candidates.where(isLikelyValidVerseId).toList(growable: false);
     if (valid.isEmpty) {
       throw ArgumentError('No valid verse IDs in candidates');
     }

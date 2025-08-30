@@ -42,7 +42,8 @@ void main() {
       notifier.setMode(TimerMode.shortBreak);
 
       expect(notifier.state.mode, TimerMode.shortBreak);
-      expect(notifier.state.timeRemaining, notifier.getInitialDuration(TimerMode.shortBreak));
+      expect(notifier.state.timeRemaining,
+          notifier.getInitialDuration(TimerMode.shortBreak));
       expect(notifier.state.isRunning, isFalse);
 
       notifier.dispose();

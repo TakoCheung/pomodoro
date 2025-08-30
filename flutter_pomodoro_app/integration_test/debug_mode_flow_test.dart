@@ -6,7 +6,8 @@ import 'package:flutter_pomodoro_app/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Enable debug mode and apply settings (no FAB present)', (tester) async {
+  testWidgets('Enable debug mode and apply settings (no FAB present)',
+      (tester) async {
     app.main();
     await tester.pumpAndSettle();
 

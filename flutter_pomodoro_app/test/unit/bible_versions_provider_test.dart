@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_pomodoro_app/models/bible_version.dart';
 import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
-import 'package:flutter_pomodoro_app/state/scripture_repository.dart' show sharedPreferencesProvider;
+import 'package:flutter_pomodoro_app/state/scripture_repository.dart'
+    show sharedPreferencesProvider;
 
 class _FakeCatalogService implements BibleCatalogServiceInterface {
   int calls = 0;
@@ -33,7 +34,8 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('bibleVersionsProvider returns cached list without calling fetch', () async {
+  test('bibleVersionsProvider returns cached list without calling fetch',
+      () async {
     final prefs = await SharedPreferences.getInstance();
     final cached = [
       {
@@ -58,10 +60,16 @@ void main() {
     expect(fake.calls, 0);
   });
 
-  test('bibleVersionsProvider fetches, persists cache, then next container reads from cache', () async {
+  test(
+      'bibleVersionsProvider fetches, persists cache, then next container reads from cache',
+      () async {
     final prefs = await SharedPreferences.getInstance();
     final versions = [
-      BibleVersion(id: 'id2', name: 'Another Version', abbreviation: 'AV', language: 'English'),
+      BibleVersion(
+          id: 'id2',
+          name: 'Another Version',
+          abbreviation: 'AV',
+          language: 'English'),
     ];
     final fake = _FakeCatalogService(versions);
     final c1 = ProviderContainer(overrides: [
@@ -98,7 +106,11 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(cacheKey, 'not-json');
     final versions = [
-      BibleVersion(id: 'id3', name: 'Third Version', abbreviation: 'TV', language: 'English'),
+      BibleVersion(
+          id: 'id3',
+          name: 'Third Version',
+          abbreviation: 'TV',
+          language: 'English'),
     ];
     final fake = _FakeCatalogService(versions);
     final container = ProviderContainer(overrides: [

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Toggling Debug Mode updates time inputs to allow zero', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: Scaffold(body: SettingsScreen()))));
+  testWidgets('Toggling Debug Mode updates time inputs to allow zero',
+      (tester) async {
+    await tester.pumpWidget(const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: SettingsScreen()))));
 
     // Toggle debug mode
     final switchFinder = find.byType(Switch);

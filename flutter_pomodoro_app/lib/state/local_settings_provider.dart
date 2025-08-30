@@ -18,7 +18,7 @@ final localSettingsProvider =
       initLongBreak: TimerDefaults.longBreakDefault,
       fontFamily: AppTextStyles.kumbhSans,
       color: AppColors.orangeRed,
-  bibleVersionName: kDefaultBibleVersionName,
+      bibleVersionName: kDefaultBibleVersionName,
     ),
   );
 });
@@ -38,10 +38,10 @@ class LocalSettings {
     required this.initShortBreak,
     required this.initLongBreak,
     required this.fontFamily,
-  required this.color,
-  this.debugMode = false,
-  this.bibleVersionName = kDefaultBibleVersionName,
-  this.bibleVersionId,
+    required this.color,
+    this.debugMode = false,
+    this.bibleVersionName = kDefaultBibleVersionName,
+    this.bibleVersionId,
   });
 
   LocalSettings copyWith(
@@ -85,7 +85,7 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
     state = state.copyWith(bibleVersionName: name, bibleVersionId: id);
   }
 
-  void updateTime(TimerMode mode, int timeInMin){
+  void updateTime(TimerMode mode, int timeInMin) {
     switch (mode) {
       case TimerMode.pomodoro:
         state = state.copyWith(initPomodoro: _calcSeconds(timeInMin));
@@ -120,7 +120,7 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
     }
   }
 
-  String getName(TimerMode mode){
+  String getName(TimerMode mode) {
     switch (mode) {
       case TimerMode.pomodoro:
         return "Pomodoro";

@@ -18,21 +18,21 @@ void main() {
     await tester.tap(gear);
     await tester.pumpAndSettle();
 
-  // Toggle Debug Mode on
-  final debugSwitch = find.byType(Switch);
-  expect(debugSwitch, findsWidgets);
-  await tester.tap(debugSwitch.first);
-  await tester.pumpAndSettle();
+    // Toggle Debug Mode on
+    final debugSwitch = find.byType(Switch);
+    expect(debugSwitch, findsWidgets);
+    await tester.tap(debugSwitch.first);
+    await tester.pumpAndSettle();
 
-  // Find Apply button and tap
+    // Find Apply button and tap
     final apply = find.text('Apply');
     expect(apply, findsOneWidget);
     await tester.tap(apply);
     await tester.pumpAndSettle();
 
-  // Validate the main screen still shows and timer reflects debug mapping (00:01)
-  expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
-  expect(find.byKey(const Key('timer_text')), findsOneWidget);
-  expect(find.text('00:01'), findsOneWidget);
+    // Validate the main screen still shows and timer reflects debug mapping (00:01)
+    expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
+    expect(find.byKey(const Key('timer_text')), findsOneWidget);
+    expect(find.text('00:01'), findsOneWidget);
   });
 }

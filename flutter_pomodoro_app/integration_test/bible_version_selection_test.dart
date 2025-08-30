@@ -6,7 +6,8 @@ import 'package:flutter_pomodoro_app/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Select Bible version from settings updates provider', (tester) async {
+  testWidgets('Select Bible version from settings updates provider',
+      (tester) async {
     app.main();
     await tester.pumpAndSettle();
 

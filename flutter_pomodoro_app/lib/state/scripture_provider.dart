@@ -24,7 +24,12 @@ final bibleIdProvider = Provider<String>((ref) {
       data: (versions) {
         if (versions.isEmpty) return null;
         final match = versions.firstWhere(
-          (v) => v.displayName == name || v.name == name || v.abbreviation == name || v.abbreviationLocal == name || v.label == name,
+          (v) =>
+              v.displayName == name ||
+              v.name == name ||
+              v.abbreviation == name ||
+              v.abbreviationLocal == name ||
+              v.label == name,
           orElse: () => versions.first,
         );
         return match.id;
@@ -48,18 +53,21 @@ final bibleIdProvider = Provider<String>((ref) {
 final scriptureServiceProvider = Provider<ScriptureServiceInterface>((ref) {
   final key = dotenv.env['SCRIPTURE_API_KEY'];
   if (key == null || key.isEmpty) {
-    throw UnimplementedError('SCRIPTURE_API_KEY not set; override scriptureServiceProvider in tests or set env');
+    throw UnimplementedError(
+        'SCRIPTURE_API_KEY not set; override scriptureServiceProvider in tests or set env');
   }
   if (kDebugMode) {
     try {
       // Log presence without leaking the key value
-      debugPrint('scriptureServiceProvider: SCRIPTURE_API_KEY detected (len=${key.length})');
+      debugPrint(
+          'scriptureServiceProvider: SCRIPTURE_API_KEY detected (len=${key.length})');
     } catch (_) {}
   }
   return ScriptureService(apiKey: key);
 });
 
-final scriptureProvider = FutureProvider.family<Passage, ScriptureRequest>((ref, req) async {
+final scriptureProvider =
+    FutureProvider.family<Passage, ScriptureRequest>((ref, req) async {
   final bibleId = req.bibleId;
   final passageId = req.passageId;
   final service = ref.read(scriptureServiceProvider);

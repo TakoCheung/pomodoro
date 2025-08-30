@@ -61,8 +61,7 @@ class TimerDisplay extends ConsumerWidget {
                 strokeAlign: BorderSide.strokeAlignCenter,
                 value: ref.read(timerProvider.notifier).progress(),
                 strokeWidth: 11,
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(timerState.color),
+                valueColor: AlwaysStoppedAnimation<Color>(timerState.color),
                 backgroundColor: Colors.transparent,
                 strokeCap: StrokeCap.round,
               ),
@@ -73,7 +72,9 @@ class TimerDisplay extends ConsumerWidget {
               children: [
                 Text(
                   key: const Key('timer_text'),
-                  ref.read(timerProvider.notifier).timeFormatted(timerState.timeRemaining),
+                  ref
+                      .read(timerProvider.notifier)
+                      .timeFormatted(timerState.timeRemaining),
                   style: TextStyle(
                     fontSize: AppTextStyles.h1FontSize,
                     color: timerState.color,

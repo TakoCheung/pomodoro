@@ -23,7 +23,8 @@ void main() {
 
     test('setMode changes mode and sets timeRemaining accordingly', () {
       final notifier = TimerNotifier();
-      notifier.state = notifier.state.copyWith(initPomodoro: 120, initShortBreak: 30, initLongBreak: 60);
+      notifier.state = notifier.state
+          .copyWith(initPomodoro: 120, initShortBreak: 30, initLongBreak: 60);
       notifier.setMode(TimerMode.shortBreak);
       expect(notifier.state.mode, TimerMode.shortBreak);
       expect(notifier.state.timeRemaining, 30);

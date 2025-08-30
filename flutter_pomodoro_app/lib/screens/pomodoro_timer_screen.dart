@@ -17,10 +17,10 @@ class PomodoroTimerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showScripture = ref.watch(scriptureOverlayVisibleProvider);
-  final bibleId = ref.watch(bibleIdProvider);
-  // Log basic debug info when needed.
-  // debugPrint('PomodoroTimerScreen: bibleId=$bibleId');
-  return Scaffold(
+    final bibleId = ref.watch(bibleIdProvider);
+    // Log basic debug info when needed.
+    // debugPrint('PomodoroTimerScreen: bibleId=$bibleId');
+    return Scaffold(
       backgroundColor: AppColors.darkBlue,
       body: Stack(
         children: [
@@ -32,12 +32,14 @@ class PomodoroTimerScreen extends ConsumerWidget {
                   'pomodoro',
                   key: Key('pomodoro_title'),
                   style: TextStyle(
-                    fontSize: AppTextStyles.title,
-                    color: AppColors.lightBlueGray,
-                    fontWeight: FontWeight.bold
-                  ),
+                      fontSize: AppTextStyles.title,
+                      color: AppColors.lightBlueGray,
+                      fontWeight: FontWeight.bold),
                 ),
-                Flexible(child:  SizedBox(height: 45,)),
+                Flexible(
+                    child: SizedBox(
+                  height: 45,
+                )),
                 TimerModeSwitcherUI(),
                 Flexible(child: SizedBox(height: 48)),
                 TimerDisplay(),
@@ -47,14 +49,14 @@ class PomodoroTimerScreen extends ConsumerWidget {
             ),
           ),
           // Overlay the scripture on top of main content when visible
-      if (showScripture)
+          if (showScripture)
             Align(
               alignment: Alignment.center,
-        child: ScriptureOverlay(bibleId: bibleId, passageId: 'GEN.1.1'),
+              child: ScriptureOverlay(bibleId: bibleId, passageId: 'GEN.1.1'),
             ),
         ],
       ),
-  // No debug FAB.
+      // No debug FAB.
     );
   }
 }

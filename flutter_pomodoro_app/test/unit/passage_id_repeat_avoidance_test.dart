@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/passage_id_provider.dart';
 
 void main() {
-  test('nextPassageIdProvider with lastPassageIdProvider avoids immediate repeat', () {
+  test(
+      'nextPassageIdProvider with lastPassageIdProvider avoids immediate repeat',
+      () {
     var ids = ['GEN.1.1', 'GEN.1.1', 'GEN.1.2'];
     int idx = 0;
     final container = ProviderContainer(overrides: [

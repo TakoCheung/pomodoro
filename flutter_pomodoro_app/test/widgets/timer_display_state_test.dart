@@ -11,7 +11,8 @@ void main() {
     addTearDown(container.dispose);
     final notifier = container.read(timerProvider.notifier);
     // start with running state
-    notifier.state = notifier.state.copyWith(isRunning: true, timeRemaining: 65);
+    notifier.state =
+        notifier.state.copyWith(isRunning: true, timeRemaining: 65);
 
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
@@ -33,7 +34,8 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     final notifier = container.read(timerProvider.notifier);
-    notifier.state = notifier.state.copyWith(isRunning: false, timeRemaining: 130);
+    notifier.state =
+        notifier.state.copyWith(isRunning: false, timeRemaining: 130);
 
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
@@ -47,9 +49,9 @@ void main() {
 
     // Tapping RESTART flips running state via toggleTimer
     expect(notifier.state.isRunning, isTrue);
-  // Stop the timer so tests don't leave pending timers
-  notifier.pauseTimer();
-  // Let the timer callback run and cancel itself
-  await tester.pump(const Duration(seconds: 2));
+    // Stop the timer so tests don't leave pending timers
+    notifier.pauseTimer();
+    // Let the timer callback run and cancel itself
+    await tester.pump(const Duration(seconds: 2));
   });
 }

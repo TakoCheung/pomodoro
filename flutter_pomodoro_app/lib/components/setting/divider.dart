@@ -10,7 +10,8 @@ class CustomDivider extends StatelessWidget {
     super.key,
     this.spaceBefore = 20,
     this.spaceAfter = 20,
-    this.color = AppColors.divider, // Assuming AppColors.divider is defined elsewhere
+    this.color =
+        AppColors.divider, // Assuming AppColors.divider is defined elsewhere
   });
 
   @override
@@ -19,7 +20,10 @@ class CustomDivider extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         SizedBox(height: spaceBefore),
-        Divider(height: 1, color: color, ),
+        Divider(
+          height: 1,
+          color: color,
+        ),
         SizedBox(height: spaceAfter),
       ],
     );

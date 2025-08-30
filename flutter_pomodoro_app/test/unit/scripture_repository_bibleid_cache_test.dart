@@ -6,7 +6,8 @@ import 'package:flutter_pomodoro_app/models/passage.dart';
 
 class _FakeSvc implements ScriptureServiceInterface {
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     return Passage(reference: '$bibleId:$passageId', text: 'T');
   }
 }
@@ -20,15 +21,20 @@ void main() {
 
   test('cachedPassageForBible returns only when bibleId matches', () async {
     final prefs = await SharedPreferences.getInstance();
-    final repo = ScriptureRepository(service: _FakeSvc(), now: () => DateTime(2025, 8, 30), prefs: prefs);
+    final repo = ScriptureRepository(
+        service: _FakeSvc(), now: () => DateTime(2025, 8, 30), prefs: prefs);
     // Cache passage for idA
-    await repo.fetchAndCacheRandomPassage(bibleId: 'idA', passageIds: ['GEN.1.1']);
-    expect(repo.cachedPassageForBible('idA')?.reference.startsWith('idA'), isTrue);
+    await repo
+        .fetchAndCacheRandomPassage(bibleId: 'idA', passageIds: ['GEN.1.1']);
+    expect(
+        repo.cachedPassageForBible('idA')?.reference.startsWith('idA'), isTrue);
     expect(repo.cachedPassageForBible('idB'), isNull);
 
     // Rehydrate new repo from prefs and verify same behavior
-    final repo2 = ScriptureRepository(service: _FakeSvc(), now: () => DateTime(2025, 8, 30), prefs: prefs);
-    expect(repo2.cachedPassageForBible('idA')?.reference.startsWith('idA'), isTrue);
+    final repo2 = ScriptureRepository(
+        service: _FakeSvc(), now: () => DateTime(2025, 8, 30), prefs: prefs);
+    expect(repo2.cachedPassageForBible('idA')?.reference.startsWith('idA'),
+        isTrue);
     expect(repo2.cachedPassageForBible('idB'), isNull);
   });
 }

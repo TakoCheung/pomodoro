@@ -23,63 +23,58 @@ class TimerModeSwitcherUI extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildModeButton(
-            context: context,
-            label: 'pomodoro',
-            isActive: timerState.mode == TimerMode.pomodoro,
-            onPressed: () => timerNotifier.setMode(TimerMode.pomodoro),
-            state: timerState
-          ),
+              context: context,
+              label: 'pomodoro',
+              isActive: timerState.mode == TimerMode.pomodoro,
+              onPressed: () => timerNotifier.setMode(TimerMode.pomodoro),
+              state: timerState),
           _buildModeButton(
-            context: context,
-            label: 'short break',
-            isActive: timerState.mode == TimerMode.shortBreak,
-            onPressed: () => timerNotifier.setMode(TimerMode.shortBreak),
-            state: timerState
-          ),
+              context: context,
+              label: 'short break',
+              isActive: timerState.mode == TimerMode.shortBreak,
+              onPressed: () => timerNotifier.setMode(TimerMode.shortBreak),
+              state: timerState),
           _buildModeButton(
-            context: context,
-            label: 'long break',
-            isActive: timerState.mode == TimerMode.longBreak,
-            onPressed: () => timerNotifier.setMode(TimerMode.longBreak),
-            state: timerState
-          ),
+              context: context,
+              label: 'long break',
+              isActive: timerState.mode == TimerMode.longBreak,
+              onPressed: () => timerNotifier.setMode(TimerMode.longBreak),
+              state: timerState),
         ],
       ),
     );
   }
 
-  Widget _buildModeButton({
-    required BuildContext context,
-    required String label,
-    required bool isActive,
-    required VoidCallback onPressed,
-    required TimerState state
-  }) {
+  Widget _buildModeButton(
+      {required BuildContext context,
+      required String label,
+      required bool isActive,
+      required VoidCallback onPressed,
+      required TimerState state}) {
     return Center(
       // child: Padding(
-        // padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: TextButton(
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            backgroundColor: isActive ? state.color : Colors.transparent,
-            maximumSize: const Size(120, 48),
-            minimumSize: const Size(120, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(26.5),
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: AppTextStyles.bodyFontSize,
-              color: isActive ? AppColors.darkBlue : AppColors.lightBlueGray,
-              fontFamily: state.fontFamily,
-              fontWeight: FontWeight.bold,
-            ),
+      // padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: isActive ? state.color : Colors.transparent,
+          maximumSize: const Size(120, 48),
+          minimumSize: const Size(120, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26.5),
           ),
         ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: AppTextStyles.bodyFontSize,
+            color: isActive ? AppColors.darkBlue : AppColors.lightBlueGray,
+            fontFamily: state.fontFamily,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       // ),
     );
   }
 }
-

@@ -39,7 +39,8 @@ void main() {
       expect(notifier.state.isRunning, isFalse);
     });
 
-    test('updateSettings applies LocalSettings values and resets mode time', () {
+    test('updateSettings applies LocalSettings values and resets mode time',
+        () {
       final notifier = TimerNotifier();
       final settings = LocalSettings(
         initPomodoro: 5 * 60,
@@ -57,7 +58,8 @@ void main() {
       expect(notifier.state.fontFamily, 'TestFont');
       expect(notifier.state.color, Colors.green);
       // setMode is called inside updateSettings and timeRemaining should match current mode initial
-      expect(notifier.state.timeRemaining, notifier.getInitialDuration(notifier.state.mode));
+      expect(notifier.state.timeRemaining,
+          notifier.getInitialDuration(notifier.state.mode));
     });
   });
 }

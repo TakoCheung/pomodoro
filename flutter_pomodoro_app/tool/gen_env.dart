@@ -21,10 +21,12 @@ void main() {
     map[key] = val;
   }
 
-  final forceShow = (map['FORCE_SHOW_SCRIPTURE_ON_COMPLETE']?.toLowerCase() == 'true');
+  final forceShow =
+      (map['FORCE_SHOW_SCRIPTURE_ON_COMPLETE']?.toLowerCase() == 'true');
 
   final out = StringBuffer();
-  out.writeln("// GENERATED - do not edit. Run `dart run tool/gen_env.dart` to regenerate.");
+  out.writeln(
+      "// GENERATED - do not edit. Run `dart run tool/gen_env.dart` to regenerate.");
   out.writeln("class EnvConfig {");
   out.writeln("  static const bool forceShowScriptureOnComplete = $forceShow;");
   out.writeln("}");

@@ -8,34 +8,38 @@ import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
 
 void main() {
-  testWidgets('ScriptureOverlay shows passage when provider has data', (tester) async {
+  testWidgets('ScriptureOverlay shows passage when provider has data',
+      (tester) async {
     // Override the family provider to immediately return our test passage for any request.
     final overrides = [
       scriptureProvider.overrideWith((ref, req) async {
-        return Passage(reference: 'Genesis 1:1', text: 'In the beginning God created the heavens and the earth.');
+        return Passage(
+            reference: 'Genesis 1:1',
+            text: 'In the beginning God created the heavens and the earth.');
       }),
     ];
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: overrides,
-      child: MaterialApp(
-        home: Scaffold(
-          body: Stack(
-            children: [
-              ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1'),
-            ],
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                ScriptureOverlay(
+                    bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1'),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
 
-  // Allow async provider to resolve; pump twice for async provider + widget rebuild
-  await tester.pump();
-  await tester.pump();
+    // Allow async provider to resolve; pump twice for async provider + widget rebuild
+    await tester.pump();
+    await tester.pump();
 
-  expect(find.byKey(const Key('scripture_reference')), findsOneWidget);
-  expect(find.byKey(const Key('scripture_text')), findsOneWidget);
+    expect(find.byKey(const Key('scripture_reference')), findsOneWidget);
+    expect(find.byKey(const Key('scripture_text')), findsOneWidget);
   });
 }
 
@@ -45,8 +49,11 @@ class FakeScriptureService implements ScriptureServiceInterface {
   FakeScriptureService();
 
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     wasCalled = true;
-    return Passage(reference: 'Genesis 1:1', text: 'In the beginning God created the heavens and the earth.');
+    return Passage(
+        reference: 'Genesis 1:1',
+        text: 'In the beginning God created the heavens and the earth.');
   }
 }

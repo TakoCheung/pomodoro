@@ -9,22 +9,29 @@ class _FakeService implements ScriptureServiceInterface {
   final Passage passage;
   _FakeService(this.passage);
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     return passage;
   }
 }
 
 class _BadService implements ScriptureServiceInterface {
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     throw Exception('service failed');
   }
 }
 
 void main() {
-  test('onComplete sets shownScriptureProvider to fetched passage when repo returns', () async {
-    final repo = ScriptureRepository(service: _FakeService(Passage(reference: 'TestRef', text: 'TestText', verses: [])));
-    final container = ProviderContainer(overrides: [scriptureRepositoryProvider.overrideWithValue(repo)]);
+  test(
+      'onComplete sets shownScriptureProvider to fetched passage when repo returns',
+      () async {
+    final repo = ScriptureRepository(
+        service: _FakeService(
+            Passage(reference: 'TestRef', text: 'TestText', verses: [])));
+    final container = ProviderContainer(
+        overrides: [scriptureRepositoryProvider.overrideWithValue(repo)]);
 
     final notifier = container.read(timerProvider.notifier);
     notifier.triggerComplete();
@@ -38,7 +45,8 @@ void main() {
 
   test('onComplete falls back to local passage when repo throws', () async {
     final repo = ScriptureRepository(service: _BadService());
-    final container = ProviderContainer(overrides: [scriptureRepositoryProvider.overrideWithValue(repo)]);
+    final container = ProviderContainer(
+        overrides: [scriptureRepositoryProvider.overrideWithValue(repo)]);
 
     final notifier = container.read(timerProvider.notifier);
     notifier.triggerComplete();

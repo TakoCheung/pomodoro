@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  testWidgets('Settings Screen renders for mobile and tablet', (WidgetTester tester) async {
-  // Mobile (constrain width to avoid overflow in headless layout)
-  tester.binding.window.physicalSizeTestValue = const Size(420, 800);
-  tester.binding.window.devicePixelRatioTestValue = 1.0;
+  testWidgets('Settings Screen renders for mobile and tablet',
+      (WidgetTester tester) async {
+    // Mobile (constrain width to avoid overflow in headless layout)
+    tester.binding.window.physicalSizeTestValue = const Size(420, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpWidget(ProviderScope(
       child: MaterialApp(
         home: Scaffold(
@@ -21,9 +22,9 @@ void main() {
 
     expect(find.text('Settings'), findsOneWidget);
 
-  // Tablet (wider surface)
-  tester.binding.window.physicalSizeTestValue = const Size(1366, 1024);
-  tester.binding.window.devicePixelRatioTestValue = 1.0;
+    // Tablet (wider surface)
+    tester.binding.window.physicalSizeTestValue = const Size(1366, 1024);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpWidget(ProviderScope(
       child: MaterialApp(
         home: Scaffold(
@@ -37,7 +38,7 @@ void main() {
 
     expect(find.text('Settings'), findsOneWidget);
 
-    addTearDown((){
+    addTearDown(() {
       tester.binding.window.clearPhysicalSizeTestValue();
       tester.binding.window.clearDevicePixelRatioTestValue();
     });

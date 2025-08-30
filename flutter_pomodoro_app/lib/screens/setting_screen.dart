@@ -68,8 +68,10 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 10),
                       isTablet
-                          ? _buildTimeRow(localSettings, localSettingsNotifier, isTablet)
-                          : _buildTimeColumn(localSettings, localSettingsNotifier, isTablet),
+                          ? _buildTimeRow(
+                              localSettings, localSettingsNotifier, isTablet)
+                          : _buildTimeColumn(
+                              localSettings, localSettingsNotifier, isTablet),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -77,7 +79,8 @@ class SettingsScreen extends ConsumerWidget {
                           const Text('Debug Mode', style: AppTextStyles.h4),
                           Switch(
                             value: localSettings.debugMode,
-                            onChanged: (v) => localSettingsNotifier.updateDebugMode(v),
+                            onChanged: (v) =>
+                                localSettingsNotifier.updateDebugMode(v),
                           )
                         ],
                       ),
@@ -89,14 +92,17 @@ class SettingsScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Consumer(builder: (context, ref, _) {
-                              final AsyncValue<List<BibleVersion>> versionsAsync = ref.watch(bibleVersionsProvider);
+                              final AsyncValue<List<BibleVersion>>
+                                  versionsAsync =
+                                  ref.watch(bibleVersionsProvider);
                               return versionsAsync.when(
                                 data: (list) {
                                   // Deduplicate by ID in case API contains duplicates.
                                   final Map<String, BibleVersion> byId = {
                                     for (final v in list) v.id: v
                                   };
-                                  final uniqueList = byId.values.toList(growable: false);
+                                  final uniqueList =
+                                      byId.values.toList(growable: false);
                                   // Use unique IDs for values to avoid duplicate label assertion.
                                   final items = uniqueList
                                       .map((v) => DropdownMenuItem<String>(
@@ -106,9 +112,11 @@ class SettingsScreen extends ConsumerWidget {
                                       .toList(growable: false);
 
                                   // Determine selected ID from current stored name by matching against common fields.
-                                  final currentName = localSettings.bibleVersionName;
+                                  final currentName =
+                                      localSettings.bibleVersionName;
                                   final match = uniqueList.firstWhere(
-                                    (v) => v.label == currentName ||
+                                    (v) =>
+                                        v.label == currentName ||
                                         v.displayName == currentName ||
                                         v.name == currentName ||
                                         v.abbreviationLocal == currentName ||
@@ -117,28 +125,39 @@ class SettingsScreen extends ConsumerWidget {
                                   );
                                   final selectedId = match.id;
 
-                  return DropdownButton<String>(
+                                  return DropdownButton<String>(
                                     key: const Key('bible_version_dropdown'),
                                     isExpanded: true,
                                     value: selectedId,
                                     items: items,
                                     onChanged: (id) {
                                       if (id == null) return;
-                                      final sel = uniqueList.firstWhere((v) => v.id == id, orElse: () => match);
-                    // Store both human-friendly label and stable id.
-                    localSettingsNotifier.updateBibleVersion(sel.label, sel.id);
+                                      final sel = uniqueList.firstWhere(
+                                          (v) => v.id == id,
+                                          orElse: () => match);
+                                      // Store both human-friendly label and stable id.
+                                      localSettingsNotifier.updateBibleVersion(
+                                          sel.label, sel.id);
                                     },
                                   );
                                 },
                                 // During loading/error, fall back to static mapping by names to keep UI usable.
                                 loading: () {
                                   // Build items from static map: values are IDs, labels are names.
-                                  final entries = kBibleVersions.entries.toList(growable: false);
+                                  final entries = kBibleVersions.entries
+                                      .toList(growable: false);
                                   final items = entries
-                                      .map((e) => DropdownMenuItem<String>(value: e.value, child: Text(e.key)))
+                                      .map((e) => DropdownMenuItem<String>(
+                                          value: e.value, child: Text(e.key)))
                                       .toList(growable: false);
                                   // Choose selected ID from settings (id preferred), else map current name.
-                                  final selectedId = localSettings.bibleVersionId ?? kBibleVersions[localSettings.bibleVersionName] ?? (entries.isNotEmpty ? entries.first.value : null);
+                                  final selectedId =
+                                      localSettings.bibleVersionId ??
+                                          kBibleVersions[
+                                              localSettings.bibleVersionName] ??
+                                          (entries.isNotEmpty
+                                              ? entries.first.value
+                                              : null);
                                   return DropdownButton<String>(
                                     key: const Key('bible_version_dropdown'),
                                     isExpanded: true,
@@ -146,17 +165,28 @@ class SettingsScreen extends ConsumerWidget {
                                     items: items,
                                     onChanged: (id) {
                                       if (id == null) return;
-                                      final e = entries.firstWhere((e) => e.value == id, orElse: () => entries.first);
-                                      localSettingsNotifier.updateBibleVersion(e.key, e.value);
+                                      final e = entries.firstWhere(
+                                          (e) => e.value == id,
+                                          orElse: () => entries.first);
+                                      localSettingsNotifier.updateBibleVersion(
+                                          e.key, e.value);
                                     },
                                   );
                                 },
                                 error: (_, __) {
-                                  final entries = kBibleVersions.entries.toList(growable: false);
-                                  final items = entries
-                                      .map((e) => DropdownMenuItem<String>(value: e.value, child: Text(e.key)))
+                                  final entries = kBibleVersions.entries
                                       .toList(growable: false);
-                                  final selectedId = localSettings.bibleVersionId ?? kBibleVersions[localSettings.bibleVersionName] ?? (entries.isNotEmpty ? entries.first.value : null);
+                                  final items = entries
+                                      .map((e) => DropdownMenuItem<String>(
+                                          value: e.value, child: Text(e.key)))
+                                      .toList(growable: false);
+                                  final selectedId =
+                                      localSettings.bibleVersionId ??
+                                          kBibleVersions[
+                                              localSettings.bibleVersionName] ??
+                                          (entries.isNotEmpty
+                                              ? entries.first.value
+                                              : null);
                                   return DropdownButton<String>(
                                     key: const Key('bible_version_dropdown'),
                                     isExpanded: true,
@@ -164,8 +194,11 @@ class SettingsScreen extends ConsumerWidget {
                                     items: items,
                                     onChanged: (id) {
                                       if (id == null) return;
-                                      final e = entries.firstWhere((e) => e.value == id, orElse: () => entries.first);
-                                      localSettingsNotifier.updateBibleVersion(e.key, e.value);
+                                      final e = entries.firstWhere(
+                                          (e) => e.value == id,
+                                          orElse: () => entries.first);
+                                      localSettingsNotifier.updateBibleVersion(
+                                          e.key, e.value);
                                     },
                                   );
                                 },
@@ -175,9 +208,11 @@ class SettingsScreen extends ConsumerWidget {
                         ],
                       ),
                       const CustomDivider(),
-                      _buildFonts(timerState, localSettings, localSettingsNotifier, isTablet),
+                      _buildFonts(timerState, localSettings,
+                          localSettingsNotifier, isTablet),
                       const CustomDivider(),
-                      _buildColor(timerState, localSettings, localSettingsNotifier, isTablet),
+                      _buildColor(timerState, localSettings,
+                          localSettingsNotifier, isTablet),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -218,7 +253,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeRow(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+  Widget _buildTimeRow(LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     // Use Expanded to prevent horizontal overflow on narrow layouts while keeping a single row on tablets.
     return Row(
       key: const Key('timeSection'),
@@ -256,24 +292,40 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeColumn(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+  Widget _buildTimeColumn(LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return Column(
       key: const Key('timeSection'),
       children: [
-    _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro,
-      localSettings.debugMode ? 0 : 25, 60, localSettingsNotifier, isTablet),
+        _buildNumberInput(
+            TimerMode.pomodoro,
+            localSettings.initPomodoro,
+            localSettings.debugMode ? 0 : 25,
+            60,
+            localSettingsNotifier,
+            isTablet),
         const SizedBox(height: 10),
-    _buildNumberInput(TimerMode.shortBreak, localSettings.initShortBreak,
-      localSettings.debugMode ? 0 : 5, 15, localSettingsNotifier, isTablet),
+        _buildNumberInput(
+            TimerMode.shortBreak,
+            localSettings.initShortBreak,
+            localSettings.debugMode ? 0 : 5,
+            15,
+            localSettingsNotifier,
+            isTablet),
         const SizedBox(height: 10),
-    _buildNumberInput(TimerMode.longBreak, localSettings.initLongBreak,
-      localSettings.debugMode ? 0 : 15, 30, localSettingsNotifier, isTablet),
+        _buildNumberInput(
+            TimerMode.longBreak,
+            localSettings.initLongBreak,
+            localSettings.debugMode ? 0 : 15,
+            30,
+            localSettingsNotifier,
+            isTablet),
       ],
     );
   }
 
-  Widget _buildFonts(
-      TimerState timerState, LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+  Widget _buildFonts(TimerState timerState, LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return isTablet
         ? Row(
             key: const Key('fontSection'),
@@ -303,7 +355,8 @@ class SettingsScreen extends ConsumerWidget {
               ]);
   }
 
-  Widget _buildFontRow(TimerState timerState, LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier) {
+  Widget _buildFontRow(TimerState timerState, LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -323,8 +376,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildColor(
-      TimerState timerState, LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+  Widget _buildColor(TimerState timerState, LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return isTablet
         ? Row(
             key: const Key('colorSection'),
@@ -352,7 +405,8 @@ class SettingsScreen extends ConsumerWidget {
               ]);
   }
 
-  Widget _buildColorRow(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, TimerState timerState) {
+  Widget _buildColorRow(LocalSettings localSettings,
+      LocalSettingsNotifier localSettingsNotifier, TimerState timerState) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -372,8 +426,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNumberInput(
-      TimerMode mode, int timeInSec, int min, int max, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+  Widget _buildNumberInput(TimerMode mode, int timeInSec, int min, int max,
+      LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
     return NumberInput(
         title: localSettingsNotifier.getName(mode),
         initialValue: timeInSec ~/ 60,

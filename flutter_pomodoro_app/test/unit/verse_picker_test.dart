@@ -20,7 +20,8 @@ void main() {
   });
 
   group('pickRandomVerseId', () {
-    test('uses provided candidates verbatim (deterministic with single item)', () {
+    test('uses provided candidates verbatim (deterministic with single item)',
+        () {
       final rng = Random(42);
       final id = pickRandomVerseId(rng, candidates: const ['JOH.3.16']);
       expect(id, equals('JOH.3.16'));
@@ -35,8 +36,8 @@ void main() {
 
     test('throws ArgumentError when candidates contain no valid IDs', () {
       final rng = Random(0);
-      expect(() => pickRandomVerseId(rng, candidates: const ['INVALID']), throwsArgumentError);
+      expect(() => pickRandomVerseId(rng, candidates: const ['INVALID']),
+          throwsArgumentError);
     });
   });
 }
-

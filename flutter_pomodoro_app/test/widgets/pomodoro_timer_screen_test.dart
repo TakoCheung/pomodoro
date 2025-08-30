@@ -15,9 +15,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
-  // The title may appear multiple times (dialog, small labels) in the
-  // widget tree during tests; ensure at least one instance is present.
-  expect(find.text('pomodoro'), findsWidgets);
+    // The title may appear multiple times (dialog, small labels) in the
+    // widget tree during tests; ensure at least one instance is present.
+    expect(find.text('pomodoro'), findsWidgets);
     expect(find.byType(TimerDisplay), findsOneWidget);
     expect(find.byType(GearIconButton), findsOneWidget);
     expect(find.byType(TimerModeSwitcherUI), findsOneWidget);

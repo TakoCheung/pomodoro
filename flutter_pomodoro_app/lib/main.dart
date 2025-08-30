@@ -7,10 +7,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   try {
-  // Explicitly request the `.env` file in the project root so we don't
-  // depend on platform defaults or cwd quirks when running from different
-  // working directories.
-  await dotenv.load(fileName: '.env');
+    // Explicitly request the `.env` file in the project root so we don't
+    // depend on platform defaults or cwd quirks when running from different
+    // working directories.
+    await dotenv.load(fileName: '.env');
   } catch (e) {
     // If there's no .env (common in CI/tests), continue without failing.
   }
@@ -18,7 +18,8 @@ Future<void> main() async {
   try {
     final apiKey = dotenv.env['SCRIPTURE_API_KEY'];
     final bibleId = dotenv.env['BIBLE_ID'];
-    debugPrint('main: SCRIPTURE_API_KEY present=${apiKey != null && apiKey.isNotEmpty}, BIBLE_ID=${bibleId ?? '(default)'}');
+    debugPrint(
+        'main: SCRIPTURE_API_KEY present=${apiKey != null && apiKey.isNotEmpty}, BIBLE_ID=${bibleId ?? '(default)'}');
   } catch (_) {}
   runApp(const ProviderScope(child: MyApp()));
 }

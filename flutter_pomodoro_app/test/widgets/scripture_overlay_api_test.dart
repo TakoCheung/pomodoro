@@ -10,25 +10,36 @@ class _FakeService implements ScriptureServiceInterface {
   final Passage passage;
   _FakeService(this.passage);
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     return passage;
   }
 }
 
 class _BadService implements ScriptureServiceInterface {
   @override
-  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage(
+      {required String bibleId, required String passageId}) async {
     throw Exception('network');
   }
 }
 
 void main() {
-  testWidgets('ScriptureOverlay shows fetched passage from API', (tester) async {
-    final fake = _FakeService(Passage(reference: 'John 3:16', text: 'For God so loved the world...', verses: []));
+  testWidgets('ScriptureOverlay shows fetched passage from API',
+      (tester) async {
+    final fake = _FakeService(Passage(
+        reference: 'John 3:16',
+        text: 'For God so loved the world...',
+        verses: []));
 
-    await tester.pumpWidget(ProviderScope(overrides: [
-      scriptureServiceProvider.overrideWithValue(fake),
-    ], child: const MaterialApp(home: Scaffold(body: ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'JOH.3.16')))));
+    await tester.pumpWidget(ProviderScope(
+        overrides: [
+          scriptureServiceProvider.overrideWithValue(fake),
+        ],
+        child: const MaterialApp(
+            home: Scaffold(
+                body: ScriptureOverlay(
+                    bibleId: '32664dc3288a28df-01', passageId: 'JOH.3.16')))));
 
     // Await the FutureProvider to complete
     await tester.pumpAndSettle();
@@ -41,9 +52,14 @@ void main() {
   testWidgets('ScriptureOverlay hides on fetch error', (tester) async {
     final bad = _BadService();
 
-    await tester.pumpWidget(ProviderScope(overrides: [
-      scriptureServiceProvider.overrideWithValue(bad),
-    ], child: const MaterialApp(home: Scaffold(body: ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1')))));
+    await tester.pumpWidget(ProviderScope(
+        overrides: [
+          scriptureServiceProvider.overrideWithValue(bad),
+        ],
+        child: const MaterialApp(
+            home: Scaffold(
+                body: ScriptureOverlay(
+                    bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1')))));
 
     // When the provider errors, the widget returns SizedBox.shrink => nothing to find
     await tester.pumpAndSettle();

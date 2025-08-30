@@ -4,7 +4,9 @@ import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  test('Applying local settings updates the global timer provider (programmatic)', () {
+  test(
+      'Applying local settings updates the global timer provider (programmatic)',
+      () {
     // Use a ProviderContainer to simulate the app providers without rendering the full UI.
     final container = ProviderContainer();
     addTearDown(container.dispose);

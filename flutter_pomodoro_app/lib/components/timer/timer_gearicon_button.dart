@@ -12,7 +12,7 @@ class GearIconButton extends StatelessWidget {
       iconSize: 28,
       icon: const Icon(
         Icons.settings,
-        color: AppColors.lightBlueGray,//TODO: did not match figma
+        color: AppColors.lightBlueGray, //TODO: did not match figma
       ),
       onPressed: () {
         showSettingsDialog(context);

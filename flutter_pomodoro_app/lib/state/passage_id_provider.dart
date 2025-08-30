@@ -51,7 +51,31 @@ final verseCatalogProvider = Provider<VerseCatalog>((ref) {
     // John: include chapter 3 only (36 verses), so JOH.3.1..36 are valid.
     'JOH': [0, 0, 36],
     // Psalms: include Psalm 23 (6 verses)
-    'PSA': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+    'PSA': [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6
+    ],
     // James: include chapter 1 (27 verses)
     'JAS': [27],
   });
