@@ -28,7 +28,7 @@ void main() {
 
     await tester.pumpWidget(ProviderScope(overrides: [
       scriptureServiceProvider.overrideWithValue(fake),
-    ], child: const MaterialApp(home: Scaffold(body: ScriptureOverlay(bibleId: 'eng-ESV', passageId: 'JOH.3.16')))));
+    ], child: const MaterialApp(home: Scaffold(body: ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'JOH.3.16')))));
 
     // Await the FutureProvider to complete
     await tester.pumpAndSettle();
@@ -43,7 +43,7 @@ void main() {
 
     await tester.pumpWidget(ProviderScope(overrides: [
       scriptureServiceProvider.overrideWithValue(bad),
-    ], child: const MaterialApp(home: Scaffold(body: ScriptureOverlay(bibleId: 'eng-ESV', passageId: 'GEN.1.1')))));
+    ], child: const MaterialApp(home: Scaffold(body: ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1')))));
 
     // When the provider errors, the widget returns SizedBox.shrink => nothing to find
     await tester.pumpAndSettle();

@@ -18,9 +18,9 @@ void main() {
   final repo = ScriptureRepository(service: mock, now: () => fixedNow, rng: Random(0));
 
   final p1 = await repo.getRandomPassageOncePerDay(
-    bibleId: 'eng-ESV', passageIds: const ['GEN.1.1', 'JOH.3.16', 'PSA.23.1']);
+    bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1', 'JOH.3.16', 'PSA.23.1']);
   final p2 = await repo.getRandomPassageOncePerDay(
-    bibleId: 'eng-ESV', passageIds: const ['GEN.1.1', 'JOH.3.16', 'PSA.23.1']);
+    bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1', 'JOH.3.16', 'PSA.23.1']);
 
     expect(identical(p1, p2), isTrue);
     verify(() => mock.fetchPassage(bibleId: any(named: 'bibleId'), passageId: any(named: 'passageId'))).called(1);
@@ -34,10 +34,10 @@ void main() {
   DateTime now = DateTime(2025, 8, 24, 10, 0, 0);
   final repo = ScriptureRepository(service: mock, now: () => now, rng: Random(0));
 
-  await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: const ['GEN.1.1']);
+  await repo.getRandomPassageOncePerDay(bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1']);
     // advance day
     now = now.add(const Duration(days: 1));
-  await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: const ['JOH.3.16']);
+  await repo.getRandomPassageOncePerDay(bibleId: '32664dc3288a28df-01', passageIds: const ['JOH.3.16']);
 
     verify(() => mock.fetchPassage(bibleId: any(named: 'bibleId'), passageId: any(named: 'passageId'))).called(2);
   });

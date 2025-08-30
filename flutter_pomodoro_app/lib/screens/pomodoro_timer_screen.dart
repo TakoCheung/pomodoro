@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/widgets/scripture_overlay.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
-import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
   const PomodoroTimerScreen({super.key});
@@ -17,12 +17,13 @@ class PomodoroTimerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showScripture = ref.watch(scriptureOverlayVisibleProvider);
+  final bibleId = ref.watch(bibleIdProvider);
   // Read debug FAB flag from provider (which safely reads dotenv). Tests can
   // override this provider when needed.
   final enableDebugFab = ref.watch(enableDebugFabProvider);
 
   // Log debug info to help diagnose why the debug FAB may not appear.
-  debugPrint('PomodoroTimerScreen: kDebugMode=$kDebugMode, enableDebugFab=$enableDebugFab');
+  debugPrint('PomodoroTimerScreen: kDebugMode=$kDebugMode, enableDebugFab=$enableDebugFab, bibleId=$bibleId');
   return Scaffold(
       backgroundColor: AppColors.darkBlue,
       body: Stack(
@@ -50,10 +51,10 @@ class PomodoroTimerScreen extends ConsumerWidget {
             ),
           ),
           // Overlay the scripture on top of main content when visible
-          if (showScripture)
+      if (showScripture)
             Align(
               alignment: Alignment.center,
-              child: const ScriptureOverlay(bibleId: 'eng-ESV', passageId: 'GEN.1.1'),
+        child: ScriptureOverlay(bibleId: bibleId, passageId: 'GEN.1.1'),
             ),
         ],
       ),
@@ -73,17 +74,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
                   localSettingsNotifier.updateTime(TimerMode.pomodoro, 1);
                   // Apply to the timer notifier
                   ref.read(timerProvider.notifier).updateSettings(ref.read(localSettingsProvider));
-                  // For simulator/debugging: directly set a fake Passage and show the overlay
-                  final testPassage = Passage(
-                    reference: 'Genesis 1:1',
-                    text: 'In the beginning God created the heavens and the earth.',
-                    verses: [],
-                  );
-                  ref.read(shownScriptureProvider.notifier).state = testPassage;
-                  // Log for debug verification
-                  debugPrint('Debug: set shownScriptureProvider -> ${testPassage.reference}');
-                  ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
-                  // Also call the completion hook so any other side-effects run
+                  // Trigger timer completion to run the normal scripture fetch flow
                   // debug-only test helper: trigger timer completion.
                   // ignore: invalid_use_of_visible_for_testing_member
                   ref.read(timerProvider.notifier).triggerComplete();

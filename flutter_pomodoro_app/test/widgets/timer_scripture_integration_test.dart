@@ -32,7 +32,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(UncontrolledProviderScope(container: container, child: MaterialApp(
-      home: Scaffold(body: Stack(children: [ScriptureOverlay(bibleId: 'eng-ESV', passageId: 'GEN.1.1')])))));
+      home: Scaffold(body: Stack(children: [ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1')])))));
 
     // Initially no shown passage
     expect(container.read(shownScriptureProvider), isNull);

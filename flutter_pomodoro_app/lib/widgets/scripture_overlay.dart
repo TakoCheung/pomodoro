@@ -9,10 +9,15 @@ import 'package:flutter_pomodoro_app/models/scripture_request.dart';
 class ScriptureOverlay extends ConsumerStatefulWidget {
   final String bibleId;
   final String passageId;
+
   /// How many seconds before the overlay auto-hides. Defaults to 60 seconds (one minute).
   final int autoHideSeconds;
 
-  const ScriptureOverlay({super.key, required this.bibleId, required this.passageId, this.autoHideSeconds = 60});
+  const ScriptureOverlay(
+      {super.key,
+      required this.bibleId,
+      required this.passageId,
+      this.autoHideSeconds = 60});
 
   @override
   ConsumerState<ScriptureOverlay> createState() => _ScriptureOverlayState();
@@ -52,7 +57,7 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
     final direct = ref.watch(shownScriptureProvider);
     if (direct != null) {
       final p = direct;
-      debugPrint('ScriptureOverlay: showing direct Passage ${p.reference}');
+      debugPrint('ScriptureOverlay: showing Passage from state ${p.reference}');
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Material(
@@ -65,21 +70,24 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: Text(p.reference, key: const Key('scripture_reference'), style: const TextStyle(fontWeight: FontWeight.bold))),
-                    IconButton(
-                      key: const Key('scripture_close_button'),
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: _dismiss,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    key: const Key('scripture_close_button'),
+                    icon: const Icon(Icons.close, size: 18),
+                    onPressed: _dismiss,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
                 ),
+                Text(p.reference,
+                    key: const Key('scripture_reference'),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Text(p.text, key: const Key('scripture_text'), maxLines: 6, overflow: TextOverflow.ellipsis),
+                Text(p.text,
+                    key: const Key('scripture_text'),
+                    maxLines: 6,
+                    overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -87,7 +95,8 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
       );
     }
 
-    final asyncPassage = ref.watch(scriptureProvider(ScriptureRequest(bibleId: widget.bibleId, passageId: widget.passageId)));
+    final asyncPassage = ref.watch(scriptureProvider(ScriptureRequest(
+        bibleId: widget.bibleId, passageId: widget.passageId)));
     return asyncPassage.when(
       data: (p) {
         debugPrint('ScriptureOverlay: showing fetched Passage ${p.reference}');
@@ -103,21 +112,24 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: Text(p.reference, key: const Key('scripture_reference'), style: const TextStyle(fontWeight: FontWeight.bold))),
-                      IconButton(
-                        key: const Key('scripture_close_button'),
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: _dismiss,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      key: const Key('scripture_close_button'),
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: _dismiss,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
                   ),
+                  Text(p.reference,
+                      key: const Key('scripture_reference'),
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text(p.text, key: const Key('scripture_text'), maxLines: 6, overflow: TextOverflow.ellipsis),
+                  Text(p.text,
+                      key: const Key('scripture_text'),
+                      maxLines: 6,
+                      overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
