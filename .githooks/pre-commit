@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Collect staged files (null-delimited) and filter to Prettier-supported extensions.
+# Collect staged files (null-delimited) and filter by type.
 mapfile -d '' -t STAGED <<<"$(git diff --name-only --cached --diff-filter=ACM -z)"
-TARGETS=()
+DART_TARGETS=()
+PRETTIER_TARGETS=()
 for f in "${STAGED[@]}"; do
   case "$f" in
+    *.dart)
+      DART_TARGETS+=("$f")
+      ;;
     *.js|*.jsx|*.ts|*.tsx|*.json|*.md|*.markdown|*.yml|*.yaml|*.css|*.scss|*.html)
-      TARGETS+=("$f")
+      PRETTIER_TARGETS+=("$f")
       ;;
     *) ;;
   esac
 done
 
-if [ ${#TARGETS[@]} -eq 0 ]; then
+if [ ${#DART_TARGETS[@]} -eq 0 ] && [ ${#PRETTIER_TARGETS[@]} -eq 0 ]; then
   exit 0
 fi
 
@@ -28,10 +32,33 @@ if ! npx --no-install prettier --version >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "pre-commit: formatting with Prettier..."
-npx --no-install prettier --write -- "${TARGETS[@]}"
+if [ ${#DART_TARGETS[@]} -gt 0 ]; then
+  echo "pre-commit: formatting Dart files..."
+  if command -v dart >/dev/null 2>&1; then
+    dart format -l 100 -- "${DART_TARGETS[@]}"
+  elif command -v flutter >/dev/null 2>&1; then
+    # fallback if dart shim isn't on PATH
+    flutter format -l 100 -- "${DART_TARGETS[@]}"
+  else
+    echo "pre-commit: dart/flutter not found. Install Flutter SDK so 'dart' or 'flutter' is on PATH." >&2
+    exit 1
+  fi
+  git add -- "${DART_TARGETS[@]}"
+fi
 
-# Re-add formatted files to the commit
-git add -- "${TARGETS[@]}"
+if [ ${#PRETTIER_TARGETS[@]} -gt 0 ]; then
+  if ! command -v npx >/dev/null 2>&1; then
+    echo "pre-commit: npx not found. Install Node.js/npm to use Prettier." >&2
+    exit 1
+  fi
+  # Require local Prettier install to avoid network access in hooks
+  if ! npx --no-install prettier --version >/dev/null 2>&1; then
+    echo "pre-commit: Prettier not installed locally. Run: npm i -D prettier" >&2
+    exit 1
+  fi
+  echo "pre-commit: formatting with Prettier..."
+  npx --no-install prettier --write -- "${PRETTIER_TARGETS[@]}"
+  git add -- "${PRETTIER_TARGETS[@]}"
+fi
 
 exit 0
