@@ -7,8 +7,12 @@ String pickRandomVerseId(Random rng, {List<String>? candidates}) {
   // If the caller provided candidates, respect them verbatim to preserve
   // backwards compatibility with existing tests that pass arbitrary IDs.
   if (candidates != null && candidates.isNotEmpty) {
-    final idx = rng.nextInt(candidates.length);
-    return candidates[idx];
+    final valid = candidates.where(isLikelyValidVerseId).toList(growable: false);
+    if (valid.isEmpty) {
+      throw ArgumentError('No valid verse IDs in candidates');
+    }
+    final idx = rng.nextInt(valid.length);
+    return valid[idx];
   }
   // Otherwise, choose from our curated and pre-validated list.
   if (esvVerseIds.isEmpty) {
