@@ -37,6 +37,16 @@ class _NumberInputState extends State<NumberInput> {
     _value = widget.initialValue;
   }
 
+  @override
+  void didUpdateWidget(covariant NumberInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      setState(() {
+        _value = widget.initialValue;
+      });
+    }
+  }
+
   void _increment() {
     if (_value < widget.maxValue) {
       setState(() {

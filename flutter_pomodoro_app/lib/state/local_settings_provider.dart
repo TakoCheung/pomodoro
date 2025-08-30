@@ -81,13 +81,24 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
   }
 
   int _calcSeconds(int timeInMin) {
-    // If debug mode is enabled and user sets minutes to 0, treat as 1 second for fast debugging.
+    // If debug mode is enabled and user sets minutes to 0, treat it as 1 second for quick testing.
     if (state.debugMode && timeInMin == 0) return 1;
     return timeInMin * AppMagicNumber.sixty;
   }
 
   void updateDebugMode(bool enabled) {
-    state = state.copyWith(debugMode: enabled);
+    // When enabling debug mode, force all timers to zero for fast flows.
+    // When disabling, keep current values (user can adjust back manually).
+    if (enabled) {
+      state = state.copyWith(
+        debugMode: true,
+        initPomodoro: 0,
+        initShortBreak: 0,
+        initLongBreak: 0,
+      );
+    } else {
+      state = state.copyWith(debugMode: false);
+    }
   }
 
   String getName(TimerMode mode){
