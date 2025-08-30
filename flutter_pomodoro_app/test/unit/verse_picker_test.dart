@@ -32,6 +32,11 @@ void main() {
       expect(esvVerseIds.contains(id), isTrue);
       expect(isLikelyValidVerseId(id), isTrue);
     });
+
+    test('throws ArgumentError when candidates contain no valid IDs', () {
+      final rng = Random(0);
+      expect(() => pickRandomVerseId(rng, candidates: const ['INVALID']), throwsArgumentError);
+    });
   });
 }
 

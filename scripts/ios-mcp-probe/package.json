@@ -1,0 +1,9 @@
+{
+  "name": "ios-mcp-probe",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.2.0"
+  }
+}

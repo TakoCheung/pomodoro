@@ -8,14 +8,27 @@ This project is a starting point for a Flutter application.
 
 A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
 
 Local env generation
+
+### Random Scripture Picker (tests)
+
+The scripture overlay uses a random verse ID (BOOK.CHAPTER.VERSE) from a curated list.
+Tests can override randomness by injecting a deterministic `Random` or by passing specific
+candidate IDs into the repository. No real network calls are needed in tests (HTTP is mocked).
+
+Simulator validation screenshots are saved under `artifacts/ios/`, e.g. `scripture_random_picker.png`.
+
+### Environment (.env)
+
+- Copy `.env.example` to `.env` for local overrides.
+- Keys:
+	- `ENABLE_DEBUG_FAB` (true/false): show a debug FAB to trigger the scripture overlay.
+	- `SCRIPTURE_API_KEY`: optional key for live fetching. Tests mock HTTP and don't need it.
+- Build-time `lib/env_config.dart` may set safe defaults; `.env` overrides are read at runtime when available.
 --------------------
 
 This project uses a small build-time config `lib/env_config.dart` for safe

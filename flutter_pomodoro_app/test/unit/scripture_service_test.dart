@@ -10,6 +10,8 @@ void main() {
     final fixture = await fixtureReader('passage_gen_1_1.json');
     final client = MockClient((request) async {
       expect(request.headers['api-key'], equals('test-key'));
+  // Ensure we use the `verses/{id}` endpoint per API docs
+  expect(request.url.path, contains('/bibles/eng-ESV/verses/GEN.1.1'));
       return http.Response(fixture, 200, headers: {
         'content-type': 'application/json'
       });
