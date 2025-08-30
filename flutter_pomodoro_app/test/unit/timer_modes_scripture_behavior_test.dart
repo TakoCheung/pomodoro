@@ -8,8 +8,7 @@ import 'package:flutter_pomodoro_app/models/passage.dart';
 
 class _DummyService implements ScriptureServiceInterface {
   @override
-  Future<Passage> fetchPassage(
-      {required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
     throw UnimplementedError();
   }
 }
@@ -43,7 +42,7 @@ class _FakeRepo extends ScriptureRepository {
   }
 
   @override
-  Future<Passage> getRandomPassageOncePerDay(
+  Future<Passage> selectPassageForBreak(
       {required String bibleId, required List<String> passageIds}) async {
     getRandomOnceCalls++;
     _cached = fetchOnceReturn;
@@ -54,10 +53,8 @@ class _FakeRepo extends ScriptureRepository {
 void main() {
   test('Pomodoro completion fetches a new passage and updates cache', () async {
     final fakeRepo = _FakeRepo(
-      pomodoroReturn:
-          Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
-      fetchOnceReturn:
-          Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
+      pomodoroReturn: Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
+      fetchOnceReturn: Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
     );
     final container = ProviderContainer(overrides: [
       scriptureRepositoryProvider.overrideWithValue(fakeRepo),
@@ -78,13 +75,10 @@ void main() {
 
   test('Short break completion shows cached passage if available', () async {
     final fakeRepo = _FakeRepo(
-      pomodoroReturn:
-          Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
-      fetchOnceReturn:
-          Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
+      pomodoroReturn: Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
+      fetchOnceReturn: Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
     );
-    fakeRepo.seedCached(
-        Passage(reference: 'CACHED', text: 'Cached Passage', verses: []));
+    fakeRepo.seedCached(Passage(reference: 'CACHED', text: 'Cached Passage', verses: []));
 
     final container = ProviderContainer(overrides: [
       scriptureRepositoryProvider.overrideWithValue(fakeRepo),
@@ -104,10 +98,8 @@ void main() {
 
   test('Long break completion fetches once when no cache exists', () async {
     final fakeRepo = _FakeRepo(
-      pomodoroReturn:
-          Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
-      fetchOnceReturn:
-          Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
+      pomodoroReturn: Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
+      fetchOnceReturn: Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
     );
     // no cache seeded
 
@@ -127,13 +119,10 @@ void main() {
     expect(shown?.reference, 'ONCE');
   });
 
-  test('Avoid immediate repeat passage id across consecutive pomodoros',
-      () async {
+  test('Avoid immediate repeat passage id across consecutive pomodoros', () async {
     final fakeRepo = _FakeRepo(
-      pomodoroReturn:
-          Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
-      fetchOnceReturn:
-          Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
+      pomodoroReturn: Passage(reference: 'POMO', text: 'Pomodoro Passage', verses: []),
+      fetchOnceReturn: Passage(reference: 'ONCE', text: 'Once Passage', verses: []),
     );
     var ids = ['GEN.1.1', 'GEN.1.1', 'GEN.1.2'];
     int idx = 0;

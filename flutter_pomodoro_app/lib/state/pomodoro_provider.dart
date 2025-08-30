@@ -223,8 +223,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
       switch (mode) {
         case TimerMode.pomodoro:
           final generatedId = generateIdAvoidingRepeat();
-          passage = await repo.fetchAndCacheRandomPassage(
-              bibleId: bibleId, passageIds: [generatedId]);
+          passage =
+              await repo.fetchAndCacheRandomPassage(bibleId: bibleId, passageIds: [generatedId]);
           // Persist the id we used to reduce immediate repeats.
           r.read(lastPassageIdProvider.notifier).state = generatedId;
           break;
@@ -232,15 +232,12 @@ class TimerNotifier extends StateNotifier<TimerState> {
         case TimerMode.longBreak:
           final cached = repo.cachedPassageForBible(bibleId);
           if (cached != null) {
-            debugPrint(
-                'TimerNotifier: using cached passage ${cached.reference} for break');
+            debugPrint('TimerNotifier: using cached passage ${cached.reference} for break');
             passage = cached;
           } else {
-            debugPrint(
-                'TimerNotifier: no cache for today; fetching once for break');
+            debugPrint('TimerNotifier: no cache for today; fetching once for break');
             final generatedId = generateIdAvoidingRepeat();
-            passage = await repo.getRandomPassageOncePerDay(
-                bibleId: bibleId, passageIds: [generatedId]);
+            passage = await repo.selectPassageForBreak(bibleId: bibleId, passageIds: [generatedId]);
             r.read(lastPassageIdProvider.notifier).state = generatedId;
           }
           break;

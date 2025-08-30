@@ -20,6 +20,7 @@ Prefer provider overrides for time/clock, randomness, env, and persistence in te
 	•	Add/adjust failing tests first that fully specify the feature.
 	•	Use provider overrides & mocks: no real network; no sleeps/long waits.
 	•	All tests pass locally; eliminate flakiness.
+	•	Line coverage must be generated on every change: run `flutter test --coverage` and export lcov to CSV/HTML artifacts. Save to `coverage/lcov.info` and `coverage/coverage.csv` (use existing tool/csv converter if present).
 	•	Integration Testing (explicit):
 	•	Implement integration_test/<feature>_flow_test.dart covering the end-to-end user flow.
 	•	Use Keys for selection, fake clocks, and provider overrides for env/prefs/services.
@@ -51,6 +52,7 @@ For each tiny behavior:
 	•	No behavior expansion without new failing tests.
 	4.	Run the whole suite
 	•	flutter test and flutter test integration_test (or flutter drive where driver is used).
+	•	Then run line coverage: `flutter test --coverage`; transform `lcov.info` to CSV via `tool/lcov_to_csv.dart` and store at `coverage/coverage.csv`.
 	•	Fix flakiness immediately (fake clocks > timers; direct triggers > waits).
 	5.	Checkpoint Output (concise)
 	•	Files changed (paths).
@@ -79,7 +81,7 @@ Repeat until all acceptance criteria are met.
 	•	Ensure WidgetsFlutterBinding.ensureInitialized() where necessary for plugins.
 	•	Selectors: use Key('...') for all tappable/asserter widgets.
 	•	Clock control: inject fake clock or expose deterministic triggers to avoid pumpAndSettle flakiness.
-	•	Artifacts: save at least one screenshot → artifacts/ios/<feature>_flow.png.
+	•	Artifacts: save at least one screenshot → artifacts/ios/<feature>_flow.png. Also attach coverage artifacts (`coverage/lcov.info`, `coverage/coverage.csv`) for the run.
 	•	Isolation: reset prefs/mocks between tests; avoid shared state across tests.
 
 ⸻
@@ -105,5 +107,6 @@ Repeat until all acceptance criteria are met.
 	•	Test results summary (counts, pass time).
 	•	List of modified files with brief rationale.
 	•	iOS simulator validation steps executed and screenshot path.
+	•	Coverage summary (total line coverage %, key package/file highlights) with paths to artifacts.
 
 ⸻

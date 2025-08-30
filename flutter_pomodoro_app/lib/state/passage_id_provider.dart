@@ -46,38 +46,14 @@ class VerseCatalog {
 /// Default verse catalog. Keep small and safe; tests can override with full catalogs.
 final verseCatalogProvider = Provider<VerseCatalog>((ref) {
   return const VerseCatalog({
-    // Genesis: include chapter 1 only for safety in default mapping.
+    // Cross-translation safe defaults:
+    // Genesis: include chapter 1 only.
     'GEN': [31],
     // John: include chapter 3 only (36 verses), so JOH.3.1..36 are valid.
     'JOH': [0, 0, 36],
     // Psalms: include Psalm 23 (6 verses)
-    'PSA': [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      6
-    ],
-    // James: include chapter 1 (27 verses)
-    'JAS': [27],
+    'PSA': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+    // Note: Avoid books/chapters that may vary across translations (e.g., JAS.1.26 reported 404 on some ids).
   });
 });
 
