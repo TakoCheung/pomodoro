@@ -9,3 +9,14 @@ Technical Requirements:
 - [ ] Unit and golden tests
 
 Follow the Figma design file (pomodora-app.fig) included in this project for mobile and tablet only. Download Figma and import the file to inspect the designs.
+
+## Git hooks
+
+This repo includes a pre-commit hook to format staged files with Prettier.
+
+Setup once:
+
+- Configure Git to use this repo's hooks directory: `git config core.hooksPath .githooks`
+- Ensure Prettier is installed locally: `npm i -D prettier`
+
+On commit, staged JS/TS/JSON/Markdown/YAML/CSS/HTML files will be formatted and re-added.

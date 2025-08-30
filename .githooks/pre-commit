@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Collect staged files (null-delimited) and filter to Prettier-supported extensions.
+mapfile -d '' -t STAGED <<<"$(git diff --name-only --cached --diff-filter=ACM -z)"
+TARGETS=()
+for f in "${STAGED[@]}"; do
+  case "$f" in
+    *.js|*.jsx|*.ts|*.tsx|*.json|*.md|*.markdown|*.yml|*.yaml|*.css|*.scss|*.html)
+      TARGETS+=("$f")
+      ;;
+    *) ;;
+  esac
+done
+
+if [ ${#TARGETS[@]} -eq 0 ]; then
+  exit 0
+fi
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "pre-commit: npx not found. Install Node.js/npm to use Prettier." >&2
+  exit 1
+fi
+
+# Require local Prettier install to avoid network access in hooks
+if ! npx --no-install prettier --version >/dev/null 2>&1; then
+  echo "pre-commit: Prettier not installed locally. Run: npm i -D prettier" >&2
+  exit 1
+fi
+
+echo "pre-commit: formatting with Prettier..."
+npx --no-install prettier --write -- "${TARGETS[@]}"
+
+# Re-add formatted files to the commit
+git add -- "${TARGETS[@]}"
+
+exit 0
