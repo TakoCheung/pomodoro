@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
@@ -41,6 +42,14 @@ class ScriptureRepository {
     }
   }
 
+  /// The last cached passage for today, if any.
+  Passage? get cachedPassage {
+    if (_cached == null || _cachedDate == null) return null;
+    final today = DateTime(now().year, now().month, now().day);
+    final cachedDay = DateTime(_cachedDate!.year, _cachedDate!.month, _cachedDate!.day);
+    return cachedDay == today ? _cached : null;
+  }
+
   Future<Passage> getRandomPassageOncePerDay({required String bibleId, required List<String> passageIds}) async {
     final today = DateTime(now().year, now().month, now().day);
     if (_cached != null && _cachedDate != null) {
@@ -66,6 +75,29 @@ class ScriptureRepository {
       }
     }
     return p;
+  }
+
+  /// Always fetches a new random passage and updates the cache for today,
+  /// regardless of whether a passage has already been cached.
+  Future<Passage> fetchAndCacheRandomPassage({required String bibleId, required List<String> passageIds}) async {
+    final passageId = pickRandomVerseId(_rng, candidates: passageIds);
+    final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
+    _cached = p;
+    _cachedDate = now();
+    if (_prefs != null) {
+      try {
+        await _prefs.setString(_prefsKeyCachedPassage, json.encode(p.toJson()));
+        await _prefs.setString(_prefsKeyCachedDate, _cachedDate!.toIso8601String());
+      } catch (_) {}
+    }
+    return p;
+  }
+
+  /// Test helper to seed the cache for today without fetching.
+  @visibleForTesting
+  void setCachedForToday(Passage passage) {
+    _cached = passage;
+    _cachedDate = now();
   }
 }
 

@@ -11,7 +11,9 @@ export 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
+import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
+import 'package:flutter_pomodoro_app/state/passage_id_provider.dart';
 // ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
@@ -42,36 +44,7 @@ final scriptureShowDeciderProvider = Provider<BoolCallback>((ref) {
 });
 
 final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
-  // Note: randomness and repository are part of the onComplete behavior. We capture
-  // them here so the TimerNotifier can trigger the side-effect when the timer ends.
-  return TimerNotifier(onComplete: () async {
-    // Randomly decide whether to show scripture on timer end. Read repository lazily
-    // at callback time so tests or environments without SCRIPTURE_API_KEY don't
-    // fail at provider creation.
-  final show = ref.read(scriptureShowDeciderProvider)();
-    if (!show) return;
-    debugPrint('TimerNotifier: onComplete triggered');
-    try {
-      final repo = ref.read(scriptureRepositoryProvider);
-      // Use repository's internal verse picker (default curated list) for randomness.
-      final passage = await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: const []);
-      debugPrint('TimerNotifier: fetched passage ${passage.reference}');
-      ref.read(shownScriptureProvider.notifier).state = passage;
-      ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
-    } catch (e) {
-      debugPrint('TimerNotifier: fetch failed, using fallback: $e');
-      // If fetching fails (missing API key or network), fall back to a
-      // local passage so the overlay is still shown in dev/debug.
-      final fallback = Passage(
-        reference: 'Genesis 1:1',
-        text: 'In the beginning God created the heavens and the earth.',
-        verses: [],
-      );
-      debugPrint('TimerNotifier: using fallback passage ${fallback.reference}');
-      ref.read(shownScriptureProvider.notifier).state = fallback;
-      ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
-    }
-  });
+  return TimerNotifier(ref: ref);
 });
 
 class TimerState {
@@ -120,9 +93,9 @@ class TimerState {
 }
 
 class TimerNotifier extends StateNotifier<TimerState> {
-  final void Function()? onComplete;
+  final Ref? ref;
 
-  TimerNotifier({this.onComplete})
+  TimerNotifier({this.ref})
       : super(TimerState(
             timeRemaining: TimerDefaults.pomodoroDefault,
             isRunning: false,
@@ -151,9 +124,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final newRemaining = state.timeRemaining - 1;
       state = state.copyWith(timeRemaining: newRemaining);
       if (newRemaining == 0) {
-        try {
-          onComplete?.call();
-        } catch (_) {}
+  unawaited(_handleComplete());
       }
     }
   }
@@ -161,9 +132,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
   /// Test helper: trigger the onComplete callback synchronously.
   @visibleForTesting
   void triggerComplete() {
-    try {
-      onComplete?.call();
-    } catch (_) {}
+  unawaited(_handleComplete());
   }
 
   void pauseTimer() {
@@ -222,5 +191,67 @@ class TimerNotifier extends StateNotifier<TimerState> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _handleComplete() async {
+    // If ref is not provided (legacy tests constructing TimerNotifier directly),
+    // skip scripture logic entirely.
+    if (ref == null) return;
+    final r = ref!;
+    final show = r.read(scriptureShowDeciderProvider)();
+    if (!show) return;
+    debugPrint('TimerNotifier: onComplete triggered');
+    try {
+      final repo = r.read(scriptureRepositoryProvider);
+      final bibleId = r.read(bibleIdProvider);
+      // Helper to lazily generate a passage id only when needed.
+      String _generateIdAvoidingRepeat() {
+        final gen = r.read(nextPassageIdProvider);
+        final lastId = r.read(lastPassageIdProvider);
+        String id = gen();
+        int tries = 0;
+        while (lastId != null && id == lastId && tries < 10) {
+          id = gen();
+          tries++;
+        }
+        return id;
+      }
+      final mode = state.mode;
+      Passage passage;
+      switch (mode) {
+        case TimerMode.pomodoro:
+          final generatedId = _generateIdAvoidingRepeat();
+          passage = await repo.fetchAndCacheRandomPassage(bibleId: bibleId, passageIds: [generatedId]);
+          // Persist the id we used to reduce immediate repeats.
+          r.read(lastPassageIdProvider.notifier).state = generatedId;
+          break;
+        case TimerMode.shortBreak:
+        case TimerMode.longBreak:
+          final cached = repo.cachedPassage;
+          if (cached != null) {
+            debugPrint('TimerNotifier: using cached passage ${cached.reference} for break');
+            passage = cached;
+          } else {
+            debugPrint('TimerNotifier: no cache for today; fetching once for break');
+            final generatedId = _generateIdAvoidingRepeat();
+            passage = await repo.getRandomPassageOncePerDay(bibleId: bibleId, passageIds: [generatedId]);
+            r.read(lastPassageIdProvider.notifier).state = generatedId;
+          }
+          break;
+      }
+      debugPrint('TimerNotifier: fetched passage ${passage.reference}');
+      r.read(shownScriptureProvider.notifier).state = passage;
+      r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+    } catch (e) {
+      debugPrint('TimerNotifier: fetch failed, using fallback: $e');
+      final fallback = Passage(
+        reference: 'Genesis 1:1',
+        text: 'In the beginning God created the heavens and the earth.',
+        verses: [],
+      );
+      debugPrint('TimerNotifier: using fallback passage ${fallback.reference}');
+      r.read(shownScriptureProvider.notifier).state = fallback;
+      r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+    }
   }
 }

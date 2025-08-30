@@ -5,7 +5,7 @@ void main() {
   test('fetchPassage throws Exception for invalid verse id format', () async {
     final service = ScriptureService(apiKey: 'dummy');
     expect(
-      service.fetchPassage(bibleId: 'eng-ESV', passageId: 'INVALID'),
+      service.fetchPassage(bibleId: '32664dc3288a28df-01', passageId: 'INVALID'),
       throwsException,
     );
   });

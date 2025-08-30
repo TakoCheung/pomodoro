@@ -22,7 +22,7 @@ void main() {
         home: Scaffold(
           body: Stack(
             children: [
-              ScriptureOverlay(bibleId: 'eng-ESV', passageId: 'GEN.1.1'),
+              ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1'),
             ],
           ),
         ),

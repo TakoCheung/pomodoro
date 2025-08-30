@@ -14,6 +14,12 @@ Future<void> main() async {
   } catch (e) {
     // If there's no .env (common in CI/tests), continue without failing.
   }
+  // Debug: confirm env presence without leaking secrets
+  try {
+    final apiKey = dotenv.env['SCRIPTURE_API_KEY'];
+    final bibleId = dotenv.env['BIBLE_ID'];
+    debugPrint('main: SCRIPTURE_API_KEY present=${apiKey != null && apiKey.isNotEmpty}, BIBLE_ID=${bibleId ?? '(default)'}');
+  } catch (_) {}
   // Determine debug-FAB flag from .env (if present) and override the provider so
   // the UI can read a stable value regardless of widget build timing.
   // Prefer build-time config when available. EnvConfig is intended to be
