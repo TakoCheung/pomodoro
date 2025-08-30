@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Collect staged .dart files (null-delimited)
-mapfile -d '' -t STAGED <<<"$(git diff --name-only --cached --diff-filter=ACM -z)"
+# Collect staged .dart files (null-delimited) using process substitution to preserve NULs
+mapfile -d '' -t STAGED < <(git diff --name-only --cached --diff-filter=ACM -z)
 DART_TARGETS=()
 for f in "${STAGED[@]}"; do
   case "$f" in
@@ -16,17 +13,6 @@ done
 
 if [ ${#DART_TARGETS[@]} -eq 0 ]; then
   exit 0
-fi
-
-if ! command -v npx >/dev/null 2>&1; then
-  echo "pre-commit: npx not found. Install Node.js/npm to use Prettier." >&2
-  exit 1
-fi
-
-# Require local Prettier install to avoid network access in hooks
-if ! npx --no-install prettier --version >/dev/null 2>&1; then
-  echo "pre-commit: Prettier not installed locally. Run: npm i -D prettier" >&2
-  exit 1
 fi
 
 echo "pre-commit: formatting Dart files..."
