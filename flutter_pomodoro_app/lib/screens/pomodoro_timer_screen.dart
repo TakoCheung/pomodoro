@@ -68,10 +68,13 @@ class PomodoroTimerScreen extends ConsumerWidget {
               return FloatingActionButton(
                 key: const Key('debug_trigger_complete'),
                 onPressed: () {
-                  // Force debug mode and set pomodoro to 1 second for quick testing
+                  // Force debug mode and set all timers to zero minutes (maps to 1 second in debug)
                   final localSettingsNotifier = ref.read(localSettingsProvider.notifier);
                   localSettingsNotifier.updateDebugMode(true);
-                  localSettingsNotifier.updateTime(TimerMode.pomodoro, 1);
+                  // Zero all modes; NumberInput and Timer state will update via apply
+                  localSettingsNotifier.updateTime(TimerMode.pomodoro, 0);
+                  localSettingsNotifier.updateTime(TimerMode.shortBreak, 0);
+                  localSettingsNotifier.updateTime(TimerMode.longBreak, 0);
                   // Apply to the timer notifier
                   ref.read(timerProvider.notifier).updateSettings(ref.read(localSettingsProvider));
                   // Trigger timer completion to run the normal scripture fetch flow

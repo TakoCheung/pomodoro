@@ -167,23 +167,30 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   int getInitialDuration(TimerMode mode) {
+    int seconds;
     switch (mode) {
       case TimerMode.pomodoro:
-        return state.initPomodoro;
+        seconds = state.initPomodoro;
+        break;
       case TimerMode.shortBreak:
-        return state.initShortBreak;
+        seconds = state.initShortBreak;
+        break;
       case TimerMode.longBreak:
-        return state.initLongBreak;
+        seconds = state.initLongBreak;
+        break;
     }
+    // Debug semantics: zero minutes selected means "1 second left" for fast flows.
+    return seconds == 0 ? 1 : seconds;
   }
 
   void updateSettings(LocalSettings localSettings) {
-    state = state.copyWith(
-        initPomodoro: localSettings.initPomodoro,
-        initLongBreak: localSettings.initLongBreak,
-        initShortBreak: localSettings.initShortBreak,
-        fontFamily: localSettings.fontFamily,
-        color: localSettings.color);
+  // If debug mode is enabled and settings were zeroed, keep zero seconds.
+  state = state.copyWith(
+    initPomodoro: localSettings.initPomodoro,
+    initLongBreak: localSettings.initLongBreak,
+    initShortBreak: localSettings.initShortBreak,
+    fontFamily: localSettings.fontFamily,
+    color: localSettings.color);
     setMode(state.mode);
   }
 
