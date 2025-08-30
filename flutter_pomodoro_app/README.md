@@ -26,14 +26,12 @@ Simulator validation screenshots are saved under `artifacts/ios/`, e.g. `scriptu
 
 - Copy `.env.example` to `.env` for local overrides.
 - Keys:
-	- `ENABLE_DEBUG_FAB` (true/false): show a debug FAB to trigger the scripture overlay.
 	- `SCRIPTURE_API_KEY`: optional key for live fetching. Tests mock HTTP and don't need it.
 - Build-time `lib/env_config.dart` may set safe defaults; `.env` overrides are read at runtime when available.
 --------------------
 
 This project uses a small build-time config `lib/env_config.dart` for safe
-feature flags (for example, showing the debug FAB). To regenerate
-`lib/env_config.dart` from a local `.env` file, run:
+feature flags. To regenerate `lib/env_config.dart` from a local `.env` file, run:
 
 ```bash
 cd flutter_pomodoro_app
