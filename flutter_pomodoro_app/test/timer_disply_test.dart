@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -10,7 +10,6 @@ import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_pomodoro_app/state/timer_model.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
   const PomodoroTimerScreen({super.key});

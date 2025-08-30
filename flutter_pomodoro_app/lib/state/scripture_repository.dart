@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
+import 'package:flutter_pomodoro_app/utils/verse_picker.dart';
 
 /// A small repository that picks a random passage id from a list and fetches it
 /// from the provided [ScriptureServiceInterface]. It caches the fetched passage
@@ -48,10 +49,8 @@ class ScriptureRepository {
         return _cached!;
       }
     }
-
-    if (passageIds.isEmpty) throw ArgumentError('passageIds must not be empty');
-    final idx = _rng.nextInt(passageIds.length);
-    final passageId = passageIds[idx];
+    // If caller doesn't provide candidates, pick from default curated verse IDs.
+    final passageId = pickRandomVerseId(_rng, candidates: passageIds);
     final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
     _cached = p;
     _cachedDate = now();

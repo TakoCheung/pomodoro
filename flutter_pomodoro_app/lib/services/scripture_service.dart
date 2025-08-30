@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:flutter_pomodoro_app/data/verse_ids_esv.dart';
 import '../models/passage.dart';
 
 abstract class ScriptureServiceInterface {
@@ -20,7 +21,14 @@ class ScriptureService implements ScriptureServiceInterface {
 
   @override
   Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
-    final uri = Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/passages/$passageId');
+    // The API docs recommend using the /verses/{verseId} endpoint for specific verses.
+    // See: https://docs.api.bible/tutorials/getting-a-specific-verse
+    // We validate the ID format lightly, then request via /verses.
+    if (!isLikelyValidVerseId(passageId)) {
+      // Throw an Exception type so tests using `throwsException` pass.
+      throw FormatException('Invalid verse ID format: $passageId');
+    }
+    final uri = Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/verses/$passageId');
     int attempt = 0;
     while (true) {
       attempt++;
