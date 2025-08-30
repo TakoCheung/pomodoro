@@ -206,7 +206,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final repo = r.read(scriptureRepositoryProvider);
       final bibleId = r.read(bibleIdProvider);
       // Helper to lazily generate a passage id only when needed.
-      String _generateIdAvoidingRepeat() {
+      String generateIdAvoidingRepeat() {
         final gen = r.read(nextPassageIdProvider);
         final lastId = r.read(lastPassageIdProvider);
         String id = gen();
@@ -217,24 +217,24 @@ class TimerNotifier extends StateNotifier<TimerState> {
         }
         return id;
       }
-      final mode = state.mode;
+  final mode = state.mode;
       Passage passage;
       switch (mode) {
         case TimerMode.pomodoro:
-          final generatedId = _generateIdAvoidingRepeat();
+          final generatedId = generateIdAvoidingRepeat();
           passage = await repo.fetchAndCacheRandomPassage(bibleId: bibleId, passageIds: [generatedId]);
           // Persist the id we used to reduce immediate repeats.
           r.read(lastPassageIdProvider.notifier).state = generatedId;
           break;
         case TimerMode.shortBreak:
         case TimerMode.longBreak:
-          final cached = repo.cachedPassage;
+          final cached = repo.cachedPassageForBible(bibleId);
           if (cached != null) {
             debugPrint('TimerNotifier: using cached passage ${cached.reference} for break');
             passage = cached;
           } else {
             debugPrint('TimerNotifier: no cache for today; fetching once for break');
-            final generatedId = _generateIdAvoidingRepeat();
+            final generatedId = generateIdAvoidingRepeat();
             passage = await repo.getRandomPassageOncePerDay(bibleId: bibleId, passageIds: [generatedId]);
             r.read(lastPassageIdProvider.notifier).state = generatedId;
           }

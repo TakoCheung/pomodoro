@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
+import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/models/scripture_request.dart';
 
 class ScriptureOverlay extends ConsumerStatefulWidget {
@@ -53,6 +54,9 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
 
   @override
   Widget build(BuildContext context) {
+  // Apply font from settings across the overlay
+  final settings = ref.watch(localSettingsProvider);
+  final font = settings.fontFamily;
     // If a Passage was set directly (e.g. in tests or debug), show it immediately
     final direct = ref.watch(shownScriptureProvider);
     if (direct != null) {
@@ -80,14 +84,15 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                     constraints: const BoxConstraints(),
                   ),
                 ),
-                Text(p.reference,
+        Text(p.reference,
                     key: const Key('scripture_reference'),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
                 const SizedBox(height: 8),
-                Text(p.text,
+        Text(p.text,
                     key: const Key('scripture_text'),
                     maxLines: 6,
-                    overflow: TextOverflow.ellipsis),
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontFamily: font)),
               ],
             ),
           ),
@@ -122,14 +127,15 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                       constraints: const BoxConstraints(),
                     ),
                   ),
-                  Text(p.reference,
+          Text(p.reference,
                       key: const Key('scripture_reference'),
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+            style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
                   const SizedBox(height: 8),
-                  Text(p.text,
+          Text(p.text,
                       key: const Key('scripture_text'),
                       maxLines: 6,
-                      overflow: TextOverflow.ellipsis),
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontFamily: font)),
                 ],
               ),
             ),

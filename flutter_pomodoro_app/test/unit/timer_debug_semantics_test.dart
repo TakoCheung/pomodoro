@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
-import 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 
 void main() {

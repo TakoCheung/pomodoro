@@ -17,6 +17,7 @@ class ScriptureRepository {
   final ScriptureServiceInterface service;
   final DateTime Function() now;
   Passage? _cached;
+  String? _cachedBibleId;
   DateTime? _cachedDate;
   final SharedPreferences? _prefs;
   final Random _rng;
@@ -30,14 +31,17 @@ class ScriptureRepository {
     if (_prefs != null) {
   final jsonStr = _prefs.getString(_prefsKeyCachedPassage);
   final dateStr = _prefs.getString(_prefsKeyCachedDate);
+  final cachedId = _prefs.getString(_prefsKeyCachedBibleId);
       if (jsonStr != null && dateStr != null) {
         try {
           _cached = Passage.fromJson(json.decode(jsonStr) as Map<String, dynamic>);
           _cachedDate = DateTime.parse(dateStr);
+          _cachedBibleId = cachedId;
         } catch (_) {
           // ignore and leave cache empty
           _cached = null;
           _cachedDate = null;
+          _cachedBibleId = null;
         }
       }
       // Hydrate history
@@ -69,6 +73,16 @@ class ScriptureRepository {
     return cachedDay == today ? _cached : null;
   }
 
+  /// Returns today's cached passage, but only if it was fetched with the
+  /// provided bibleId. This ensures we don't show an ESV passage when the
+  /// user switched to another version.
+  Passage? cachedPassageForBible(String bibleId) {
+    final p = cachedPassage;
+    if (p == null) return null;
+    if (_cachedBibleId == null) return null;
+    return _cachedBibleId == bibleId ? p : null;
+  }
+
   Future<Passage> getRandomPassageOncePerDay({required String bibleId, required List<String> passageIds}) async {
     final today = DateTime(now().year, now().month, now().day);
     if (_cached != null && _cachedDate != null) {
@@ -79,8 +93,9 @@ class ScriptureRepository {
     }
     // If caller doesn't provide candidates, pick from default curated verse IDs.
     final passageId = pickRandomVerseId(_rng, candidates: passageIds);
-    final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
+  final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
   _cached = p;
+  _cachedBibleId = bibleId;
     _cachedDate = now();
     // persist if prefs available
     if (_prefs != null) {
@@ -89,6 +104,7 @@ class ScriptureRepository {
         if (_cachedDate != null) {
           await _prefs.setString(_prefsKeyCachedDate, _cachedDate!.toIso8601String());
         }
+    await _prefs.setString(_prefsKeyCachedBibleId, bibleId);
     // Also append to history and persist
     _history.add(p);
     await _persistHistory();
@@ -103,13 +119,15 @@ class ScriptureRepository {
   /// regardless of whether a passage has already been cached.
   Future<Passage> fetchAndCacheRandomPassage({required String bibleId, required List<String> passageIds}) async {
     final passageId = pickRandomVerseId(_rng, candidates: passageIds);
-    final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
+  final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
   _cached = p;
+  _cachedBibleId = bibleId;
     _cachedDate = now();
     if (_prefs != null) {
       try {
         await _prefs.setString(_prefsKeyCachedPassage, json.encode(p.toJson()));
         await _prefs.setString(_prefsKeyCachedDate, _cachedDate!.toIso8601String());
+    await _prefs.setString(_prefsKeyCachedBibleId, bibleId);
     // Append to history and persist
     _history.add(p);
     await _persistHistory();
@@ -141,6 +159,7 @@ class ScriptureRepository {
 
 const _prefsKeyCachedPassage = 'scripture_cached_passage';
 const _prefsKeyCachedDate = 'scripture_cached_date';
+const _prefsKeyCachedBibleId = 'scripture_cached_bible_id';
 const _prefsKeyHistory = 'scripture_history';
 
 final scriptureRepositoryProvider = Provider<ScriptureRepository>((ref) {

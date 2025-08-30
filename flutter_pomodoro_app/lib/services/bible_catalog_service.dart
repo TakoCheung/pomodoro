@@ -19,7 +19,7 @@ class BibleCatalogService implements BibleCatalogServiceInterface {
   @override
   Future<List<BibleVersion>> fetchBibles() async {
     final uri = Uri.parse('https://api.scripture.api.bible/v1/bibles');
-    if (kDebugMode) debugPrint('BibleCatalogService: GET ' + uri.toString());
+    if (kDebugMode) debugPrint('BibleCatalogService: GET $uri');
     final resp = await client.get(uri, headers: {'api-key': apiKey}).timeout(const Duration(seconds: 5));
     if (resp.statusCode != 200) {
       throw Exception('Failed to fetch bibles: ${resp.statusCode}');

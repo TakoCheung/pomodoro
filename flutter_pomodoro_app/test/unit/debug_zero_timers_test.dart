@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
-import 'package:flutter_pomodoro_app/state/timer_model.dart';
 
 void main() {
   test('LocalSettings.updateDebugMode(true) zero minutes maps to 1 second per timer', () {

@@ -31,6 +31,7 @@ class LocalSettings {
   Color color;
   bool debugMode;
   String bibleVersionName;
+  String? bibleVersionId;
 
   LocalSettings({
     required this.initPomodoro,
@@ -40,6 +41,7 @@ class LocalSettings {
   required this.color,
   this.debugMode = false,
   this.bibleVersionName = kDefaultBibleVersionName,
+  this.bibleVersionId,
   });
 
   LocalSettings copyWith(
@@ -49,7 +51,8 @@ class LocalSettings {
       String? fontFamily,
       Color? color,
       bool? debugMode,
-      String? bibleVersionName}) {
+      String? bibleVersionName,
+      String? bibleVersionId}) {
     return LocalSettings(
         initLongBreak: initLongBreak ?? this.initLongBreak,
         initPomodoro: initPomodoro ?? this.initPomodoro,
@@ -57,7 +60,8 @@ class LocalSettings {
         fontFamily: fontFamily ?? this.fontFamily,
         color: color ?? this.color,
         debugMode: debugMode ?? this.debugMode,
-        bibleVersionName: bibleVersionName ?? this.bibleVersionName);
+        bibleVersionName: bibleVersionName ?? this.bibleVersionName,
+        bibleVersionId: bibleVersionId ?? this.bibleVersionId);
   }
 }
 
@@ -73,7 +77,12 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
   }
 
   void updateBibleVersionName(String name) {
-    state = state.copyWith(bibleVersionName: name);
+    // When only the name is set (e.g., during loading fallback), clear the id to avoid stale mismatch.
+    state = state.copyWith(bibleVersionName: name, bibleVersionId: null);
+  }
+
+  void updateBibleVersion(String name, String id) {
+    state = state.copyWith(bibleVersionName: name, bibleVersionId: id);
   }
 
   void updateTime(TimerMode mode, int timeInMin){

@@ -42,7 +42,7 @@ void main() {
 
   test('getRandomPassageOncePerDay adds to history only when fetching (first call), not when returning cached', () async {
     final prefs = await SharedPreferences.getInstance();
-    final fixedNow = () => DateTime(2025, 8, 30, 10, 0, 0);
+    DateTime fixedNow() => DateTime(2025, 8, 30, 10, 0, 0);
     final repo = ScriptureRepository(service: FakeService(), now: fixedNow, prefs: prefs);
 
     final p1 = await repo.getRandomPassageOncePerDay(bibleId: 'b', passageIds: ['PSA.23.1']);

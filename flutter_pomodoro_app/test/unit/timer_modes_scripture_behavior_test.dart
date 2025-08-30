@@ -25,6 +25,9 @@ class _FakeRepo extends ScriptureRepository {
   @override
   Passage? get cachedPassage => _cached;
 
+  @override
+  Passage? cachedPassageForBible(String bibleId) => _cached;
+
   void seedCached(Passage? p) {
     _cached = p;
   }

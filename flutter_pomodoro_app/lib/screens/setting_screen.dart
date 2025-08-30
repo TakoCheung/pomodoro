@@ -84,40 +84,94 @@ class SettingsScreen extends ConsumerWidget {
                       const CustomDivider(spaceBefore: 30),
                       // Bible Version selector
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Bible Version', style: AppTextStyles.h4),
-                          Consumer(builder: (context, ref, _) {
-                            final AsyncValue<List<BibleVersion>> versionsAsync = ref.watch(bibleVersionsProvider);
-                            final values = versionsAsync.when<List<String>>(
-                              data: (list) => list.map((v) => v.displayName).toList(growable: false),
-                              loading: () => kBibleVersions.keys.toList(growable: false),
-                              error: (_, __) => kBibleVersions.keys.toList(growable: false),
-                            );
-                            final items = values
-                                .map((name) => DropdownMenuItem<String>(value: name, child: Text(name)))
-                                .toList(growable: false);
-                            // Ensure current value is in the list
-                            final current = localSettings.bibleVersionName;
-                            final dropdownValue = values.contains(current) ? current : (values.isNotEmpty ? values.first : current);
-                            return Flexible(
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: SizedBox(
-                                  width: isTablet ? 240 : 180,
-                                  child: DropdownButton<String>(
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Consumer(builder: (context, ref, _) {
+                              final AsyncValue<List<BibleVersion>> versionsAsync = ref.watch(bibleVersionsProvider);
+                              return versionsAsync.when(
+                                data: (list) {
+                                  // Deduplicate by ID in case API contains duplicates.
+                                  final Map<String, BibleVersion> byId = {
+                                    for (final v in list) v.id: v
+                                  };
+                                  final uniqueList = byId.values.toList(growable: false);
+                                  // Use unique IDs for values to avoid duplicate label assertion.
+                                  final items = uniqueList
+                                      .map((v) => DropdownMenuItem<String>(
+                                            value: v.id,
+                                            child: Text(v.label),
+                                          ))
+                                      .toList(growable: false);
+
+                                  // Determine selected ID from current stored name by matching against common fields.
+                                  final currentName = localSettings.bibleVersionName;
+                                  final match = uniqueList.firstWhere(
+                                    (v) => v.label == currentName ||
+                                        v.displayName == currentName ||
+                                        v.name == currentName ||
+                                        v.abbreviationLocal == currentName ||
+                                        v.abbreviation == currentName,
+                                    orElse: () => uniqueList.first,
+                                  );
+                                  final selectedId = match.id;
+
+                  return DropdownButton<String>(
                                     key: const Key('bible_version_dropdown'),
                                     isExpanded: true,
-                                    value: dropdownValue,
+                                    value: selectedId,
                                     items: items,
-                                    onChanged: (v) {
-                                      if (v != null) localSettingsNotifier.updateBibleVersionName(v);
+                                    onChanged: (id) {
+                                      if (id == null) return;
+                                      final sel = uniqueList.firstWhere((v) => v.id == id, orElse: () => match);
+                    // Store both human-friendly label and stable id.
+                    localSettingsNotifier.updateBibleVersion(sel.label, sel.id);
                                     },
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
+                                  );
+                                },
+                                // During loading/error, fall back to static mapping by names to keep UI usable.
+                                loading: () {
+                                  // Build items from static map: values are IDs, labels are names.
+                                  final entries = kBibleVersions.entries.toList(growable: false);
+                                  final items = entries
+                                      .map((e) => DropdownMenuItem<String>(value: e.value, child: Text(e.key)))
+                                      .toList(growable: false);
+                                  // Choose selected ID from settings (id preferred), else map current name.
+                                  final selectedId = localSettings.bibleVersionId ?? kBibleVersions[localSettings.bibleVersionName] ?? (entries.isNotEmpty ? entries.first.value : null);
+                                  return DropdownButton<String>(
+                                    key: const Key('bible_version_dropdown'),
+                                    isExpanded: true,
+                                    value: selectedId,
+                                    items: items,
+                                    onChanged: (id) {
+                                      if (id == null) return;
+                                      final e = entries.firstWhere((e) => e.value == id, orElse: () => entries.first);
+                                      localSettingsNotifier.updateBibleVersion(e.key, e.value);
+                                    },
+                                  );
+                                },
+                                error: (_, __) {
+                                  final entries = kBibleVersions.entries.toList(growable: false);
+                                  final items = entries
+                                      .map((e) => DropdownMenuItem<String>(value: e.value, child: Text(e.key)))
+                                      .toList(growable: false);
+                                  final selectedId = localSettings.bibleVersionId ?? kBibleVersions[localSettings.bibleVersionName] ?? (entries.isNotEmpty ? entries.first.value : null);
+                                  return DropdownButton<String>(
+                                    key: const Key('bible_version_dropdown'),
+                                    isExpanded: true,
+                                    value: selectedId,
+                                    items: items,
+                                    onChanged: (id) {
+                                      if (id == null) return;
+                                      final e = entries.firstWhere((e) => e.value == id, orElse: () => entries.first);
+                                      localSettingsNotifier.updateBibleVersion(e.key, e.value);
+                                    },
+                                  );
+                                },
+                              );
+                            }),
+                          ),
                         ],
                       ),
                       const CustomDivider(),

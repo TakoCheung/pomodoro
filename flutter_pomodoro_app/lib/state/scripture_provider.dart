@@ -11,7 +11,12 @@ import 'package:flutter/foundation.dart';
 /// Configurable Bible ID, defaults to '32664dc3288a28df-01' for tests/backwards-compat.
 final bibleIdProvider = Provider<String>((ref) {
   // If user selected a version in LocalSettings, prefer it.
-  final name = ref.watch(localSettingsProvider).bibleVersionName;
+  final settings = ref.watch(localSettingsProvider);
+  final idFromSettings = settings.bibleVersionId;
+  if (idFromSettings != null && idFromSettings.isNotEmpty) {
+    return idFromSettings;
+  }
+  final name = settings.bibleVersionName;
   // dynamic mapping from fetched list
   try {
     final asyncList = ref.watch(bibleVersionsProvider);
@@ -19,7 +24,7 @@ final bibleIdProvider = Provider<String>((ref) {
       data: (versions) {
         if (versions.isEmpty) return null;
         final match = versions.firstWhere(
-          (v) => v.displayName == name || v.name == name || v.abbreviation == name,
+          (v) => v.displayName == name || v.name == name || v.abbreviation == name || v.abbreviationLocal == name || v.label == name,
           orElse: () => versions.first,
         );
         return match.id;
