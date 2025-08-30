@@ -87,7 +87,8 @@ class _NumberInputState extends State<NumberInput> {
       ),
       const SizedBox(height: 10),
       Container(
-          width: 140,
+          // Allow this control to shrink in tight spaces to avoid overflow during tests on small widths.
+          width: widget.isTablet ? 160 : 120,
           height: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15.0),
@@ -96,16 +97,20 @@ class _NumberInputState extends State<NumberInput> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Text(
-                  '$_value',
-                  style: const TextStyle(
-                      fontSize: AppTextStyles.bodyFontSize,
-                      fontFamily: AppTextStyles.kumbhSans,
-                      fontWeight: FontWeight.bold,
-                      height: AppTextStyles
-                          .body2LineSpacing), // Adjust font size to fit
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    '$_value',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(
+                        fontSize: AppTextStyles.bodyFontSize,
+                        fontFamily: AppTextStyles.kumbhSans,
+                        fontWeight: FontWeight.bold,
+                        height: AppTextStyles.body2LineSpacing),
+                  ),
                 ),
               ),
               Container(

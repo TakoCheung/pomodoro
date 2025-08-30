@@ -29,7 +29,7 @@ Future<void> main() async {
   } catch (_) {
     // ignore: noop
   }
-  debugPrint('main: EnvConfig.enableDebugFab=${EnvConfig.enableDebugFab}, .env=${rawEnableDebugFab} -> enableDebugFab=$enableDebugFab');
+  debugPrint('main: EnvConfig.enableDebugFab=${EnvConfig.enableDebugFab}, .env=$rawEnableDebugFab -> enableDebugFab=$enableDebugFab');
 
   runApp(ProviderScope(overrides: [enableDebugFabProvider.overrideWithValue(enableDebugFab)], child: const MyApp()));
 }

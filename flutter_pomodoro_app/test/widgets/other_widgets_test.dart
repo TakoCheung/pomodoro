@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_pomodoro_app/components/timer/timer_gearicon_button.dart';
 import 'package:flutter_pomodoro_app/components/timer/timer_mode_switch_ui.dart';
 import 'package:flutter_pomodoro_app/components/setting/divider.dart';
-import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main(){

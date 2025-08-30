@@ -24,7 +24,7 @@ void main() {
     await tester.tap(apply);
     await tester.pumpAndSettle();
 
-    // Validate that after applying, the main screen still shows (smoke check)
-    expect(find.text('pomodoro'), findsOneWidget);
+  // Validate that after applying, the main screen still shows (smoke check)
+  expect(find.byKey(const Key('pomodoro_title')), findsOneWidget);
   });
 }

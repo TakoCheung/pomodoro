@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:flutter_pomodoro_app/widgets/scripture_overlay.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
-import 'package:flutter_pomodoro_app/models/scripture_request.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
 

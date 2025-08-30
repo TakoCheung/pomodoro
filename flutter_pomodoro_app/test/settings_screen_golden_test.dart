@@ -1,7 +1,6 @@
 import 'package:flutter_pomodoro_app/screens/setting_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {

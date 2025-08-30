@@ -5,7 +5,6 @@ import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
-import 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -124,16 +123,39 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildTimeRow(LocalSettings localSettings, LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+    // Use Expanded to prevent horizontal overflow on narrow layouts while keeping a single row on tablets.
     return Row(
       key: const Key('timeSection'),
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-    _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro,
-      localSettings.debugMode ? 0 : 25, 60, localSettingsNotifier, isTablet),
-    _buildNumberInput(TimerMode.shortBreak, localSettings.initShortBreak,
-      localSettings.debugMode ? 0 : 5, 15, localSettingsNotifier, isTablet),
-    _buildNumberInput(TimerMode.longBreak, localSettings.initLongBreak,
-      localSettings.debugMode ? 0 : 15, 30, localSettingsNotifier, isTablet),
+        Expanded(
+          child: _buildNumberInput(
+              TimerMode.pomodoro,
+              localSettings.initPomodoro,
+              localSettings.debugMode ? 0 : 25,
+              60,
+              localSettingsNotifier,
+              isTablet),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildNumberInput(
+              TimerMode.shortBreak,
+              localSettings.initShortBreak,
+              localSettings.debugMode ? 0 : 5,
+              15,
+              localSettingsNotifier,
+              isTablet),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildNumberInput(
+              TimerMode.longBreak,
+              localSettings.initLongBreak,
+              localSettings.debugMode ? 0 : 15,
+              30,
+              localSettingsNotifier,
+              isTablet),
+        ),
       ],
     );
   }

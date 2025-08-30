@@ -53,7 +53,8 @@ final timerProvider = StateNotifierProvider<TimerNotifier, TimerState>((ref) {
     debugPrint('TimerNotifier: onComplete triggered');
     try {
       final repo = ref.read(scriptureRepositoryProvider);
-      final passage = await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: ['GEN.1.1']);
+      // Use repository's internal verse picker (default curated list) for randomness.
+      final passage = await repo.getRandomPassageOncePerDay(bibleId: 'eng-ESV', passageIds: const []);
       debugPrint('TimerNotifier: fetched passage ${passage.reference}');
       ref.read(shownScriptureProvider.notifier).state = passage;
       ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
