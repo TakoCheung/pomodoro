@@ -9,6 +9,8 @@ class NumberInput extends StatefulWidget {
   final String title;
   final void Function(int) onValueChanged;
   final bool isTablet;
+  // Optional key prefix to make finding sub-widgets easier in tests.
+  final String? testKeyPrefix;
 
   const NumberInput(
       {super.key,
@@ -17,7 +19,8 @@ class NumberInput extends StatefulWidget {
       this.minValue = 0,
       this.maxValue = 60,
       required this.onValueChanged,
-      required this.isTablet});
+      required this.isTablet,
+      this.testKeyPrefix});
 
   @override
   State<StatefulWidget> createState() {
@@ -77,8 +80,7 @@ class _NumberInputState extends State<NumberInput> {
         : LayoutBuilder(builder: (context, constraints) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment:
-                  CrossAxisAlignment.center, // Align vertically center
+              crossAxisAlignment: CrossAxisAlignment.center, // Align vertically center
               children: _getWidgets(),
             );
           });
@@ -112,6 +114,7 @@ class _NumberInputState extends State<NumberInput> {
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Text(
                     '$_value',
+                    key: widget.testKeyPrefix != null ? Key('${widget.testKeyPrefix}_value') : null,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.left,
@@ -133,6 +136,9 @@ class _NumberInputState extends State<NumberInput> {
                         flex: 1,
                         child: IconButton(
                           icon: const Icon(Icons.keyboard_arrow_up),
+                          key: widget.testKeyPrefix != null
+                              ? Key('${widget.testKeyPrefix}_inc')
+                              : null,
                           onPressed: _increment,
                           padding: EdgeInsets.zero,
                         ),
@@ -141,6 +147,9 @@ class _NumberInputState extends State<NumberInput> {
                         flex: 1,
                         child: IconButton(
                           icon: const Icon(Icons.keyboard_arrow_down),
+                          key: widget.testKeyPrefix != null
+                              ? Key('${widget.testKeyPrefix}_dec')
+                              : null,
                           onPressed: _decrement,
                           padding: EdgeInsets.zero,
                         ),

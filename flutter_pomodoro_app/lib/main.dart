@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pomodoro_app/state/settings_persistence.dart';
 // import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 // import 'package:flutter_pomodoro_app/env_config.dart';
 
@@ -24,11 +25,13 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Ensure settings are hydrated/persisted at startup; the bool return isn't used.
+    ref.watch(settingsPersistenceInitializerProvider);
     return const MaterialApp(home: PomodoroTimerScreen());
   }
 }

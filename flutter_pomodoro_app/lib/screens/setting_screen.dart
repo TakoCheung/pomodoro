@@ -10,6 +10,7 @@ import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
 import 'package:flutter_pomodoro_app/models/bible_version.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
+import 'package:flutter_pomodoro_app/state/settings_persistence.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -77,6 +78,7 @@ class SettingsScreen extends ConsumerWidget {
                         children: [
                           const Text('Debug Mode', style: AppTextStyles.h4),
                           Switch(
+                            key: const Key('debug_mode_switch'),
                             value: localSettings.debugMode,
                             onChanged: (v) => localSettingsNotifier.updateDebugMode(v),
                           )
@@ -203,6 +205,42 @@ class SettingsScreen extends ConsumerWidget {
                       const CustomDivider(),
                       _buildColor(timerState, localSettings, localSettingsNotifier, isTablet),
                       const SizedBox(height: 20),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton.icon(
+                          key: const Key('reset_defaults_button'),
+                          onPressed: () async {
+                            // Reset by re-initializing default LocalSettings instance
+                            final def = LocalSettings(
+                              initPomodoro: TimerDefaults.pomodoroDefault,
+                              initShortBreak: TimerDefaults.shortBreakDefault,
+                              initLongBreak: TimerDefaults.longBreakDefault,
+                              fontFamily: AppTextStyles.kumbhSans,
+                              color: AppColors.orangeRed,
+                              bibleVersionName: kDefaultBibleVersionName,
+                            );
+                            ref.read(localSettingsProvider.notifier).updateFont(def.fontFamily);
+                            ref.read(localSettingsProvider.notifier).updateColor(def.color);
+                            ref
+                                .read(localSettingsProvider.notifier)
+                                .updateBibleVersionName(def.bibleVersionName);
+                            ref
+                                .read(localSettingsProvider.notifier)
+                                .updateTime(TimerMode.pomodoro, def.initPomodoro ~/ 60);
+                            ref
+                                .read(localSettingsProvider.notifier)
+                                .updateTime(TimerMode.shortBreak, def.initShortBreak ~/ 60);
+                            ref
+                                .read(localSettingsProvider.notifier)
+                                .updateTime(TimerMode.longBreak, def.initLongBreak ~/ 60);
+                            // Clear persisted copy
+                            final sp = ref.read(settingsPersistenceProvider);
+                            await sp?.resetToDefaults();
+                          },
+                          icon: const Icon(Icons.restore),
+                          label: const Text('Reset to Defaults'),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -296,17 +334,20 @@ class SettingsScreen extends ConsumerWidget {
       children: [
         Expanded(
           child: _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro,
-              localSettings.debugMode ? 0 : 25, 60, localSettingsNotifier, isTablet),
+              localSettings.debugMode ? 0 : 25, 60, localSettingsNotifier, isTablet,
+              keyPrefix: 'pomodoro'),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildNumberInput(TimerMode.shortBreak, localSettings.initShortBreak,
-              localSettings.debugMode ? 0 : 5, 15, localSettingsNotifier, isTablet),
+              localSettings.debugMode ? 0 : 5, 15, localSettingsNotifier, isTablet,
+              keyPrefix: 'shortBreak'),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildNumberInput(TimerMode.longBreak, localSettings.initLongBreak,
-              localSettings.debugMode ? 0 : 15, 30, localSettingsNotifier, isTablet),
+              localSettings.debugMode ? 0 : 15, 30, localSettingsNotifier, isTablet,
+              keyPrefix: 'longBreak'),
         ),
       ],
     );
@@ -318,13 +359,16 @@ class SettingsScreen extends ConsumerWidget {
       key: const Key('timeSection'),
       children: [
         _buildNumberInput(TimerMode.pomodoro, localSettings.initPomodoro,
-            localSettings.debugMode ? 0 : 25, 60, localSettingsNotifier, isTablet),
+            localSettings.debugMode ? 0 : 25, 60, localSettingsNotifier, isTablet,
+            keyPrefix: 'pomodoro'),
         const SizedBox(height: 10),
         _buildNumberInput(TimerMode.shortBreak, localSettings.initShortBreak,
-            localSettings.debugMode ? 0 : 5, 15, localSettingsNotifier, isTablet),
+            localSettings.debugMode ? 0 : 5, 15, localSettingsNotifier, isTablet,
+            keyPrefix: 'shortBreak'),
         const SizedBox(height: 10),
         _buildNumberInput(TimerMode.longBreak, localSettings.initLongBreak,
-            localSettings.debugMode ? 0 : 15, 30, localSettingsNotifier, isTablet),
+            localSettings.debugMode ? 0 : 15, 30, localSettingsNotifier, isTablet,
+            keyPrefix: 'longBreak'),
       ],
     );
   }
@@ -423,14 +467,16 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildNumberInput(TimerMode mode, int timeInSec, int min, int max,
-      LocalSettingsNotifier localSettingsNotifier, bool isTablet) {
+      LocalSettingsNotifier localSettingsNotifier, bool isTablet,
+      {String? keyPrefix}) {
     return NumberInput(
         title: localSettingsNotifier.getName(mode),
         initialValue: timeInSec ~/ 60,
         minValue: min,
         maxValue: max,
         onValueChanged: (value) => localSettingsNotifier.updateTime(mode, value),
-        isTablet: isTablet);
+        isTablet: isTablet,
+        testKeyPrefix: keyPrefix);
   }
 
   Widget _buildFontOption(String text, String fontFamily, TimerState timerState,
