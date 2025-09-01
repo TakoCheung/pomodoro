@@ -4,9 +4,7 @@ import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  test(
-      'Applying local settings updates the global timer provider (programmatic)',
-      () {
+  test('Applying local settings updates the global timer provider (programmatic)', () {
     // Use a ProviderContainer to simulate the app providers without rendering the full UI.
     final container = ProviderContainer();
     addTearDown(container.dispose);
@@ -17,11 +15,12 @@ void main() {
 
     // Programmatically apply the settings the SettingsScreen would apply.
     final timerNotifier = container.read(timerProvider.notifier);
-    timerNotifier.updateSettings(container.read(localSettingsProvider));
+    timerNotifier.applyLiveSettings(container.read(localSettingsProvider));
 
     // After applying, timerProvider should reflect the local settings
     final timerState = container.read(timerProvider);
     final localState = container.read(localSettingsProvider);
-    expect(timerState.initPomodoro, equals(localState.initPomodoro));
+    // Live apply should not change durations; only font/color are updated immediately.
+    expect(timerState.initPomodoro, isNot(equals(localState.initPomodoro)));
   });
 }

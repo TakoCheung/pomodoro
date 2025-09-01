@@ -139,6 +139,9 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   void setMode(TimerMode mode) {
+    // On any explicit session (re)start, pull staged durations from LocalSettings
+    // so that next sessions use the latest values without altering a running session.
+    _syncDurationsFromLocalSettings();
     state = state.copyWith(
       mode: mode,
       timeRemaining: getInitialDuration(mode),
@@ -177,15 +180,53 @@ class TimerNotifier extends StateNotifier<TimerState> {
     return seconds == 0 ? 1 : seconds;
   }
 
-  void updateSettings(LocalSettings localSettings) {
-    // If debug mode is enabled and settings were zeroed, keep zero seconds.
+  @visibleForTesting
+  void setForTest({int? timeRemaining, bool? isRunning, TimerMode? mode}) {
     state = state.copyWith(
-        initPomodoro: localSettings.initPomodoro,
-        initLongBreak: localSettings.initLongBreak,
-        initShortBreak: localSettings.initShortBreak,
-        fontFamily: localSettings.fontFamily,
-        color: localSettings.color);
+      timeRemaining: timeRemaining,
+      isRunning: isRunning,
+      mode: mode,
+    );
+  }
+
+  /// Apply only live settings (font/color) immediately without touching
+  /// session durations or timeRemaining.
+  void applyLiveSettings(LocalSettings localSettings) {
+    state = state.copyWith(
+      fontFamily: localSettings.fontFamily,
+      color: localSettings.color,
+    );
+  }
+
+  /// Backward-compatible apply used by existing tests: applies both live and
+  /// duration settings immediately and resets the current session.
+  void updateSettings(LocalSettings localSettings) {
+    state = state.copyWith(
+      initPomodoro: localSettings.initPomodoro,
+      initShortBreak: localSettings.initShortBreak,
+      initLongBreak: localSettings.initLongBreak,
+      fontFamily: localSettings.fontFamily,
+      color: localSettings.color,
+    );
     setMode(state.mode);
+  }
+
+  /// Apply staged durations now and reset current session (with confirmation in UI).
+  void applyStagedDurationsNow() {
+    _syncDurationsFromLocalSettings();
+    // Reset current session using current mode and new durations.
+    setMode(state.mode);
+  }
+
+  /// Pull staged durations from LocalSettings into the active timer state.
+  void _syncDurationsFromLocalSettings() {
+    if (ref == null) return;
+    final s = ref!.read(localSettingsProvider);
+    state = state.copyWith(
+      initPomodoro: s.initPomodoro,
+      initShortBreak: s.initShortBreak,
+      initLongBreak: s.initLongBreak,
+    );
   }
 
   @override

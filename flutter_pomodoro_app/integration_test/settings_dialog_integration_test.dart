@@ -24,8 +24,8 @@ void main() {
     await tester.tap(debugSwitch.first);
     await tester.pumpAndSettle();
 
-    // Find Apply button and tap
-    final apply = find.text('Apply');
+    // Find Apply Next Session button and tap
+    final apply = find.byKey(const Key('apply_next_session_button'));
     expect(apply, findsOneWidget);
     await tester.tap(apply);
     await tester.pumpAndSettle();

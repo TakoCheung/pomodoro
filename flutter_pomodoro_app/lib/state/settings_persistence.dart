@@ -129,6 +129,7 @@ final settingsPersistenceInitializerProvider = Provider<bool>((ref) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final notifier = ref.read(localSettingsProvider.notifier);
       final loaded = persistence.loadOrDefaults();
+      // Live settings: apply immediately.
       notifier.updateFont(loaded.fontFamily);
       notifier.updateColor(loaded.color);
       notifier.updateBibleVersionName(loaded.bibleVersionName);
@@ -136,11 +137,13 @@ final settingsPersistenceInitializerProvider = Provider<bool>((ref) {
         notifier.updateBibleVersion(loaded.bibleVersionName, loaded.bibleVersionId!);
       }
       notifier.updateDebugMode(loaded.debugMode);
+      // Stage session-scoped settings into LocalSettings only; timer picks them up
+      // at the next session boundary.
       notifier.updateTime(TimerMode.pomodoro, loaded.initPomodoro ~/ 60);
       notifier.updateTime(TimerMode.shortBreak, loaded.initShortBreak ~/ 60);
       notifier.updateTime(TimerMode.longBreak, loaded.initLongBreak ~/ 60);
-      // Apply to timer state so initial UI reflects persisted settings quickly.
-      ref.read(timerProvider.notifier).updateSettings(loaded);
+      // Apply live settings to timer immediately without affecting time remaining.
+      ref.read(timerProvider.notifier).applyLiveSettings(loaded);
       ref.read(_settingsHydratedFlagProvider.notifier).state = true;
     });
   }

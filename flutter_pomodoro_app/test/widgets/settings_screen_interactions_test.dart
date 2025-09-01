@@ -5,8 +5,7 @@ import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  testWidgets('Settings apply logic updates TimerNotifier when called',
-      (tester) async {
+  testWidgets('Settings apply logic updates TimerNotifier when called', (tester) async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     final notifier = container.read(timerProvider.notifier);
@@ -17,12 +16,12 @@ void main() {
     localNotifier.updateColor(const Color(0xFF00FF00));
     localNotifier.updateTime(TimerMode.pomodoro, 10);
 
-    // Simulate pressing Apply which calls timerNotifier.updateSettings(localSettings)
-    notifier.updateSettings(localNotifier.state);
+    // Simulate pressing Apply (Next Session): live settings only now
+    notifier.applyLiveSettings(localNotifier.state);
 
     expect(notifier.state.fontFamily, equals(localNotifier.state.fontFamily));
     expect(notifier.state.color, equals(localNotifier.state.color));
-    expect(
-        notifier.state.initPomodoro, equals(localNotifier.state.initPomodoro));
+    // Durations are staged only; timer durations remain unchanged until next session
+    expect(notifier.state.initPomodoro, isNot(equals(localNotifier.state.initPomodoro)));
   });
 }

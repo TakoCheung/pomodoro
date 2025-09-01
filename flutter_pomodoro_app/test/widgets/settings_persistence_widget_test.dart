@@ -22,8 +22,8 @@ void main() {
       await tester.tap(inc);
       await tester.pump();
     }
-    // Apply
-    await tester.tap(find.text('Apply'));
+    // Apply (Next Session)
+    await tester.tap(find.byKey(const Key('apply_next_session_button')));
     await tester.pumpAndSettle();
     // Verify provider value via reading minute on timer initial duration
     final container = ProviderScope.containerOf(tester.element(find.byType(PomodoroTimerScreen)));
@@ -37,10 +37,10 @@ void main() {
     // Open settings
     await tester.tap(find.byKey(const Key('settingsButton')));
     await tester.pumpAndSettle();
-    // Choose font Inter by tapping the middle option (robotoSlab) then apply
+    // Choose font Inter by tapping the middle option (robotoSlab) then apply (next session)
     await tester.tap(find.text('Aa').at(1));
     await tester.pump();
-    await tester.tap(find.text('Apply'));
+    await tester.tap(find.byKey(const Key('apply_next_session_button')));
     await tester.pumpAndSettle();
     // Re-open settings and check the font selection ring persists via provider
     await tester.tap(find.byKey(const Key('settingsButton')));

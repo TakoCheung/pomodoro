@@ -20,7 +20,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final localSettings = ref.watch(localSettingsProvider);
     final localSettingsNotifier = ref.read(localSettingsProvider.notifier);
-    final timerNotifier = ref.read(timerProvider.notifier);
+    // Timer updates are invoked directly via provider reads where needed.
     final timerState = ref.read(timerProvider);
     final isTablet = MediaQuery.of(context).size.width >= 600;
     // Treat debug/web runs as simulator-like so tests and simulator show the toggle; hide in release on device.
@@ -77,6 +77,8 @@ class SettingsScreen extends ConsumerWidget {
                                       .read(localSettingsProvider.notifier)
                                       .updateFont(def.fontFamily);
                                   ref.read(localSettingsProvider.notifier).updateColor(def.color);
+                                  // Apply live settings immediately to reflect new theme
+                                  ref.read(timerProvider.notifier).applyLiveSettings(def);
                                   ref
                                       .read(localSettingsProvider.notifier)
                                       .updateBibleVersionName(def.bibleVersionName);
@@ -115,6 +117,8 @@ class SettingsScreen extends ConsumerWidget {
                                       .read(localSettingsProvider.notifier)
                                       .updateFont(def.fontFamily);
                                   ref.read(localSettingsProvider.notifier).updateColor(def.color);
+                                  // Apply live settings immediately to reflect new theme
+                                  ref.read(timerProvider.notifier).applyLiveSettings(def);
                                   ref
                                       .read(localSettingsProvider.notifier)
                                       .updateBibleVersionName(def.bibleVersionName);
@@ -294,30 +298,96 @@ class SettingsScreen extends ConsumerWidget {
               // Fixed footer Apply button so it's always visible
               SafeArea(
                 top: false,
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      timerNotifier.updateSettings(localSettings);
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.orangeRed,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(26.5),
+                child: LayoutBuilder(builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 360;
+                  final buttons = <Widget>[
+                    // Default: Apply next session (non-interrupting). This updates live settings
+                    // immediately and stages durations for the next session boundary.
+                    ElevatedButton(
+                      key: const Key('apply_next_session_button'),
+                      onPressed: () {
+                        // Live settings now
+                        ref.read(timerProvider.notifier).applyLiveSettings(localSettings);
+                        // Session-scoped changes are already staged via localSettingsProvider
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.orangeRed,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26.5),
+                        ),
+                        fixedSize: const Size(180, 53),
                       ),
-                      fixedSize: const Size(140, 53),
-                    ),
-                    child: const Text(
-                      'Apply',
-                      style: TextStyle(
-                        fontSize: AppTextStyles.h3FontSize,
-                        fontFamily: AppTextStyles.kumbhSans,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.white,
+                      child: const Text(
+                        'Apply (Next Session)',
+                        style: TextStyle(
+                          fontSize: AppTextStyles.h3FontSize,
+                          fontFamily: AppTextStyles.kumbhSans,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                    if (!isNarrow) const SizedBox(width: 12) else const SizedBox(height: 8),
+                    OutlinedButton(
+                      key: const Key('apply_now_button'),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            key: const Key('apply_now_confirm_dialog'),
+                            title: const Text('Apply now?'),
+                            content: const Text('This will reset the current session'),
+                            actions: [
+                              TextButton(
+                                key: const Key('apply_now_cancel'),
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                key: const Key('apply_now_confirm'),
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: const Text('Apply Now'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          // Apply durations immediately and reset the current session.
+                          ref.read(timerProvider.notifier).applyStagedDurationsNow();
+                          // Also update live settings so UI theme is consistent.
+                          ref.read(timerProvider.notifier).applyLiveSettings(localSettings);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.orangeRed),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26.5),
+                        ),
+                        fixedSize: const Size(140, 53),
+                      ),
+                      child: const Text(
+                        'Apply now',
+                        style: TextStyle(
+                          fontSize: AppTextStyles.h3FontSize,
+                          fontFamily: AppTextStyles.kumbhSans,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.orangeRed,
+                        ),
+                      ),
+                    ),
+                  ];
+                  return isNarrow
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: buttons,
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: buttons,
+                        );
+                }),
               ),
             ],
           ),
