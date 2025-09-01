@@ -10,7 +10,8 @@ import 'package:flutter_pomodoro_app/state/scripture_repository.dart'
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Bible version dropdown shows abbreviationLocal when available',
+  testWidgets(
+      'Bible version dropdown shows abbreviationLocal when available and header is uppercase',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -40,6 +41,9 @@ void main() {
     // Allow FutureProvider to resolve and UI to rebuild with fetched list
     await tester.pump();
     await tester.pumpAndSettle();
+
+    // Header label should be uppercase like other section headers
+    expect(find.text('BIBLE VERSION'), findsOneWidget);
 
     // Open dropdown and verify abbreviations appear in the menu
     await tester.tap(find.byKey(const Key('bible_version_dropdown')));

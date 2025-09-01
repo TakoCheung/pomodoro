@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter_pomodoro_app/components/setting/divider.dart';
 import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
@@ -22,7 +23,8 @@ class SettingsScreen extends ConsumerWidget {
     final timerNotifier = ref.read(timerProvider.notifier);
     final timerState = ref.read(timerProvider);
     final isTablet = MediaQuery.of(context).size.width >= 600;
-
+    // Treat debug/web runs as simulator-like so tests and simulator show the toggle; hide in release on device.
+    final showDebugControls = kIsWeb || kDebugMode;
     return Dialog(
       key: const Key('SettingsScreen'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
@@ -42,27 +44,104 @@ class SettingsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Settings',
-                            style: TextStyle(
-                              fontSize: AppTextStyles.h2FontSize,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppTextStyles.kumbhSans,
-                              height: AppTextStyles.h2LineSpacing,
-                              color: AppColors.darkDarkBlue,
+                      LayoutBuilder(builder: (context, constraints) {
+                        final bool showCompact = constraints.maxWidth < 500;
+                        return Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Settings',
+                                style: TextStyle(
+                                  fontSize: AppTextStyles.h2FontSize,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: AppTextStyles.kumbhSans,
+                                  height: AppTextStyles.h2LineSpacing,
+                                  color: AppColors.darkDarkBlue,
+                                ),
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          )
-                        ],
-                      ),
+                            if (!showCompact)
+                              OutlinedButton.icon(
+                                key: const Key('reset_defaults_button'),
+                                onPressed: () async {
+                                  // Reset by re-initializing default LocalSettings instance
+                                  final def = LocalSettings(
+                                    initPomodoro: TimerDefaults.pomodoroDefault,
+                                    initShortBreak: TimerDefaults.shortBreakDefault,
+                                    initLongBreak: TimerDefaults.longBreakDefault,
+                                    fontFamily: AppTextStyles.kumbhSans,
+                                    color: AppColors.orangeRed,
+                                    bibleVersionName: kDefaultBibleVersionName,
+                                  );
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateFont(def.fontFamily);
+                                  ref.read(localSettingsProvider.notifier).updateColor(def.color);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateBibleVersionName(def.bibleVersionName);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateTime(TimerMode.pomodoro, def.initPomodoro ~/ 60);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateTime(TimerMode.shortBreak, def.initShortBreak ~/ 60);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateTime(TimerMode.longBreak, def.initLongBreak ~/ 60);
+                                  // Clear persisted copy
+                                  final sp = ref.read(settingsPersistenceProvider);
+                                  await sp?.resetToDefaults();
+                                },
+                                icon: const Icon(Icons.restore),
+                                label: const Text('Reset to Defaults'),
+                              )
+                            else
+                              IconButton(
+                                key: const Key('reset_defaults_button'),
+                                tooltip: 'Reset to Defaults',
+                                icon: const Icon(Icons.restore),
+                                onPressed: () async {
+                                  // Reset by re-initializing default LocalSettings instance
+                                  final def = LocalSettings(
+                                    initPomodoro: TimerDefaults.pomodoroDefault,
+                                    initShortBreak: TimerDefaults.shortBreakDefault,
+                                    initLongBreak: TimerDefaults.longBreakDefault,
+                                    fontFamily: AppTextStyles.kumbhSans,
+                                    color: AppColors.orangeRed,
+                                    bibleVersionName: kDefaultBibleVersionName,
+                                  );
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateFont(def.fontFamily);
+                                  ref.read(localSettingsProvider.notifier).updateColor(def.color);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateBibleVersionName(def.bibleVersionName);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateTime(TimerMode.pomodoro, def.initPomodoro ~/ 60);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateTime(TimerMode.shortBreak, def.initShortBreak ~/ 60);
+                                  ref
+                                      .read(localSettingsProvider.notifier)
+                                      .updateTime(TimerMode.longBreak, def.initLongBreak ~/ 60);
+                                  // Clear persisted copy
+                                  final sp = ref.read(settingsPersistenceProvider);
+                                  await sp?.resetToDefaults();
+                                },
+                              ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            )
+                          ],
+                        );
+                      }),
                       const CustomDivider(spaceAfter: 30, spaceBefore: 25),
                       const Text(
                         'TIME (MINUTES)',
@@ -73,34 +152,37 @@ class SettingsScreen extends ConsumerWidget {
                           ? _buildTimeRow(localSettings, localSettingsNotifier, isTablet)
                           : _buildTimeColumn(localSettings, localSettingsNotifier, isTablet),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Debug Mode', style: AppTextStyles.h4),
-                          Switch(
-                            key: const Key('debug_mode_switch'),
-                            value: localSettings.debugMode,
-                            onChanged: (v) => localSettingsNotifier.updateDebugMode(v),
-                          )
-                        ],
-                      ),
-                      if (localSettings.debugMode) ...[
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: OutlinedButton.icon(
-                            key: const Key('view_cached_passages_button'),
-                            icon: const Icon(Icons.history),
-                            label: const Text('View cached passages'),
-                            onPressed: () => _showCachedPassagesDialog(context, ref),
-                          ),
+                      const SizedBox(height: 12),
+                      if (showDebugControls) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Debug Mode', style: AppTextStyles.h4),
+                            Switch(
+                              key: const Key('debug_mode_switch'),
+                              value: localSettings.debugMode,
+                              onChanged: (v) => localSettingsNotifier.updateDebugMode(v),
+                            )
+                          ],
                         ),
+                        if (localSettings.debugMode) ...[
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: OutlinedButton.icon(
+                              key: const Key('view_cached_passages_button'),
+                              icon: const Icon(Icons.history),
+                              label: const Text('View cached passages'),
+                              onPressed: () => _showCachedPassagesDialog(context, ref),
+                            ),
+                          ),
+                        ],
                       ],
                       const CustomDivider(spaceBefore: 30),
                       // Bible Version selector
                       Row(
                         children: [
-                          const Text('Bible Version', style: AppTextStyles.h4),
+                          const Text('BIBLE VERSION', style: AppTextStyles.h4),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Consumer(builder: (context, ref, _) {
@@ -205,42 +287,6 @@ class SettingsScreen extends ConsumerWidget {
                       const CustomDivider(),
                       _buildColor(timerState, localSettings, localSettingsNotifier, isTablet),
                       const SizedBox(height: 20),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton.icon(
-                          key: const Key('reset_defaults_button'),
-                          onPressed: () async {
-                            // Reset by re-initializing default LocalSettings instance
-                            final def = LocalSettings(
-                              initPomodoro: TimerDefaults.pomodoroDefault,
-                              initShortBreak: TimerDefaults.shortBreakDefault,
-                              initLongBreak: TimerDefaults.longBreakDefault,
-                              fontFamily: AppTextStyles.kumbhSans,
-                              color: AppColors.orangeRed,
-                              bibleVersionName: kDefaultBibleVersionName,
-                            );
-                            ref.read(localSettingsProvider.notifier).updateFont(def.fontFamily);
-                            ref.read(localSettingsProvider.notifier).updateColor(def.color);
-                            ref
-                                .read(localSettingsProvider.notifier)
-                                .updateBibleVersionName(def.bibleVersionName);
-                            ref
-                                .read(localSettingsProvider.notifier)
-                                .updateTime(TimerMode.pomodoro, def.initPomodoro ~/ 60);
-                            ref
-                                .read(localSettingsProvider.notifier)
-                                .updateTime(TimerMode.shortBreak, def.initShortBreak ~/ 60);
-                            ref
-                                .read(localSettingsProvider.notifier)
-                                .updateTime(TimerMode.longBreak, def.initLongBreak ~/ 60);
-                            // Clear persisted copy
-                            final sp = ref.read(settingsPersistenceProvider);
-                            await sp?.resetToDefaults();
-                          },
-                          icon: const Icon(Icons.restore),
-                          label: const Text('Reset to Defaults'),
-                        ),
-                      ),
                     ],
                   ),
                 ),

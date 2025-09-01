@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/utils/verse_picker.dart';
+import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
+import 'package:flutter_pomodoro_app/services/scripture_mapping_service.dart';
 
 /// Provides a Random instance; tests can override with a seeded RNG.
 final rngProvider = Provider<Random>((ref) => Random());
@@ -65,11 +67,33 @@ final lastPassageIdProvider = StateProvider<String?>((ref) => null);
 final passageIdProvider = Provider<String>((ref) {
   final rng = ref.read(rngProvider);
   final catalog = ref.read(verseCatalogProvider);
-  if (!catalog.isEmpty) {
-    return catalog.pickRandom(rng);
-  }
-  // Fallback: curated verse list
-  return pickRandomVerseId(rng, candidates: null);
+  // Try dynamic mapping when available
+  final bibleId = ref.read(bibleIdProvider);
+  final mappingAsync = ref.watch(scriptureMappingProvider(bibleId));
+  return mappingAsync.maybeWhen(
+    data: (m) {
+      // Flatten all verseIds across all books/chapters
+      final verseIds = <String>[];
+      m.data.forEach((_, chapters) {
+        chapters.forEach((_, verses) => verseIds.addAll(verses));
+      });
+      if (verseIds.isNotEmpty) {
+        return verseIds[rng.nextInt(verseIds.length)];
+      }
+      // If mapping is oddly empty, fall back on catalog/curated
+      if (!catalog.isEmpty) return catalog.pickRandom(rng);
+      return pickRandomVerseId(rng, candidates: null);
+    },
+    error: (e, st) {
+      // Unknown/invalid bibleId mapping requested
+      throw StateError('Unknown bibleId');
+    },
+    orElse: () {
+      // Mapping not yet loaded — use catalog/curated fallback
+      if (!catalog.isEmpty) return catalog.pickRandom(rng);
+      return pickRandomVerseId(rng, candidates: null);
+    },
+  );
 });
 
 /// Provides a generator function that yields a new random valid verse id on each call.
@@ -77,6 +101,23 @@ final nextPassageIdProvider = Provider<String Function()>((ref) {
   final rng = ref.read(rngProvider);
   final catalog = ref.read(verseCatalogProvider);
   return () {
+    final bibleId = ref.read(bibleIdProvider);
+    final mappingAsync = ref.watch(scriptureMappingProvider(bibleId));
+    final verseIds = <String>[];
+    mappingAsync.when(
+      data: (m) {
+        m.data.forEach((_, chapters) {
+          chapters.forEach((_, verses) => verseIds.addAll(verses));
+        });
+      },
+      loading: () {},
+      error: (_, __) {
+        throw StateError('Unknown bibleId');
+      },
+    );
+    if (verseIds.isNotEmpty) {
+      return verseIds[rng.nextInt(verseIds.length)];
+    }
     if (!catalog.isEmpty) {
       return catalog.pickRandom(rng);
     }
