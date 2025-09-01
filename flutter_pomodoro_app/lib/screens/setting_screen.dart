@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
 import 'package:flutter_pomodoro_app/models/bible_version.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/state/settings_persistence.dart';
 
@@ -169,6 +170,27 @@ class SettingsScreen extends ConsumerWidget {
                             )
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        Builder(builder: (context) {
+                          bool showNotificationsToggle = false;
+                          try {
+                            final flag = dotenv.env['ENABLE_NOTIFICATIONS_TOGGLE_UI'];
+                            showNotificationsToggle = flag == 'true';
+                          } catch (_) {}
+                          if (!showNotificationsToggle) return const SizedBox.shrink();
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Notifications', style: AppTextStyles.h4),
+                              Switch(
+                                key: const Key('notifications_switch'),
+                                value: localSettings.notificationsEnabled,
+                                onChanged: (v) =>
+                                    localSettingsNotifier.updateNotificationsEnabled(v),
+                              )
+                            ],
+                          );
+                        }),
                         if (localSettings.debugMode) ...[
                           const SizedBox(height: 8),
                           Align(

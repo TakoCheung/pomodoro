@@ -43,6 +43,7 @@ dependencies:
   flutter_dotenv: ^5.0.2
   shared_preferences: ^2.0.15
   html: ^0.15.4
+  flutter_local_notifications: ^17.2.3
 
 dev_dependencies:
   flutter_test:

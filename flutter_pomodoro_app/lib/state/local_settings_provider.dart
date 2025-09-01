@@ -9,8 +9,7 @@ import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 /// Local settings live in their own provider and start from safe defaults.
 /// We avoid reading `timerProvider` at provider creation time to prevent
 /// NotInitializedError (ProviderScope initialization ordering issues).
-final localSettingsProvider =
-    StateNotifierProvider<LocalSettingsNotifier, LocalSettings>((ref) {
+final localSettingsProvider = StateNotifierProvider<LocalSettingsNotifier, LocalSettings>((ref) {
   return LocalSettingsNotifier(
     LocalSettings(
       initPomodoro: TimerDefaults.pomodoroDefault,
@@ -30,6 +29,7 @@ class LocalSettings {
   String fontFamily;
   Color color;
   bool debugMode;
+  bool notificationsEnabled;
   String bibleVersionName;
   String? bibleVersionId;
 
@@ -40,6 +40,7 @@ class LocalSettings {
     required this.fontFamily,
     required this.color,
     this.debugMode = false,
+    this.notificationsEnabled = true,
     this.bibleVersionName = kDefaultBibleVersionName,
     this.bibleVersionId,
   });
@@ -51,6 +52,7 @@ class LocalSettings {
       String? fontFamily,
       Color? color,
       bool? debugMode,
+      bool? notificationsEnabled,
       String? bibleVersionName,
       String? bibleVersionId}) {
     return LocalSettings(
@@ -60,6 +62,7 @@ class LocalSettings {
         fontFamily: fontFamily ?? this.fontFamily,
         color: color ?? this.color,
         debugMode: debugMode ?? this.debugMode,
+        notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
         bibleVersionName: bibleVersionName ?? this.bibleVersionName,
         bibleVersionId: bibleVersionId ?? this.bibleVersionId);
   }
@@ -118,6 +121,10 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
     } else {
       state = state.copyWith(debugMode: false);
     }
+  }
+
+  void updateNotificationsEnabled(bool enabled) {
+    state = state.copyWith(notificationsEnabled: enabled);
   }
 
   String getName(TimerMode mode) {

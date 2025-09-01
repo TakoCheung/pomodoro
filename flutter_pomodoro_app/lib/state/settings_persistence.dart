@@ -24,6 +24,7 @@ Map<String, dynamic> _defaultsJson() => <String, dynamic>{
       // Prefer explicit default id to avoid lookup latency/flicker on cold start.
       'bibleVersionId': '32664dc3288a28df-01',
       'debugMode': false,
+      'notificationsEnabled': true,
     };
 
 Color _colorFromHex(String hex) {
@@ -55,6 +56,7 @@ LocalSettings _mergeIntoDefaults(Map<String, dynamic> jsonMap) {
     fontFamily: (d['fontFamily'] as String?) ?? AppTextStyles.kumbhSans,
     color: chosen,
     debugMode: (d['debugMode'] as bool?) ?? false,
+    notificationsEnabled: (d['notificationsEnabled'] as bool?) ?? true,
     bibleVersionName: (d['bibleVersionName'] as String?) ?? kDefaultBibleVersionName,
     bibleVersionId: d['bibleVersionId'] as String?,
   );
@@ -69,6 +71,7 @@ Map<String, dynamic> _toJson(LocalSettings s) => <String, dynamic>{
       'bibleVersionName': s.bibleVersionName,
       'bibleVersionId': s.bibleVersionId,
       'debugMode': s.debugMode,
+      'notificationsEnabled': s.notificationsEnabled,
     };
 
 /// Exposes helpers to load and persist LocalSettings into SharedPreferences.
@@ -137,6 +140,7 @@ final settingsPersistenceInitializerProvider = Provider<bool>((ref) {
         notifier.updateBibleVersion(loaded.bibleVersionName, loaded.bibleVersionId!);
       }
       notifier.updateDebugMode(loaded.debugMode);
+      notifier.updateNotificationsEnabled(loaded.notificationsEnabled);
       // Stage session-scoped settings into LocalSettings only; timer picks them up
       // at the next session boundary.
       notifier.updateTime(TimerMode.pomodoro, loaded.initPomodoro ~/ 60);

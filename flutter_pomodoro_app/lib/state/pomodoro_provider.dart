@@ -14,6 +14,9 @@ import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
 import 'package:flutter_pomodoro_app/state/passage_id_provider.dart';
+import 'package:flutter_pomodoro_app/state/app_lifecycle_provider.dart';
+import 'package:flutter_pomodoro_app/state/notification_provider.dart';
+import 'package:flutter_pomodoro_app/services/notification_service.dart';
 // ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
@@ -285,7 +288,41 @@ class TimerNotifier extends StateNotifier<TimerState> {
       }
       debugPrint('TimerNotifier: fetched passage ${passage.reference}');
       r.read(shownScriptureProvider.notifier).state = passage;
-      r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+      // Decide whether to show overlay or system notification based on app state and user pref
+      final settings = r.read(localSettingsProvider);
+      final isFg = r.read(isAppForegroundProvider);
+      final overlayVisible = r.read(scriptureOverlayVisibleProvider);
+      final notificationsEnabled = settings.notificationsEnabled;
+      if (isFg && notificationsEnabled) {
+        // Foreground: show overlay and skip system notification to avoid double ping
+        r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+      } else if (notificationsEnabled && !overlayVisible) {
+        final scheduler = r.read(notificationSchedulerProvider);
+        // Ensure initialized & channel exists; do not mutate providers here
+        await ensureChannelCreatedOnce(r, scheduler);
+        // Ask for permission once per app lifecycle
+        final granted = await ensureNotificationPermissionOnce(r, scheduler, provisional: true);
+        if (granted) {
+          final res = NotificationContentBuilder.build(
+            bibleId: bibleId,
+            passageId: r.read(lastPassageIdProvider) ?? 'unknown',
+            passage: passage,
+            maxLen: 140,
+          );
+          await scheduler.show(
+            channelId: NotificationChannel.id,
+            title: res.title,
+            body: res.body,
+            payload: res.payload,
+          );
+        } else {
+          // Record a non-blocking message by setting overlay with fallback hint (no-op UI here)
+        }
+      }
+      // If notifications are disabled, still show overlay in foreground; in background do nothing.
+      if (isFg && !notificationsEnabled) {
+        r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+      }
     } catch (e) {
       debugPrint('TimerNotifier: fetch failed, using fallback: $e');
       final fallback = Passage(
@@ -295,7 +332,24 @@ class TimerNotifier extends StateNotifier<TimerState> {
       );
       debugPrint('TimerNotifier: using fallback passage ${fallback.reference}');
       r.read(shownScriptureProvider.notifier).state = fallback;
-      r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+      final settings = r.read(localSettingsProvider);
+      final isFg = r.read(isAppForegroundProvider);
+      if (isFg) {
+        r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+      } else if (settings.notificationsEnabled) {
+        final scheduler = r.read(notificationSchedulerProvider);
+        await ensureChannelCreatedOnce(r, scheduler);
+        final granted = await ensureNotificationPermissionOnce(r, scheduler, provisional: true);
+        if (granted) {
+          final res = NotificationContentBuilder.fallback();
+          await scheduler.show(
+            channelId: NotificationChannel.id,
+            title: res.title,
+            body: res.body,
+            payload: res.payload,
+          );
+        }
+      }
     }
   }
 }

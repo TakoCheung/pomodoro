@@ -57,3 +57,30 @@ Bible Versions
 - The list is populated from the Scripture API catalog (`/v1/bibles`) and cached in SharedPreferences for fast subsequent loads. If the catalog isn't available, a small built-in fallback list is used.
 - The selected display name is mapped to a Bible ID via the fetched catalog. Fallback order: fetched catalog → static map → `BIBLE_ID` env → default (`32664dc3288a28df-01`).
 - Tests use provider overrides and a mocked catalog service; no real network calls.
+
+Notifications
+-------------
+- The app schedules a local notification with a scripture snippet when a timer completes in the background. In the foreground, it shows the in-app scripture overlay to avoid double alerts.
+- Android uses a single high-importance channel: `pomodoro_notifications`.
+- iOS requests notification permission once (provisional supported by the scheduler adapter).
+- The notification payload includes: `bibleId`, `passageId`, `reference`, `textSnippet` (≤140 chars, ellipsis when truncated).
+- Tests use a fake scheduler and repository; no real notifications or network in tests.
+
+Feature flags
+-------------
+- `ENABLE_NOTIFICATIONS_TOGGLE_UI` (default: false) — when `true`, shows a Notifications switch in Settings. Kept off by default to avoid golden/UI churn in CI; logic remains enabled regardless of the toggle visibility.
+
+Tests & Coverage
+----------------
+- Run all tests and produce coverage artifacts:
+	- `flutter test`
+	- `flutter test --coverage`
+	- Convert LCOV to CSV: `dart tool/lcov_to_csv.dart coverage/lcov.info > coverage/coverage.csv`
+- Artifacts are written to:
+	- `coverage/lcov.info`
+	- `coverage/coverage.csv`
+- Integration tests live under `integration_test/` and rely on provider overrides and fakes for stability.
+
+Artifacts
+---------
+- iOS simulator validation screenshots are saved in `artifacts/ios/`, e.g. `notification_flow.png`.
