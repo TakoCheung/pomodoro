@@ -33,6 +33,17 @@ jobs:
           cd flutter_pomodoro_app
           flutter pub get
 
+      - name: Prepare .env for tests
+        run: |
+          cd flutter_pomodoro_app
+          if [ -f .env.sample ]; then
+            cp .env.sample .env
+          else
+            printf "SCRIPTURE_API_KEY=dummy\n" > .env
+            printf "BIBLE_ID=32664dc3288a28df-01\n" >> .env
+            printf "ENABLE_LOCAL_NOTIFICATIONS=false\n" >> .env
+          fi
+
       - name: Run unit/widget tests with coverage
         run: |
           cd flutter_pomodoro_app
@@ -91,6 +102,16 @@ jobs:
         run: |
           cd flutter_pomodoro_app
           flutter pub get
+
+      - name: Prepare .env for tests
+        run: |
+          cd flutter_pomodoro_app
+          if [ -f .env.sample ]; then
+            cp .env.sample .env
+          else
+            printf "SCRIPTURE_API_KEY=dummy\n" > .env
+            printf "ENABLE_LOCAL_NOTIFICATIONS=false\n" >> .env
+          fi
 
       - name: Run integration tests
         run: |
