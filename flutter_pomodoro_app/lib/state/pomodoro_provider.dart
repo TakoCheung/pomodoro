@@ -17,6 +17,9 @@ import 'package:flutter_pomodoro_app/state/passage_id_provider.dart';
 import 'package:flutter_pomodoro_app/state/app_lifecycle_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
 import 'package:flutter_pomodoro_app/services/notification_service.dart';
+import 'package:flutter_pomodoro_app/state/clock_provider.dart';
+import 'package:flutter_pomodoro_app/state/active_timer_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
 // ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
@@ -134,11 +137,34 @@ class TimerNotifier extends StateNotifier<TimerState> {
 
   void pauseTimer() {
     state = state.copyWith(isRunning: false);
+    // Clear persisted active timer and cancel scheduled alarm
+    if (ref != null) {
+      final r = ref!;
+      unawaited(r.read(activeTimerProvider.notifier).clear());
+      final alarm = r.read(alarmSchedulerProvider);
+      unawaited(alarm.cancel(timerId: 'active'));
+    }
   }
 
   void toggleTimer() {
     state = state.copyWith(isRunning: !state.isRunning);
-    if (state.isRunning) startTimer();
+    if (state.isRunning) {
+      startTimer();
+      // Persist and schedule background-resilient alarm
+      if (ref != null) {
+        final r = ref!;
+        final now = r.read(clockProvider)();
+        final duration = Duration(seconds: getInitialDuration(state.mode));
+        final endUtc = now.add(duration);
+        final timerId = 'active';
+        final label = state.mode.name;
+        unawaited(r.read(activeTimerProvider.notifier).save(
+              ActiveTimer(timerId: timerId, startUtc: now, endUtc: endUtc, label: label),
+            ));
+        final alarm = r.read(alarmSchedulerProvider);
+        unawaited(alarm.scheduleExact(timerId: timerId, endUtc: endUtc));
+      }
+    }
   }
 
   void setMode(TimerMode mode) {
@@ -236,6 +262,24 @@ class TimerNotifier extends StateNotifier<TimerState> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  /// Resync on app init/resume: ensure single scheduled alarm or process overdue completion once.
+  Future<void> resyncAndProcessOverdue() async {
+    if (ref == null) return;
+    final r = ref!;
+    final at = r.read(activeTimerProvider);
+    if (at == null) return;
+    final now = r.read(clockProvider)();
+    if (now.isBefore(at.endUtc)) {
+      final alarm = r.read(alarmSchedulerProvider);
+      await alarm.cancel(timerId: at.timerId);
+      await alarm.scheduleExact(timerId: at.timerId, endUtc: at.endUtc);
+      return;
+    }
+    // Overdue: clear and handle completion once
+    await r.read(activeTimerProvider.notifier).clear();
+    await _handleComplete();
   }
 
   Future<void> _handleComplete() async {

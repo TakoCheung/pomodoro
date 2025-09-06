@@ -43,16 +43,14 @@ class TimerDisplay extends ConsumerWidget {
             Container(
               width: 373,
               height: 373,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.darkDarkBlue,
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black.withOpacity(.25),
-                        spreadRadius: 0,
-                        blurRadius: 4,
-                        offset: const Offset(0, 4)),
-                  ]),
+              decoration:
+                  BoxDecoration(shape: BoxShape.circle, color: AppColors.darkDarkBlue, boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(.25),
+                    spreadRadius: 0,
+                    blurRadius: 4,
+                    offset: const Offset(0, 4)),
+              ]),
             ),
             SizedBox(
               width: 339,
@@ -72,9 +70,7 @@ class TimerDisplay extends ConsumerWidget {
               children: [
                 Text(
                   key: const Key('timer_text'),
-                  ref
-                      .read(timerProvider.notifier)
-                      .timeFormatted(timerState.timeRemaining),
+                  ref.read(timerProvider.notifier).timeFormatted(timerState.timeRemaining),
                   style: TextStyle(
                     fontSize: AppTextStyles.h1FontSize,
                     color: timerState.color,
@@ -85,6 +81,7 @@ class TimerDisplay extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 TextButton(
+                  key: const Key('pauseRestart'),
                   onPressed: () {
                     if (timerState.isRunning) {
                       ref.read(timerProvider.notifier).pauseTimer();
@@ -93,7 +90,7 @@ class TimerDisplay extends ConsumerWidget {
                     }
                   },
                   child: Text(
-                    key: const Key('pauseRestart'),
+                    key: const Key('timer_start'),
                     timerState.isRunning ? 'PAUSE' : 'RESTART',
                     style: TextStyle(
                         fontSize: AppTextStyles.h3FontSize,
@@ -102,6 +99,12 @@ class TimerDisplay extends ConsumerWidget {
                         height: AppTextStyles.h3LineSpacing,
                         fontFamily: timerState.fontFamily),
                   ),
+                ),
+                // Expose remaining label for tests
+                Text(
+                  '${timerState.timeRemaining}',
+                  key: const Key('timer_remaining'),
+                  style: const TextStyle(fontSize: 0.1), // invisible but findable
                 ),
               ],
             ),

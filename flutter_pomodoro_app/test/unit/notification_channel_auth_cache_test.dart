@@ -34,7 +34,7 @@ class _SpyScheduler implements NotificationScheduler {
 }
 
 void main() {
-  test('Android notification channel is created once', () async {
+  test('Android notification channels are created once (both regular and alarm)', () async {
     final spy = _SpyScheduler();
     final c = ProviderContainer(overrides: [
       notificationSchedulerProvider.overrideWithValue(spy),
@@ -43,7 +43,8 @@ void main() {
     final ref = c.read(_refCaptureProvider);
     await ensureChannelCreatedOnce(ref, spy);
     await ensureChannelCreatedOnce(ref, spy);
-    expect(spy.channelCreates, 1);
+    // Two channels should be created only on the first call.
+    expect(spy.channelCreates, 2);
   });
 
   test('iOS authorization state is cached to avoid repeated prompts', () async {

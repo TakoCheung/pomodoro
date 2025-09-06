@@ -9,6 +9,10 @@ class NotificationChannel {
   static const id = 'pomodoro_notifications';
   static const name = 'Pomodoro';
   static const description = 'Timer completion and scripture';
+  // High-importance channel for exact timer alarms
+  static const alarmId = 'timer_alarm';
+  static const alarmName = 'Timer Alarm';
+  static const alarmDescription = 'Timer completion alarm notifications';
 }
 
 final _authStateProvider = StateProvider<bool?>((_) => null);
@@ -31,6 +35,12 @@ Future<void> ensureChannelCreatedOnce(Ref ref, NotificationScheduler sched) asyn
     id: NotificationChannel.id,
     name: NotificationChannel.name,
     description: NotificationChannel.description,
+    importance: 4,
+  );
+  await sched.createAndroidChannel(
+    id: NotificationChannel.alarmId,
+    name: NotificationChannel.alarmName,
+    description: NotificationChannel.alarmDescription,
     importance: 4,
   );
   ref.read(_channelCreatedProvider.notifier).state = true;

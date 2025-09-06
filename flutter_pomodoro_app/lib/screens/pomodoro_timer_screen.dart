@@ -24,13 +24,15 @@ class PomodoroTimerScreen extends ConsumerWidget {
       backgroundColor: AppColors.darkBlue,
       body: Stack(
         children: [
+          // Deep link target key
+          const SizedBox.shrink(key: Key('deep_link_timer')),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'pomodoro',
-                  key: Key('pomodoro_title'),
+                  key: const Key('pomodoro_title'),
                   style: TextStyle(
                       fontSize: AppTextStyles.title,
                       color: AppColors.lightBlueGray,
