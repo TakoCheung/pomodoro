@@ -38,12 +38,19 @@ void main() {
     final timeTextFinder = find.byKey(const Key('timer_text'));
     expect(timeTextFinder, findsOneWidget);
     final txt = tester.widget<Text>(timeTextFinder).data ?? '';
-    expect(txt.startsWith('25:'), isTrue, reason: 'current session should remain at 25 minutes');
+    final mm = int.tryParse(txt.split(':').first) ?? 0;
+    // Current session should not jump to 30; allow elapsed seconds to reduce minutes slightly.
+    expect(mm <= 25, isTrue, reason: 'current session should remain at or below 25 minutes');
+    expect(mm, isNot(30), reason: 'current session should not be 30 minutes yet');
 
     // Move to short break and back to pomodoro to start a new session
-    await tester.tap(find.text('short break'));
+    final shortBreakTab = find.byKey(const Key('mode_shortBreak'));
+    expect(shortBreakTab, findsOneWidget);
+    await tester.tap(shortBreakTab);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('pomodoro'));
+    final pomoTab = find.byKey(const Key('mode_pomodoro'));
+    expect(pomoTab, findsOneWidget);
+    await tester.tap(pomoTab);
     await tester.pumpAndSettle();
 
     final txt2 = tester.widget<Text>(timeTextFinder).data ?? '';

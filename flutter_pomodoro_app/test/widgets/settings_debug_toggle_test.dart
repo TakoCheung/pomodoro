@@ -4,15 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Toggling Debug Mode updates time inputs to allow zero',
-      (tester) async {
-    await tester.pumpWidget(const ProviderScope(
-        child: MaterialApp(home: Scaffold(body: SettingsScreen()))));
+  testWidgets('Toggling Debug Mode updates time inputs to allow zero', (tester) async {
+    await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: Scaffold(body: SettingsScreen()))));
 
-    // Toggle debug mode
-    final switchFinder = find.byType(Switch);
-    expect(switchFinder, findsOneWidget);
-    await tester.tap(switchFinder);
+    // Toggle debug mode (use key to avoid ambiguity with other switches)
+    final debugSwitch = find.byKey(const Key('debug_mode_switch'));
+    expect(debugSwitch, findsOneWidget);
+    await tester.tap(debugSwitch);
     await tester.pumpAndSettle();
 
     // With debug on, the min for inputs should be 0; decrement Pomodoro from default to reach 0

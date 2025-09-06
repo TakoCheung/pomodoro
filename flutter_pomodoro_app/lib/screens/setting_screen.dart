@@ -42,6 +42,8 @@ class SettingsScreen extends ConsumerWidget {
               // Scrollable content
               Expanded(
                 child: SingleChildScrollView(
+                  // Ensure scrollable content isn’t covered by the fixed footer buttons.
+                  padding: const EdgeInsets.only(bottom: 120),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -148,16 +150,6 @@ class SettingsScreen extends ConsumerWidget {
                         );
                       }),
                       const CustomDivider(spaceAfter: 30, spaceBefore: 25),
-                      const Text(
-                        'TIME (MINUTES)',
-                        style: AppTextStyles.h4,
-                      ),
-                      const SizedBox(height: 10),
-                      isTablet
-                          ? _buildTimeRow(localSettings, localSettingsNotifier, isTablet)
-                          : _buildTimeColumn(localSettings, localSettingsNotifier, isTablet),
-                      const SizedBox(height: 12),
-                      const SizedBox(height: 12),
                       if (showDebugControls) ...[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -170,42 +162,9 @@ class SettingsScreen extends ConsumerWidget {
                             )
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Builder(builder: (context) {
-                          bool showNotificationsToggle = false;
-                          try {
-                            final flag = dotenv.env['ENABLE_NOTIFICATIONS_TOGGLE_UI'];
-                            showNotificationsToggle = flag == 'true';
-                          } catch (_) {}
-                          if (!showNotificationsToggle) return const SizedBox.shrink();
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Notifications', style: AppTextStyles.h4),
-                              Switch(
-                                key: const Key('notifications_switch'),
-                                value: localSettings.notificationsEnabled,
-                                onChanged: (v) =>
-                                    localSettingsNotifier.updateNotificationsEnabled(v),
-                              )
-                            ],
-                          );
-                        }),
-                        if (localSettings.debugMode) ...[
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: OutlinedButton.icon(
-                              key: const Key('view_cached_passages_button'),
-                              icon: const Icon(Icons.history),
-                              label: const Text('View cached passages'),
-                              onPressed: () => _showCachedPassagesDialog(context, ref),
-                            ),
-                          ),
-                        ],
+                        const SizedBox(height: 12),
                       ],
-                      const CustomDivider(spaceBefore: 30),
-                      // Bible Version selector
+                      // Bible Version selector (moved up for visibility in tests/UX)
                       Row(
                         children: [
                           const Text('BIBLE VERSION', style: AppTextStyles.h4),
@@ -216,12 +175,10 @@ class SettingsScreen extends ConsumerWidget {
                                   ref.watch(bibleVersionsProvider);
                               return versionsAsync.when(
                                 data: (list) {
-                                  // Deduplicate by ID in case API contains duplicates.
                                   final Map<String, BibleVersion> byId = {
                                     for (final v in list) v.id: v
                                   };
                                   final uniqueList = byId.values.toList(growable: false);
-                                  // Use unique IDs for values to avoid duplicate label assertion.
                                   final items = uniqueList
                                       .map((v) => DropdownMenuItem<String>(
                                             value: v.id,
@@ -229,7 +186,6 @@ class SettingsScreen extends ConsumerWidget {
                                           ))
                                       .toList(growable: false);
 
-                                  // Determine selected ID from current stored name by matching against common fields.
                                   final currentName = localSettings.bibleVersionName;
                                   final match = uniqueList.firstWhere(
                                     (v) =>
@@ -251,20 +207,16 @@ class SettingsScreen extends ConsumerWidget {
                                       if (id == null) return;
                                       final sel = uniqueList.firstWhere((v) => v.id == id,
                                           orElse: () => match);
-                                      // Store both human-friendly label and stable id.
                                       localSettingsNotifier.updateBibleVersion(sel.label, sel.id);
                                     },
                                   );
                                 },
-                                // During loading/error, fall back to static mapping by names to keep UI usable.
                                 loading: () {
-                                  // Build items from static map: values are IDs, labels are names.
                                   final entries = kBibleVersions.entries.toList(growable: false);
                                   final items = entries
                                       .map((e) => DropdownMenuItem<String>(
                                           value: e.value, child: Text(e.key)))
                                       .toList(growable: false);
-                                  // Choose selected ID from settings (id preferred), else map current name.
                                   final selectedId = localSettings.bibleVersionId ??
                                       kBibleVersions[localSettings.bibleVersionName] ??
                                       (entries.isNotEmpty ? entries.first.value : null);
@@ -308,6 +260,64 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
+                      const CustomDivider(spaceBefore: 30),
+                      const Text(
+                        'TIME (MINUTES)',
+                        style: AppTextStyles.h4,
+                      ),
+                      const SizedBox(height: 10),
+                      isTablet
+                          ? _buildTimeRow(localSettings, localSettingsNotifier, isTablet)
+                          : _buildTimeColumn(localSettings, localSettingsNotifier, isTablet),
+                      const SizedBox(height: 12),
+                      const SizedBox(height: 12),
+                      const CustomDivider(spaceBefore: 30),
+                      if (showDebugControls) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Sound', style: AppTextStyles.h4),
+                            Switch(
+                              key: const Key('settings_sound_toggle'),
+                              value: localSettings.soundEnabled,
+                              onChanged: (v) => localSettingsNotifier.updateSoundEnabled(v),
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Haptics', style: AppTextStyles.h4),
+                            Switch(
+                              key: const Key('settings_haptics_toggle'),
+                              value: localSettings.hapticsEnabled,
+                              onChanged: (v) => localSettingsNotifier.updateHapticsEnabled(v),
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Builder(builder: (context) {
+                          bool showNotificationsToggle = false;
+                          try {
+                            final flag = dotenv.env['ENABLE_NOTIFICATIONS_TOGGLE_UI'];
+                            showNotificationsToggle = flag == 'true';
+                          } catch (_) {}
+                          if (!showNotificationsToggle) return const SizedBox.shrink();
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Notifications', style: AppTextStyles.h4),
+                              Switch(
+                                key: const Key('notifications_switch'),
+                                value: localSettings.notificationsEnabled,
+                                onChanged: (v) =>
+                                    localSettingsNotifier.updateNotificationsEnabled(v),
+                              )
+                            ],
+                          );
+                        }),
+                      ],
                       const CustomDivider(),
                       _buildFonts(timerState, localSettings, localSettingsNotifier, isTablet),
                       const CustomDivider(),
@@ -323,6 +333,13 @@ class SettingsScreen extends ConsumerWidget {
                 child: LayoutBuilder(builder: (context, constraints) {
                   final isNarrow = constraints.maxWidth < 360;
                   final buttons = <Widget>[
+                    if (ref.watch(localSettingsProvider).debugMode)
+                      OutlinedButton.icon(
+                        key: const Key('view_cached_passages_button'),
+                        icon: const Icon(Icons.history),
+                        label: const Text('View cached passages'),
+                        onPressed: () => _showCachedPassagesDialog(context, ref),
+                      ),
                     // Default: Apply next session (non-interrupting). This updates live settings
                     // immediately and stages durations for the next session boundary.
                     ElevatedButton(
@@ -405,8 +422,10 @@ class SettingsScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: buttons,
                         )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      : Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
                           children: buttons,
                         );
                 }),

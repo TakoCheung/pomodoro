@@ -6,8 +6,7 @@ import 'package:flutter_pomodoro_app/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Enable debug mode and apply settings (no FAB present)',
-      (tester) async {
+  testWidgets('Enable debug mode and apply settings (no FAB present)', (tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -21,8 +20,8 @@ void main() {
     await tester.tap(debugSwitch.first);
     await tester.pumpAndSettle();
 
-    // Apply
-    await tester.tap(find.text('Apply'));
+    // Apply for next session (non-interrupting)
+    await tester.tap(find.byKey(const Key('apply_next_session_button')));
     await tester.pumpAndSettle();
 
     // Main title still visible

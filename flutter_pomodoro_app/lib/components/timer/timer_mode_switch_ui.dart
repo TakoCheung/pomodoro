@@ -23,23 +23,29 @@ class TimerModeSwitcherUI extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildModeButton(
-              context: context,
-              label: 'pomodoro',
-              isActive: timerState.mode == TimerMode.pomodoro,
-              onPressed: () => timerNotifier.setMode(TimerMode.pomodoro),
-              state: timerState),
+            context: context,
+            label: 'pomodoro',
+            isActive: timerState.mode == TimerMode.pomodoro,
+            onPressed: () => timerNotifier.setMode(TimerMode.pomodoro),
+            state: timerState,
+            key: const Key('mode_pomodoro'),
+          ),
           _buildModeButton(
-              context: context,
-              label: 'short break',
-              isActive: timerState.mode == TimerMode.shortBreak,
-              onPressed: () => timerNotifier.setMode(TimerMode.shortBreak),
-              state: timerState),
+            context: context,
+            label: 'short break',
+            isActive: timerState.mode == TimerMode.shortBreak,
+            onPressed: () => timerNotifier.setMode(TimerMode.shortBreak),
+            state: timerState,
+            key: const Key('mode_shortBreak'),
+          ),
           _buildModeButton(
-              context: context,
-              label: 'long break',
-              isActive: timerState.mode == TimerMode.longBreak,
-              onPressed: () => timerNotifier.setMode(TimerMode.longBreak),
-              state: timerState),
+            context: context,
+            label: 'long break',
+            isActive: timerState.mode == TimerMode.longBreak,
+            onPressed: () => timerNotifier.setMode(TimerMode.longBreak),
+            state: timerState,
+            key: const Key('mode_longBreak'),
+          ),
         ],
       ),
     );
@@ -50,11 +56,13 @@ class TimerModeSwitcherUI extends ConsumerWidget {
       required String label,
       required bool isActive,
       required VoidCallback onPressed,
-      required TimerState state}) {
+      required TimerState state,
+      Key? key}) {
     return Center(
       // child: Padding(
       // padding: const EdgeInsets.symmetric(horizontal: 5.0),
       child: TextButton(
+        key: key,
         onPressed: onPressed,
         style: TextButton.styleFrom(
           backgroundColor: isActive ? state.color : Colors.transparent,

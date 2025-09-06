@@ -25,6 +25,8 @@ Map<String, dynamic> _defaultsJson() => <String, dynamic>{
       'bibleVersionId': '32664dc3288a28df-01',
       'debugMode': false,
       'notificationsEnabled': true,
+      'soundEnabled': true,
+      'hapticsEnabled': true,
     };
 
 Color _colorFromHex(String hex) {
@@ -57,6 +59,8 @@ LocalSettings _mergeIntoDefaults(Map<String, dynamic> jsonMap) {
     color: chosen,
     debugMode: (d['debugMode'] as bool?) ?? false,
     notificationsEnabled: (d['notificationsEnabled'] as bool?) ?? true,
+    soundEnabled: (d['soundEnabled'] as bool?) ?? true,
+    hapticsEnabled: (d['hapticsEnabled'] as bool?) ?? true,
     bibleVersionName: (d['bibleVersionName'] as String?) ?? kDefaultBibleVersionName,
     bibleVersionId: d['bibleVersionId'] as String?,
   );
@@ -72,6 +76,8 @@ Map<String, dynamic> _toJson(LocalSettings s) => <String, dynamic>{
       'bibleVersionId': s.bibleVersionId,
       'debugMode': s.debugMode,
       'notificationsEnabled': s.notificationsEnabled,
+      'soundEnabled': s.soundEnabled,
+      'hapticsEnabled': s.hapticsEnabled,
     };
 
 /// Exposes helpers to load and persist LocalSettings into SharedPreferences.
@@ -141,6 +147,8 @@ final settingsPersistenceInitializerProvider = Provider<bool>((ref) {
       }
       notifier.updateDebugMode(loaded.debugMode);
       notifier.updateNotificationsEnabled(loaded.notificationsEnabled);
+      notifier.updateSoundEnabled(loaded.soundEnabled);
+      notifier.updateHapticsEnabled(loaded.hapticsEnabled);
       // Stage session-scoped settings into LocalSettings only; timer picks them up
       // at the next session boundary.
       notifier.updateTime(TimerMode.pomodoro, loaded.initPomodoro ~/ 60);

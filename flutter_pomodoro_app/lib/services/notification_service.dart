@@ -20,6 +20,7 @@ class NotificationContentBuilder {
       'passageId': passageId,
       'reference': ref,
       'textSnippet': body,
+      'action': 'open_timer',
     };
     return NotificationBuildResult(title: ref, body: body, payload: payload);
   }
@@ -28,7 +29,7 @@ class NotificationContentBuilder {
     return NotificationBuildResult(
       title: 'Session complete',
       body: 'Great job! Open to view your verse.',
-      payload: const <String, dynamic>{},
+      payload: const <String, dynamic>{'action': 'open_timer'},
     );
   }
 
@@ -36,7 +37,7 @@ class NotificationContentBuilder {
     if (input.length <= maxLen) return input;
     // Reserve one char for ellipsis when truncating.
     final cut = (maxLen - 1).clamp(0, input.length);
-    return input.substring(0, cut) + '…';
+    return '${input.substring(0, cut)}…';
   }
 }
 

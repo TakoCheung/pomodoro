@@ -20,6 +20,9 @@ import 'package:flutter_pomodoro_app/services/notification_service.dart';
 import 'package:flutter_pomodoro_app/state/clock_provider.dart';
 import 'package:flutter_pomodoro_app/state/active_timer_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
+import 'package:flutter_pomodoro_app/services/haptics_service.dart';
 // ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
@@ -338,8 +341,21 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final overlayVisible = r.read(scriptureOverlayVisibleProvider);
       final notificationsEnabled = settings.notificationsEnabled;
       if (isFg && notificationsEnabled) {
-        // Foreground: show overlay and skip system notification to avoid double ping
+        // Foreground: show overlay and trigger alarm/haptics if enabled.
         r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+        if (settings.soundEnabled || settings.hapticsEnabled) {
+          r.read(alarmBannerVisibleProvider.notifier).state = true;
+          if (settings.soundEnabled) {
+            final alarm = r.read(alarmServiceProvider);
+            // Play bundled alarm sound in a loop for a short duration; tests use Noop.
+            unawaited(
+                alarm.play(assetName: 'assets/alarm.mp3', loopFor: const Duration(seconds: 2)));
+          }
+          if (settings.hapticsEnabled) {
+            final h = r.read(hapticsServiceProvider);
+            unawaited(h.pattern([HapticPulse.short, HapticPulse.long]));
+          }
+        }
       } else if (notificationsEnabled && !overlayVisible) {
         final scheduler = r.read(notificationSchedulerProvider);
         // Ensure initialized & channel exists; do not mutate providers here

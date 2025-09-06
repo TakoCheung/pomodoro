@@ -5,8 +5,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/settings_persistence.dart';
 import 'package:flutter_pomodoro_app/state/app_lifecycle_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
-import 'package:flutter_pomodoro_app/services/notification_service.dart';
 import 'package:flutter_pomodoro_app/services/flutter_local_notifications_scheduler.dart';
+import 'package:flutter_pomodoro_app/state/deeplink_handler.dart';
+import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
+import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 // import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 // import 'package:flutter_pomodoro_app/env_config.dart';
 
@@ -54,6 +57,20 @@ class _MyAppState extends ConsumerState<MyApp> {
     // Attach lifecycle observer to keep foreground/background state accurate.
     _observer = LifecycleObserver(ref);
     WidgetsBinding.instance.addObserver(_observer!);
+    // Handle notification taps: show scripture overlay and stop any ongoing alarm.
+    DeepLinkDispatcher.onNotificationTap = (payload) {
+      // Only one action for now: open timer/scripture overlay.
+      final action = payload['action'] as String?;
+      if (action == null || action == 'open_timer') {
+        try {
+          ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
+          // Dismiss and stop alarm if playing (in case app was backgrounded with sound).
+          ref.read(alarmBannerVisibleProvider.notifier).state = false;
+          final alarm = ref.read(alarmServiceProvider);
+          alarm.stop();
+        } catch (_) {}
+      }
+    };
   }
 
   @override
@@ -61,6 +78,8 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (_observer != null) {
       WidgetsBinding.instance.removeObserver(_observer!);
     }
+    // Clear handler to avoid leaks in hot reload scenarios.
+    DeepLinkDispatcher.onNotificationTap = null;
     super.dispose();
   }
 

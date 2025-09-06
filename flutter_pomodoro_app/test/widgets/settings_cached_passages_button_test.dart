@@ -39,9 +39,11 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Toggle Debug Mode switch on
+    // Toggle Debug Mode switch on (use specific key to avoid ambiguity)
     expect(find.text('Debug Mode'), findsOneWidget);
-    await tester.tap(find.byType(Switch));
+    final debugSwitch = find.byKey(const Key('debug_mode_switch'));
+    expect(debugSwitch, findsOneWidget);
+    await tester.tap(debugSwitch);
     await tester.pumpAndSettle();
 
     // Button should be visible

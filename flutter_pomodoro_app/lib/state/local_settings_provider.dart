@@ -30,6 +30,8 @@ class LocalSettings {
   Color color;
   bool debugMode;
   bool notificationsEnabled;
+  bool soundEnabled;
+  bool hapticsEnabled;
   String bibleVersionName;
   String? bibleVersionId;
 
@@ -41,6 +43,8 @@ class LocalSettings {
     required this.color,
     this.debugMode = false,
     this.notificationsEnabled = true,
+    this.soundEnabled = true,
+    this.hapticsEnabled = true,
     this.bibleVersionName = kDefaultBibleVersionName,
     this.bibleVersionId,
   });
@@ -53,6 +57,8 @@ class LocalSettings {
       Color? color,
       bool? debugMode,
       bool? notificationsEnabled,
+      bool? soundEnabled,
+      bool? hapticsEnabled,
       String? bibleVersionName,
       String? bibleVersionId}) {
     return LocalSettings(
@@ -63,6 +69,8 @@ class LocalSettings {
         color: color ?? this.color,
         debugMode: debugMode ?? this.debugMode,
         notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+        soundEnabled: soundEnabled ?? this.soundEnabled,
+        hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
         bibleVersionName: bibleVersionName ?? this.bibleVersionName,
         bibleVersionId: bibleVersionId ?? this.bibleVersionId);
   }
@@ -125,6 +133,14 @@ class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
 
   void updateNotificationsEnabled(bool enabled) {
     state = state.copyWith(notificationsEnabled: enabled);
+  }
+
+  void updateSoundEnabled(bool enabled) {
+    state = state.copyWith(soundEnabled: enabled);
+  }
+
+  void updateHapticsEnabled(bool enabled) {
+    state = state.copyWith(hapticsEnabled: enabled);
   }
 
   String getName(TimerMode mode) {

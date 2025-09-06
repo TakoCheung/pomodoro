@@ -6,8 +6,7 @@ import 'package:flutter_pomodoro_app/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Select Bible version from settings updates provider',
-      (tester) async {
+  testWidgets('Select Bible version from settings updates provider', (tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -29,8 +28,10 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // Apply
-    await tester.tap(find.text('Apply'));
+    // Ensure the footer buttons are visible, then apply for next session
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('apply_next_session_button')));
     await tester.pumpAndSettle();
 
     // Nothing hard asserts here beyond flow; a full provider assert would require in-app debug UI.
