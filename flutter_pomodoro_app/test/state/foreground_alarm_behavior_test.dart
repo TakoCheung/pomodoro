@@ -1,7 +1,6 @@
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/app_lifecycle_provider.dart';
-import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 import 'package:flutter_pomodoro_app/services/alarm_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +19,7 @@ class _FakeScriptureService implements ScriptureServiceInterface {
 }
 
 void main() {
-  test('Foreground completion shows banner and triggers alarm/haptics when enabled', () async {
+  test('Foreground completion shows scripture overlay only (no banner/alarm)', () async {
     final container = ProviderContainer(overrides: [
       isAppForegroundProvider.overrideWith((_) => true),
       alarmServiceProvider.overrideWithValue(TestAlarmService()),
@@ -37,7 +36,9 @@ void main() {
     timer.triggerComplete();
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
-    expect(container.read(alarmBannerVisibleProvider), isTrue);
-    expect(container.read(alarmServiceProvider).isPlaying, isTrue);
+    // Foreground should show scripture overlay; banner is only on deep-link tap.
+    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
+    // Alarm sound should not auto-play in foreground.
+    expect(container.read(alarmServiceProvider).isPlaying, isFalse);
   });
 }

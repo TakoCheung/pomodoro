@@ -20,12 +20,16 @@ import 'package:flutter_pomodoro_app/services/notification_service.dart';
 import 'package:flutter_pomodoro_app/state/clock_provider.dart';
 import 'package:flutter_pomodoro_app/state/active_timer_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
-import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
-import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
-import 'package:flutter_pomodoro_app/services/haptics_service.dart';
+// import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
+// import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
+// import 'package:flutter_pomodoro_app/services/haptics_service.dart';
 // ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
+// Show a simple overlay when a completion is detected on cold start/resume.
+final missedAlarmOverlayVisibleProvider = StateProvider<bool>((ref) => false);
+// Re-entrancy guard to avoid duplicate concurrent processing; resets after completion.
+final _completionInFlightProvider = StateProvider<bool>((_) => false);
 
 /// Whether to show the debug FAB. Read from .env if available; tests can override.
 // Debug FAB removed: provider no longer needed.
@@ -157,10 +161,19 @@ class TimerNotifier extends StateNotifier<TimerState> {
       if (ref != null) {
         final r = ref!;
         final now = r.read(clockProvider)();
-        final duration = Duration(seconds: getInitialDuration(state.mode));
+        // Use remaining time if resuming; otherwise use initial duration.
+        final remaining = state.timeRemaining;
+        final int seconds = remaining > 0 ? remaining : getInitialDuration(state.mode);
+        final duration = Duration(seconds: seconds);
         final endUtc = now.add(duration);
         final timerId = 'active';
         final label = state.mode.name;
+        // Ensure notification permission/channel once so iOS can deliver scheduled alarms.
+        try {
+          final notif = r.read(notificationSchedulerProvider);
+          unawaited(ensureChannelCreatedOnce(r, notif));
+          unawaited(ensureNotificationPermissionOnce(r, notif, provisional: true));
+        } catch (_) {}
         unawaited(r.read(activeTimerProvider.notifier).save(
               ActiveTimer(timerId: timerId, startUtc: now, endUtc: endUtc, label: label),
             ));
@@ -285,6 +298,12 @@ class TimerNotifier extends StateNotifier<TimerState> {
       }
       // Ensure an exact alarm is scheduled once.
       final alarm = r.read(alarmSchedulerProvider);
+      // Ensure permission/channel before scheduling (no-op if already handled)
+      try {
+        final notif = r.read(notificationSchedulerProvider);
+        await ensureChannelCreatedOnce(r, notif);
+        await ensureNotificationPermissionOnce(r, notif, provisional: true);
+      } catch (_) {}
       await alarm.cancel(timerId: at.timerId);
       await alarm.scheduleExact(
           timerId: at.endUtc.isAfter(now) ? at.timerId : 'active', endUtc: at.endUtc);
@@ -292,6 +311,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
     }
     // Overdue: clear and handle completion once
     await r.read(activeTimerProvider.notifier).clear();
+    // Show missed overlay (UI)
+    r.read(missedAlarmOverlayVisibleProvider.notifier).state = true;
     await _handleComplete();
   }
 
@@ -300,6 +321,20 @@ class TimerNotifier extends StateNotifier<TimerState> {
     // skip scripture logic entirely.
     if (ref == null) return;
     final r = ref!;
+    // Reentrancy guard
+    final inflight = r.read(_completionInFlightProvider);
+    if (inflight == true) return;
+    r.read(_completionInFlightProvider.notifier).state = true;
+    // Ensure timer is stopped and persistence cleared on completion.
+    _timer?.cancel();
+    state = state.copyWith(isRunning: false, timeRemaining: 0);
+    try {
+      await r.read(activeTimerProvider.notifier).clear();
+    } catch (_) {}
+    try {
+      final alarm = r.read(alarmSchedulerProvider);
+      await alarm.cancel(timerId: 'active');
+    } catch (_) {}
     final show = r.read(scriptureShowDeciderProvider)();
     if (!show) return;
     debugPrint('TimerNotifier: onComplete triggered');
@@ -351,21 +386,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final overlayVisible = r.read(scriptureOverlayVisibleProvider);
       final notificationsEnabled = settings.notificationsEnabled;
       if (isFg && notificationsEnabled) {
-        // Foreground: show overlay and trigger alarm/haptics if enabled.
+        // Foreground: show scripture overlay only; banner will be shown on notification tap.
         r.read(scriptureOverlayVisibleProvider.notifier).state = true;
-        if (settings.soundEnabled || settings.hapticsEnabled) {
-          r.read(alarmBannerVisibleProvider.notifier).state = true;
-          if (settings.soundEnabled) {
-            final alarm = r.read(alarmServiceProvider);
-            // Play bundled alarm sound in a loop for a short duration; tests use Noop.
-            unawaited(
-                alarm.play(assetName: 'assets/alarm.mp3', loopFor: const Duration(seconds: 2)));
-          }
-          if (settings.hapticsEnabled) {
-            final h = r.read(hapticsServiceProvider);
-            unawaited(h.pattern([HapticPulse.short, HapticPulse.long]));
-          }
-        }
       } else if (notificationsEnabled && !overlayVisible) {
         final scheduler = r.read(notificationSchedulerProvider);
         // Ensure initialized & channel exists; do not mutate providers here
@@ -380,11 +402,12 @@ class TimerNotifier extends StateNotifier<TimerState> {
             maxLen: 140,
           );
           await scheduler.show(
-            channelId: NotificationChannel.id,
+            channelId: NotificationChannel.alarmId,
             title: res.title,
             body: res.body,
             payload: res.payload,
           );
+          r.read(lastNotificationPostedProvider.notifier).state = true;
         } else {
           // Record a non-blocking message by setting overlay with fallback hint (no-op UI here)
         }
@@ -405,6 +428,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final settings = r.read(localSettingsProvider);
       final isFg = r.read(isAppForegroundProvider);
       if (isFg) {
+        // Foreground: show scripture overlay only; banner will be shown on notification tap.
         r.read(scriptureOverlayVisibleProvider.notifier).state = true;
       } else if (settings.notificationsEnabled) {
         final scheduler = r.read(notificationSchedulerProvider);
@@ -413,13 +437,17 @@ class TimerNotifier extends StateNotifier<TimerState> {
         if (granted) {
           final res = NotificationContentBuilder.fallback();
           await scheduler.show(
-            channelId: NotificationChannel.id,
+            channelId: NotificationChannel.alarmId,
             title: res.title,
             body: res.body,
             payload: res.payload,
           );
+          r.read(lastNotificationPostedProvider.notifier).state = true;
         }
       }
+    } finally {
+      // Allow future completion events (e.g., next session) while still preventing concurrent dupes.
+      r.read(_completionInFlightProvider.notifier).state = false;
     }
   }
 }

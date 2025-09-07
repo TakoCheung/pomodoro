@@ -1,4 +1,4 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/data/bible_versions.dart';
@@ -59,15 +59,13 @@ final scriptureServiceProvider = Provider<ScriptureServiceInterface>((ref) {
   if (kDebugMode) {
     try {
       // Log presence without leaking the key value
-      debugPrint(
-          'scriptureServiceProvider: SCRIPTURE_API_KEY detected (len=${key.length})');
+      debugPrint('scriptureServiceProvider: SCRIPTURE_API_KEY detected (len=${key.length})');
     } catch (_) {}
   }
   return ScriptureService(apiKey: key);
 });
 
-final scriptureProvider =
-    FutureProvider.family<Passage, ScriptureRequest>((ref, req) async {
+final scriptureProvider = FutureProvider.family<Passage, ScriptureRequest>((ref, req) async {
   final bibleId = req.bibleId;
   final passageId = req.passageId;
   final service = ref.read(scriptureServiceProvider);

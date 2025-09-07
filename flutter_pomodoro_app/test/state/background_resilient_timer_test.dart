@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/clock_provider.dart';
 import 'package:flutter_pomodoro_app/state/active_timer_provider.dart';
@@ -12,11 +12,13 @@ class _FakeAlarm implements AlarmScheduler {
   int cancelCalls = 0;
   DateTime? lastEnd;
   String? lastId;
+  @override
   Future<void> cancel({required String timerId}) async {
     cancelCalls++;
     lastId = timerId;
   }
 
+  @override
   Future<void> scheduleExact({required String timerId, required DateTime endUtc}) async {
     scheduleCalls++;
     lastId = timerId;

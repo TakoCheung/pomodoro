@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_pomodoro_app/main.dart' as app;
 import 'package:flutter_pomodoro_app/models/passage.dart';
@@ -66,9 +66,7 @@ void main() {
 
     final container = ProviderContainer(overrides: [
       notificationSchedulerProvider.overrideWithValue(fakeScheduler),
-      isAppForegroundProvider.overrideWithProvider(
-        StateProvider<bool>((_) => false),
-      ), // simulate background
+      isAppForegroundProvider.overrideWith((ref) => false), // simulate background
       scriptureRepositoryProvider.overrideWithValue(
         ScriptureRepository(service: _FakeService()),
       ),

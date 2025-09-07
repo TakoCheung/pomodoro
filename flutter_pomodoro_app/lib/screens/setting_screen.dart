@@ -329,7 +329,9 @@ class SettingsScreen extends ConsumerWidget {
                             final flag = dotenv.env['ENABLE_NOTIFICATIONS_TOGGLE_UI'];
                             showNotificationsToggle = flag == 'true';
                           } catch (_) {}
-                          if (!showNotificationsToggle) return const SizedBox.shrink();
+                          if (!showNotificationsToggle) {
+                            return const SizedBox.shrink();
+                          }
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -418,10 +420,12 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         );
                         if (confirmed == true) {
+                          if (!context.mounted) return;
                           // Apply durations immediately and reset the current session.
                           ref.read(timerProvider.notifier).applyStagedDurationsNow();
                           // Also update live settings so UI theme is consistent.
                           ref.read(timerProvider.notifier).applyLiveSettings(localSettings);
+                          if (!context.mounted) return;
                           Navigator.of(context).pop();
                         }
                       },

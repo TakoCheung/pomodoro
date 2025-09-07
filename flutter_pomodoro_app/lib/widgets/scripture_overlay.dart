@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
@@ -15,10 +15,7 @@ class ScriptureOverlay extends ConsumerStatefulWidget {
   final int autoHideSeconds;
 
   const ScriptureOverlay(
-      {super.key,
-      required this.bibleId,
-      required this.passageId,
-      this.autoHideSeconds = 60});
+      {super.key, required this.bibleId, required this.passageId, this.autoHideSeconds = 60});
 
   @override
   ConsumerState<ScriptureOverlay> createState() => _ScriptureOverlayState();
@@ -86,8 +83,7 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                 ),
                 Text(p.reference,
                     key: const Key('scripture_reference'),
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontFamily: font)),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
                 const SizedBox(height: 8),
                 Text(p.text,
                     key: const Key('scripture_text'),
@@ -101,8 +97,8 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
       );
     }
 
-    final asyncPassage = ref.watch(scriptureProvider(ScriptureRequest(
-        bibleId: widget.bibleId, passageId: widget.passageId)));
+    final asyncPassage = ref.watch(
+        scriptureProvider(ScriptureRequest(bibleId: widget.bibleId, passageId: widget.passageId)));
     return asyncPassage.when(
       data: (p) {
         debugPrint('ScriptureOverlay: showing fetched Passage ${p.reference}');
@@ -130,8 +126,7 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                   ),
                   Text(p.reference,
                       key: const Key('scripture_reference'),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontFamily: font)),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
                   const SizedBox(height: 8),
                   Text(p.text,
                       key: const Key('scripture_text'),

@@ -46,7 +46,7 @@ class TimerDisplay extends ConsumerWidget {
               decoration:
                   BoxDecoration(shape: BoxShape.circle, color: AppColors.darkDarkBlue, boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(.25),
+                    color: Colors.black.withValues(alpha: 0.25),
                     spreadRadius: 0,
                     blurRadius: 4,
                     offset: const Offset(0, 4)),
@@ -100,6 +100,8 @@ class TimerDisplay extends ConsumerWidget {
                         fontFamily: timerState.fontFamily),
                   ),
                 ),
+                const SizedBox(height: 8),
+                // Cancel button removed to reduce redundancy with Pause.
                 // Expose remaining label for tests
                 Text(
                   '${timerState.timeRemaining}',

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/services/notification_service.dart';
 
+// Default is Noop for tests; main.dart overrides to real local notifications.
 final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
   return NoopNotificationScheduler();
 });
@@ -17,6 +18,11 @@ class NotificationChannel {
 
 final _authStateProvider = StateProvider<bool?>((_) => null);
 final _channelCreatedProvider = StateProvider<bool>((_) => false);
+
+/// Test/diagnostic marker: set to true when a system notification is posted via
+/// NotificationScheduler.show. Integration tests can assert Key('notification_alarm')
+/// is present without requiring real platform I/O.
+final lastNotificationPostedProvider = StateProvider<bool>((_) => false);
 
 Future<bool> ensureNotificationPermissionOnce(Ref ref, NotificationScheduler sched,
     {bool provisional = false}) async {

@@ -33,9 +33,10 @@ Future<void> main() async {
     debugPrint(
         'main: SCRIPTURE_API_KEY present=${apiKey != null && apiKey.isNotEmpty}, BIBLE_ID=${bibleId ?? '(default)'}');
   } catch (_) {}
-  // Conditionally enable real local notifications via env flag to keep tests stable.
+  // Enable local notifications/alarm scheduling by default for real runs.
+  // You can disable explicitly by setting ENABLE_LOCAL_NOTIFICATIONS=false in .env
   final enableLocalNotifications =
-      dotenv.env['ENABLE_LOCAL_NOTIFICATIONS']?.toLowerCase() == 'true';
+      dotenv.env['ENABLE_LOCAL_NOTIFICATIONS']?.toLowerCase() != 'false';
   final overrides = <Override>[
     if (enableLocalNotifications)
       notificationSchedulerProvider.overrideWithValue(
@@ -83,9 +84,11 @@ class _MyAppState extends ConsumerState<MyApp> {
       final action = payload['action'] as String?;
       if (action == null || action == 'open_timer') {
         try {
-          ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
-          // Dismiss and stop alarm if playing (in case app was backgrounded with sound).
-          ref.read(alarmBannerVisibleProvider.notifier).state = false;
+          // Show only the banner with verse when user taps the notification.
+          ref.read(scriptureOverlayVisibleProvider.notifier).state = false;
+          ref.read(missedAlarmOverlayVisibleProvider.notifier).state = false;
+          ref.read(alarmBannerVisibleProvider.notifier).state = true;
+          // Stop any ongoing alarm sound, banner will be visible.
           final alarm = ref.read(alarmServiceProvider);
           alarm.stop();
         } catch (_) {}

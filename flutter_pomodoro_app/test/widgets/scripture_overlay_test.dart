@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_pomodoro_app/widgets/scripture_overlay.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
@@ -8,8 +8,7 @@ import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
 
 void main() {
-  testWidgets('ScriptureOverlay shows passage when provider has data',
-      (tester) async {
+  testWidgets('ScriptureOverlay shows passage when provider has data', (tester) async {
     // Override the family provider to immediately return our test passage for any request.
     final overrides = [
       scriptureProvider.overrideWith((ref, req) async {
@@ -25,8 +24,7 @@ void main() {
           home: Scaffold(
             body: Stack(
               children: [
-                ScriptureOverlay(
-                    bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1'),
+                ScriptureOverlay(bibleId: '32664dc3288a28df-01', passageId: 'GEN.1.1'),
               ],
             ),
           ),
@@ -49,11 +47,9 @@ class FakeScriptureService implements ScriptureServiceInterface {
   FakeScriptureService();
 
   @override
-  Future<Passage> fetchPassage(
-      {required String bibleId, required String passageId}) async {
+  Future<Passage> fetchPassage({required String bibleId, required String passageId}) async {
     wasCalled = true;
     return Passage(
-        reference: 'Genesis 1:1',
-        text: 'In the beginning God created the heavens and the earth.');
+        reference: 'Genesis 1:1', text: 'In the beginning God created the heavens and the earth.');
   }
 }
