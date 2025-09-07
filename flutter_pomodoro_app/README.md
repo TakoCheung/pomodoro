@@ -66,6 +66,13 @@ Notifications
 - The notification payload includes: `bibleId`, `passageId`, `reference`, `textSnippet` (≤140 chars, ellipsis when truncated).
 - Tests use a fake scheduler and repository; no real notifications or network in tests.
 
+Local notifications & background timers
+--------------------------------------
+- Set `ENABLE_LOCAL_NOTIFICATIONS=true` in your local `.env` to enable the concrete schedulers at runtime.
+- When enabled, a platform notification is scheduled exactly at the timer end to wake the app if it is backgrounded.
+- Timezone handling: the app initializes the timezone database and uses UTC for zoned scheduling to avoid tz.local issues on simulators.
+- Deep-link payload: tapping the notification sends `{ "action": "open_timer" }` to open the scripture overlay and stop any in-app alarm banner.
+
 Feature flags
 -------------
 - `ENABLE_NOTIFICATIONS_TOGGLE_UI` (default: false) — when `true`, shows a Notifications switch in Settings. Kept off by default to avoid golden/UI churn in CI; logic remains enabled regardless of the toggle visibility.
@@ -83,4 +90,4 @@ Tests & Coverage
 
 Artifacts
 ---------
-- iOS simulator validation screenshots are saved in `artifacts/ios/`, e.g. `notification_flow.png`.
+- iOS simulator validation screenshots are saved in `artifacts/ios/`, e.g. `notification_flow.png` and the end-to-end `_flow.png` produced by `integration_test/_flow_test.dart`.

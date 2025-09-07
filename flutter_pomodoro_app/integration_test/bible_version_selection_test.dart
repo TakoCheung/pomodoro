@@ -29,9 +29,10 @@ void main() {
     }
 
     // Ensure the footer buttons are visible, then apply for next session
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -400));
+    final applyNext = find.byKey(const Key('apply_next_session_button'));
+    await tester.ensureVisible(applyNext);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('apply_next_session_button')));
+    await tester.tap(applyNext);
     await tester.pumpAndSettle();
 
     // Nothing hard asserts here beyond flow; a full provider assert would require in-app debug UI.

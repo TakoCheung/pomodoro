@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
@@ -11,13 +12,18 @@ void main() {
 
   testWidgets('Changing a setting updates state and persists', (tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
-    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen())));
+    await tester.pumpWidget(ProviderScope(overrides: [
+      permissionAutostartProvider.overrideWith((ref) => false),
+    ], child: const MaterialApp(home: PomodoroTimerScreen())));
     // Open settings
     await tester.tap(find.byKey(const Key('settingsButton')));
     await tester.pumpAndSettle();
     // Increase pomodoro to 30 using the up arrow
     final inc = find.byKey(const Key('pomodoro_inc'));
     expect(inc, findsOneWidget);
+    // Ensure the control is visible (dialog content is scrollable on small layouts)
+    await tester.ensureVisible(inc);
+    // Default pomodoro is 25m; pressing + increases by 1 minute per tap to reach 30m.
     for (int i = 0; i < 5; i++) {
       await tester.tap(inc);
       await tester.pump();
@@ -33,12 +39,16 @@ void main() {
 
   testWidgets('Settings changes are idempotent and persist across views', (tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
-    await tester.pumpWidget(const ProviderScope(child: MaterialApp(home: PomodoroTimerScreen())));
+    await tester.pumpWidget(ProviderScope(overrides: [
+      permissionAutostartProvider.overrideWith((ref) => false),
+    ], child: const MaterialApp(home: PomodoroTimerScreen())));
     // Open settings
     await tester.tap(find.byKey(const Key('settingsButton')));
     await tester.pumpAndSettle();
     // Choose font Inter by tapping the middle option (robotoSlab) then apply (next session)
-    await tester.tap(find.text('Aa').at(1));
+    final fontOption = find.text('Aa').at(1);
+    await tester.ensureVisible(fontOption);
+    await tester.tap(fontOption);
     await tester.pump();
     await tester.tap(find.byKey(const Key('apply_next_session_button')));
     await tester.pumpAndSettle();

@@ -11,7 +11,12 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
   @override
   Future<void> ensureInitialized() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings();
+    // Gate iOS OS sheet behind our own banner; don't auto-request on init.
+    const iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
     const initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
     await _plugin.initialize(initSettings, onDidReceiveNotificationResponse: (response) {
       // Deep-link handling would be wired here by parsing response.payload
@@ -40,7 +45,7 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
 
   @override
   Future<bool> requestPermission({bool provisional = false}) async {
-    // iOS: request alert/badge/sound permissions.
+    // iOS: request alert/badge/sound permissions; this shows the OS sheet.
     final ios = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
     if (ios != null) {
       final settings = await ios.requestPermissions(alert: true, badge: true, sound: true);

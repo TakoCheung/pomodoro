@@ -13,6 +13,7 @@ import 'package:flutter_pomodoro_app/models/bible_version.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/state/settings_persistence.dart';
+import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -261,6 +262,31 @@ class SettingsScreen extends ConsumerWidget {
                         ],
                       ),
                       const CustomDivider(spaceBefore: 30),
+                      // Notifications permission status (single-line)
+                      Builder(builder: (context) {
+                        final statusText = ref.watch(permissionStatusTextProvider);
+                        return ListTile(
+                          key: const Key('settings_notifications_tile'),
+                          leading: const Icon(Icons.notifications_active),
+                          title: const Text('Notifications', style: AppTextStyles.h4),
+                          // Show the On/Off badge on the same line using trailing.
+                          trailing: Container(
+                            key: const Key('permission_status_badge'),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color:
+                                  statusText == 'On' ? Colors.green.shade600 : Colors.red.shade600,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              statusText,
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ),
+                          onTap: () {},
+                        );
+                      }),
+                      const CustomDivider(spaceBefore: 10),
                       const Text(
                         'TIME (MINUTES)',
                         style: AppTextStyles.h4,

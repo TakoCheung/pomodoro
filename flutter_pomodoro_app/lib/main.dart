@@ -10,6 +10,10 @@ import 'package:flutter_pomodoro_app/state/deeplink_handler.dart';
 import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
+import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
+import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_pomodoro_app/services/alarm_scheduler.dart';
 // import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 // import 'package:flutter_pomodoro_app/env_config.dart';
 
@@ -37,6 +41,10 @@ Future<void> main() async {
       notificationSchedulerProvider.overrideWithValue(
         FlutterLocalNotificationsScheduler(),
       ),
+    if (enableLocalNotifications)
+      alarmSchedulerProvider.overrideWithValue(
+        FlutterLocalNotificationsAlarmScheduler(FlutterLocalNotificationsPlugin()),
+      ),
   ];
   runApp(ProviderScope(overrides: overrides, child: const MyApp()));
 }
@@ -55,8 +63,20 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     // Attach lifecycle observer to keep foreground/background state accurate.
-    _observer = LifecycleObserver(ref);
+    _observer = LifecycleObserver(ref, onChange: (ref, state) {
+      if (state == AppLifecycleState.resumed) {
+        // Reschedule active timers or process overdue completion once
+        ref.read(timerProvider.notifier).resyncAndProcessOverdue();
+      }
+    });
     WidgetsBinding.instance.addObserver(_observer!);
+    // Prompt notification permission at first launch: show rationale, then OS sheet upon accept.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auto = ref.read(permissionAutostartProvider);
+      if (auto) {
+        ref.read(permissionCoordinatorProvider.notifier).initialize();
+      }
+    });
     // Handle notification taps: show scripture overlay and stop any ongoing alarm.
     DeepLinkDispatcher.onNotificationTap = (payload) {
       // Only one action for now: open timer/scripture overlay.
@@ -87,6 +107,10 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     // Ensure settings are hydrated/persisted at startup; the bool return isn't used.
     ref.watch(settingsPersistenceInitializerProvider);
+    // Also resync once on first frame to handle cold-start overdue detection.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(timerProvider.notifier).resyncAndProcessOverdue();
+    });
     return const MaterialApp(home: PomodoroTimerScreen());
   }
 }

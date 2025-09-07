@@ -106,4 +106,4 @@ Repeat until all acceptance criteria are met.
 •	Test results summary (counts, pass time).
 •	List of modified files with brief rationale.
 •	iOS simulator validation steps executed and screenshot path.
-•	Coverage summary (total line coverage %, key package/file highlights) with paths to artifacts.
+•	Coverage summary (total line coverage 95%+, key package/file highlights) with paths to artifacts.

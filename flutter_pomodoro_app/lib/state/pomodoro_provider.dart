@@ -275,9 +275,19 @@ class TimerNotifier extends StateNotifier<TimerState> {
     if (at == null) return;
     final now = r.read(clockProvider)();
     if (now.isBefore(at.endUtc)) {
+      // Update remaining time based on persisted end time.
+      final remaining = at.endUtc.difference(now).inSeconds;
+      state = state.copyWith(timeRemaining: remaining > 0 ? remaining : 0, isRunning: true);
+      // Restart the ticking timer to continue countdown in foreground.
+      _timer?.cancel();
+      if (state.timeRemaining > 0) {
+        startTimer();
+      }
+      // Ensure an exact alarm is scheduled once.
       final alarm = r.read(alarmSchedulerProvider);
       await alarm.cancel(timerId: at.timerId);
-      await alarm.scheduleExact(timerId: at.timerId, endUtc: at.endUtc);
+      await alarm.scheduleExact(
+          timerId: at.endUtc.isAfter(now) ? at.timerId : 'active', endUtc: at.endUtc);
       return;
     }
     // Overdue: clear and handle completion once

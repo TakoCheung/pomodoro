@@ -25,13 +25,17 @@ void main() {
     // Increase pomodoro (work) minutes from 25 to 30
     final inc = find.byKey(const Key('pomodoro_inc'));
     expect(inc, findsOneWidget);
+    // Ensure the control is visible before tapping in integration envs
+    await tester.ensureVisible(inc);
     for (int i = 0; i < 5; i++) {
       await tester.tap(inc);
       await tester.pump();
     }
 
     // Apply next session
-    await tester.tap(find.byKey(const Key('apply_next_session_button')));
+    final applyNext = find.byKey(const Key('apply_next_session_button'));
+    await tester.ensureVisible(applyNext);
+    await tester.tap(applyNext);
     await tester.pumpAndSettle();
 
     // Ensure timer remains running and remaining time keeps 25-minute target for this session

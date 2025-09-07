@@ -7,6 +7,7 @@ import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/widgets/scripture_overlay.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
+import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 // import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 // import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
@@ -18,6 +19,9 @@ class PomodoroTimerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showScripture = ref.watch(scriptureOverlayVisibleProvider);
     final bibleId = ref.watch(bibleIdProvider);
+    // Rationale visibility is driven by the coordinator (initialized at app start).
+    final auto = ref.watch(permissionAutostartProvider);
+    final rationaleVisible = auto && ref.watch(notifRationaleVisibleProvider);
     // Log basic debug info when needed.
     // debugPrint('PomodoroTimerScreen: bibleId=$bibleId');
     return Scaffold(
@@ -55,6 +59,50 @@ class PomodoroTimerScreen extends ConsumerWidget {
             Align(
               alignment: Alignment.center,
               child: ScriptureOverlay(bibleId: bibleId, passageId: 'GEN.1.1'),
+            ),
+          // Topmost: in-app permission rationale banner. Render last so it paints above everything.
+          if (rationaleVisible)
+            Align(
+              alignment: Alignment.topCenter,
+              child: Material(
+                // Solid banner so it isn’t transparent behind the system sheet
+                color: const Color(0xFF111214),
+                child: Container(
+                  key: const Key('notif_rationale_sheet'),
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Allow notifications to get alerts when timers finish. You can change this later in Settings.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          OutlinedButton(
+                            key: const Key('notif_rationale_later'),
+                            onPressed: () =>
+                                ref.read(permissionCoordinatorProvider.notifier).deferPrompt(),
+                            child: const Text('Later'),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            key: const Key('notif_rationale_accept'),
+                            onPressed: () => ref
+                                .read(permissionCoordinatorProvider.notifier)
+                                .requestPermission(provisional: false),
+                            child: const Text('Allow'),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ),
         ],
       ),
