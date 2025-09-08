@@ -8,14 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/widgets/scripture_overlay.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
-// import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
+import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 // import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
-import 'package:flutter_pomodoro_app/widgets/missed_alarm_overlay.dart';
 import 'package:flutter_pomodoro_app/widgets/alarm_banner.dart';
 import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
-import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
   const PomodoroTimerScreen({super.key});
@@ -23,11 +21,10 @@ class PomodoroTimerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showScripture = ref.watch(scriptureOverlayVisibleProvider);
-    final showMissed = ref.watch(missedAlarmOverlayVisibleProvider);
     final showBanner = ref.watch(alarmBannerVisibleProvider);
+    final notifPosted = ref.watch(lastNotificationPostedProvider);
     final settings = ref.watch(localSettingsProvider);
     final shown = ref.watch(shownScriptureProvider);
-    final notifPosted = ref.watch(lastNotificationPostedProvider);
     final bibleId = ref.watch(bibleIdProvider);
     // Rationale visibility is driven by the coordinator (initialized at app start).
     final auto = ref.watch(permissionAutostartProvider);
@@ -70,13 +67,6 @@ class PomodoroTimerScreen extends ConsumerWidget {
             Align(
               alignment: Alignment.center,
               child: ScriptureOverlay(bibleId: bibleId, passageId: 'GEN.1.1'),
-            ),
-          if (showMissed)
-            Align(
-              alignment: Alignment.center,
-              child: MissedAlarmOverlay(
-                onDismiss: () => ref.read(missedAlarmOverlayVisibleProvider.notifier).state = false,
-              ),
             ),
           if (showBanner)
             Align(

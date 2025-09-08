@@ -27,7 +27,6 @@ import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
 // Show a simple overlay when a completion is detected on cold start/resume.
-final missedAlarmOverlayVisibleProvider = StateProvider<bool>((ref) => false);
 // Re-entrancy guard to avoid duplicate concurrent processing; resets after completion.
 final _completionInFlightProvider = StateProvider<bool>((_) => false);
 
@@ -311,8 +310,6 @@ class TimerNotifier extends StateNotifier<TimerState> {
     }
     // Overdue: clear and handle completion once
     await r.read(activeTimerProvider.notifier).clear();
-    // Show missed overlay (UI)
-    r.read(missedAlarmOverlayVisibleProvider.notifier).state = true;
     await _handleComplete();
   }
 

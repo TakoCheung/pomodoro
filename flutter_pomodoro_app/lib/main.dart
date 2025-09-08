@@ -86,7 +86,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         try {
           // Show only the banner with verse when user taps the notification.
           ref.read(scriptureOverlayVisibleProvider.notifier).state = false;
-          ref.read(missedAlarmOverlayVisibleProvider.notifier).state = false;
           ref.read(alarmBannerVisibleProvider.notifier).state = true;
           // Stop any ongoing alarm sound, banner will be visible.
           final alarm = ref.read(alarmServiceProvider);

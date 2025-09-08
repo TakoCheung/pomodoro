@@ -79,7 +79,7 @@ void main() {
     expect(fakeAlarm.scheduledAt, end);
   });
 
-  test('Overdue detection on cold start shows missed overlay exactly once', () async {
+  test('Overdue detection on cold start processes completion exactly once', () async {
     final fakeAlarm = _FakeAlarmScheduler();
     final end = DateTime.utc(2025, 9, 5, 12, 0, 0);
     final now = DateTime.utc(2025, 9, 5, 12, 0, 1);
@@ -98,11 +98,11 @@ void main() {
         );
 
     await container.read(timerProvider.notifier).resyncAndProcessOverdue();
-    // Missed overlay visible
-    expect(container.read(missedAlarmOverlayVisibleProvider), isTrue);
-    // Second resync should be idempotent
+    // Scripture overlay becomes visible in foreground on overdue completion
+    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
+    // Second resync should be idempotent (still visible, no crash)
     await container.read(timerProvider.notifier).resyncAndProcessOverdue();
-    expect(container.read(missedAlarmOverlayVisibleProvider), isTrue);
+    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
   });
 
   test('Cancel updates schedules and clears persisted activeTimer', () async {
