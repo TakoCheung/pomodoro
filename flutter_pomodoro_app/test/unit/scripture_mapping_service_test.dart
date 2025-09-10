@@ -59,7 +59,7 @@ void main() {
   });
 
   group('ScriptureMappingService', () {
-    test('buildMapping fetches and limits to first 2 books/chapters with api-key header', () async {
+    test('buildMapping fetches books and chapters with api-key header', () async {
       final client = _MockHttpClient();
       const apiKey = 'KEY';
       const bibleId = 'de4e12af7f28f599-02';
@@ -71,7 +71,6 @@ void main() {
                 'data': [
                   {'id': 'GEN'},
                   {'id': 'EXO'},
-                  {'id': 'LEV'},
                 ]
               }),
               200));
@@ -124,6 +123,17 @@ void main() {
               }),
               200));
 
+      final gen3Uri =
+          Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/chapters/GEN.3/verses');
+      when(() => client.get(gen3Uri, headers: {'api-key': apiKey}))
+          .thenAnswer((_) async => http.Response(
+              jsonEncode({
+                'data': [
+                  {'id': 'GEN.3.1'}
+                ]
+              }),
+              200));
+
       final exo1Uri =
           Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/chapters/EXO.1/verses');
       when(() => client.get(exo1Uri, headers: {'api-key': apiKey}))
@@ -156,6 +166,7 @@ void main() {
       verify(() => client.get(exoChUri, headers: {'api-key': apiKey})).called(1);
       verify(() => client.get(gen1Uri, headers: {'api-key': apiKey})).called(1);
       verify(() => client.get(gen2Uri, headers: {'api-key': apiKey})).called(1);
+      verify(() => client.get(gen3Uri, headers: {'api-key': apiKey})).called(1);
       verify(() => client.get(exo1Uri, headers: {'api-key': apiKey})).called(1);
       verify(() => client.get(exo2Uri, headers: {'api-key': apiKey})).called(1);
 
