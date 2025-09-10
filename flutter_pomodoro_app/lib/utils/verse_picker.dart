@@ -1,24 +1,16 @@
 import 'dart:math';
-import 'package:flutter_pomodoro_app/data/verse_ids_esv.dart';
 
 /// Picks a random verse ID from the provided [candidates], or from a default
-/// curated list if none provided. Filters out obviously invalid candidates.
+/// curated list if none provided.
+///
+/// Rationale: Upstream generators (mapping or catalog) already ensure IDs are
+/// meaningful for the active translation. Previous validation occasionally
+/// rejected legit translation-specific IDs, causing unnecessary fallback.
+/// We now trust provided candidates verbatim to avoid spurious failures.
 String pickRandomVerseId(Random rng, {List<String>? candidates}) {
-  // If the caller provided candidates, respect them verbatim to preserve
-  // backwards compatibility with existing tests that pass arbitrary IDs.
   if (candidates != null && candidates.isNotEmpty) {
-    final valid =
-        candidates.where(isLikelyValidVerseId).toList(growable: false);
-    if (valid.isEmpty) {
-      throw ArgumentError('No valid verse IDs in candidates');
-    }
-    final idx = rng.nextInt(valid.length);
-    return valid[idx];
+    final idx = rng.nextInt(candidates.length);
+    return candidates[idx];
   }
-  // Otherwise, choose from our curated and pre-validated list.
-  if (esvVerseIds.isEmpty) {
-    throw ArgumentError('No verse IDs available to choose from');
-  }
-  final idx = rng.nextInt(esvVerseIds.length);
-  return esvVerseIds[idx];
+  throw ArgumentError('No verse candidates provided');
 }

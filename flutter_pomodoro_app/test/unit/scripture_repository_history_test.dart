@@ -29,17 +29,17 @@ void main() {
     expect(repo.history.length, 1);
     expect(repo.history.first.reference, 'GEN.1.1');
 
-    final p2 = await repo.fetchAndCacheRandomPassage(bibleId: 'b', passageIds: ['JOH.3.16']);
-    expect(p2.reference, 'JOH.3.16');
+    final p2 = await repo.fetchAndCacheRandomPassage(bibleId: 'b', passageIds: ['JHN.3.16']);
+    expect(p2.reference, 'JHN.3.16');
     expect(repo.history.length, 2);
-    expect(repo.history[1].reference, 'JOH.3.16');
+    expect(repo.history[1].reference, 'JHN.3.16');
 
     // New repository hydrates persisted history
     final repo2 =
         ScriptureRepository(service: FakeService(), now: () => DateTime(2025, 8, 30), prefs: prefs);
     expect(repo2.history.length, 2);
     expect(repo2.history.first.reference, 'GEN.1.1');
-    expect(repo2.history[1].reference, 'JOH.3.16');
+    expect(repo2.history[1].reference, 'JHN.3.16');
   });
 
   test(

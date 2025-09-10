@@ -71,7 +71,7 @@ class ScriptureMappingService implements ScriptureMappingServiceInterface {
         .toList(growable: false);
     final data = <String, Map<String, List<String>>>{};
     // Limit to first 1-2 books to keep it light.
-    for (final bookId in books.take(2)) {
+    for (final bookId in books) {
       final chaptersUri =
           Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/books/$bookId/chapters');
       if (kDebugMode) debugPrint('ScriptureMappingService: GET $chaptersUri');
@@ -82,7 +82,7 @@ class ScriptureMappingService implements ScriptureMappingServiceInterface {
           .map((e) => (e as Map<String, dynamic>)['id'] as String)
           .toList(growable: false);
       final chMap = <String, List<String>>{};
-      for (final chId in chapters.take(2)) {
+      for (final chId in chapters) {
         final versesUri =
             Uri.parse('https://api.scripture.api.bible/v1/bibles/$bibleId/chapters/$chId/verses');
         if (kDebugMode) debugPrint('ScriptureMappingService: GET $versesUri');

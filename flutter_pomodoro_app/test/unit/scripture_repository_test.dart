@@ -19,9 +19,9 @@ void main() {
     final repo = ScriptureRepository(service: mock, now: () => fixedNow, rng: Random(0));
 
     final p1 = await repo.selectPassageForBreak(
-        bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1', 'JOH.3.16', 'PSA.23.1']);
+        bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1', 'JHN.3.16', 'PSA.23.1']);
     final p2 = await repo.selectPassageForBreak(
-        bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1', 'JOH.3.16', 'PSA.23.1']);
+        bibleId: '32664dc3288a28df-01', passageIds: const ['GEN.1.1', 'JHN.3.16', 'PSA.23.1']);
 
     expect(identical(p1, p2), isTrue);
     verify(() =>
@@ -42,7 +42,7 @@ void main() {
     // advance day
     now = now.add(const Duration(days: 1));
     await repo
-        .selectPassageForBreak(bibleId: '32664dc3288a28df-01', passageIds: const ['JOH.3.16']);
+        .selectPassageForBreak(bibleId: '32664dc3288a28df-01', passageIds: const ['JHN.3.16']);
 
     verify(() =>
             mock.fetchPassage(bibleId: any(named: 'bibleId'), passageId: any(named: 'passageId')))

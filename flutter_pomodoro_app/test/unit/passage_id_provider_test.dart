@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/passage_id_provider.dart';
-import 'package:flutter_pomodoro_app/data/verse_ids_esv.dart';
 
 void main() {
   test('passageIdProvider returns valid BOOK.CHAPTER.VERSE from catalog', () {
@@ -16,16 +15,14 @@ void main() {
       })),
     ]);
     final id = container.read(passageIdProvider);
-    expect(isLikelyValidVerseId(id), isTrue);
     expect(id.startsWith('GEN.'), isTrue);
   });
 
-  test('passageIdProvider falls back to curated list when catalog empty', () {
+  test('passageIdProvider throws when both mapping and catalog are unavailable', () {
     final container = ProviderContainer(overrides: [
       rngProvider.overrideWithValue(Random(7)),
       verseCatalogProvider.overrideWithValue(const VerseCatalog({})),
     ]);
-    final id = container.read(passageIdProvider);
-    expect(isLikelyValidVerseId(id), isTrue);
+    expect(() => container.read(passageIdProvider), throwsA(isA<StateError>()));
   });
 }

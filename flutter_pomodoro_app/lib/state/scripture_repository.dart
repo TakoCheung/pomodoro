@@ -144,7 +144,9 @@ class ScriptureRepository {
       _perIdCache[bibleId] = _CacheEntry(passage: chosen, date: _cachedDate!);
       return chosen;
     }
-    // If caller doesn't provide candidates, pick from default curated verse IDs.
+    if (passageIds.isEmpty) {
+      throw StateError('No verse candidates provided');
+    }
     final passageId = pickRandomVerseId(_rng, candidates: passageIds);
     final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
     _cached = p;
@@ -174,6 +176,9 @@ class ScriptureRepository {
   /// regardless of whether a passage has already been cached.
   Future<Passage> fetchAndCacheRandomPassage(
       {required String bibleId, required List<String> passageIds}) async {
+    if (passageIds.isEmpty) {
+      throw StateError('No verse candidates provided');
+    }
     final passageId = pickRandomVerseId(_rng, candidates: passageIds);
     final p = await service.fetchPassage(bibleId: bibleId, passageId: passageId);
     _cached = p;

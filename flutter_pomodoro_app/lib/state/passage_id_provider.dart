@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_pomodoro_app/utils/verse_picker.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/services/scripture_mapping_service.dart';
 
@@ -51,8 +50,8 @@ final verseCatalogProvider = Provider<VerseCatalog>((ref) {
     // Cross-translation safe defaults:
     // Genesis: include chapter 1 only.
     'GEN': [31],
-    // John: include chapter 3 only (36 verses), so JOH.3.1..36 are valid.
-    'JOH': [0, 0, 36],
+    // John: include chapter 3 only (36 verses), so JHN.3.1..36 are valid.
+    'JHN': [0, 0, 36],
     // Psalms: include Psalm 23 (6 verses)
     'PSA': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
     // Note: Avoid books/chapters that may vary across translations (e.g., JAS.1.26 reported 404 on some ids).
@@ -80,18 +79,18 @@ final passageIdProvider = Provider<String>((ref) {
       if (verseIds.isNotEmpty) {
         return verseIds[rng.nextInt(verseIds.length)];
       }
-      // If mapping is oddly empty, fall back on catalog/curated
+      // If mapping is oddly empty, fall back on catalog; otherwise no source available.
       if (!catalog.isEmpty) return catalog.pickRandom(rng);
-      return pickRandomVerseId(rng, candidates: null);
+      throw StateError('No verse source available');
     },
     error: (e, st) {
       // Unknown/invalid bibleId mapping requested
       throw StateError('Unknown bibleId');
     },
     orElse: () {
-      // Mapping not yet loaded — use catalog/curated fallback
+      // Mapping not yet loaded — use catalog fallback; otherwise no source available
       if (!catalog.isEmpty) return catalog.pickRandom(rng);
-      return pickRandomVerseId(rng, candidates: null);
+      throw StateError('No verse source available');
     },
   );
 });
@@ -121,6 +120,6 @@ final nextPassageIdProvider = Provider<String Function()>((ref) {
     if (!catalog.isEmpty) {
       return catalog.pickRandom(rng);
     }
-    return pickRandomVerseId(rng, candidates: null);
+    throw StateError('No verse source available');
   };
 });
