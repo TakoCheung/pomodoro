@@ -296,9 +296,9 @@ class SettingsScreen extends ConsumerWidget {
                           ? _buildTimeRow(localSettings, localSettingsNotifier, isTablet)
                           : _buildTimeColumn(localSettings, localSettingsNotifier, isTablet),
                       const SizedBox(height: 12),
-                      const SizedBox(height: 12),
-                      const CustomDivider(spaceBefore: 30),
                       if (showDebugControls) ...[
+                        const SizedBox(height: 12),
+                        const CustomDivider(spaceBefore: 30),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
