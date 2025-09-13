@@ -67,9 +67,37 @@ Notifications
 - The notification payload includes: `bibleId`, `passageId`, `reference`, `textSnippet` (≤140 chars, ellipsis when truncated).
 - Tests use a fake scheduler and repository; no real notifications or network in tests.
 
+Alarm sound, notifications, and haptics
+---------------------------------------
+- Settings now includes an "Alarm Sound" dropdown (Classic Bell, Gentle Chime, Beep) and a Preview button.
+- Persisted preferences:
+	- `settings.sound_id` (string; default `classic_bell`)
+	- `settings.notifications_enabled` (bool; default true)
+	- `settings.haptics_enabled` (bool; default true)
+- Behavior:
+	- Foreground completion shows an in-app alarm banner and plays a short in-app audio cue; if haptics are enabled and supported, they trigger too. No duplicate system notification is posted.
+	- Background/app-killed completion posts a system notification with the selected sound (Android raw resource name); tapping deep-link opens the timer.
+	- Do Not Disturb is respected (no bypass).
+	- Idempotent completion handling (no duplicates).
+- Platform notes:
+	- Android uses `RawResourceAndroidNotificationSound(soundId)` when available.
+	- iOS uses default sound for now via DarwinNotificationDetails; custom CAF mapping can be added later if desired.
+
 Local notifications & background timers
 --------------------------------------
 - Set `ENABLE_LOCAL_NOTIFICATIONS=true` in your local `.env` to enable the concrete schedulers at runtime.
+
+Audio assets (in-app preview)
+- Generate demo sounds locally:
+	- dart run tool/gen_sounds.dart
+	- This writes .wav files to assets/audio/ and they are bundled by Flutter.
+	- If assets change, run: flutter pub get (to refresh) and rebuild the app.
+
+Notifications not showing?
+- Ensure permissions are granted:
+	- iOS: the app will prompt; you can re-enable in Settings > Notifications.
+	- Android 13+: the app will request POST_NOTIFICATIONS at runtime.
+- Channels are created at first use; try a clean reinstall if channels are misconfigured.
 - When enabled, a platform notification is scheduled exactly at the timer end to wake the app if it is backgrounded.
 - Timezone handling: the app initializes the timezone database and uses UTC for zoned scheduling to avoid tz.local issues on simulators.
 - Deep-link payload: tapping the notification sends `{ "action": "open_timer" }` to open the scripture overlay and stop any in-app alarm banner.
@@ -83,7 +111,7 @@ Tests & Coverage
 - Run all tests and produce coverage artifacts:
 	- `flutter test`
 	- `flutter test --coverage`
-	- Convert LCOV to CSV: `dart tool/lcov_to_csv.dart coverage/lcov.info > coverage/coverage.csv`
+	- Convert LCOV to CSV: `dart run tool/lcov_to_csv.dart coverage/lcov.info coverage/coverage.csv`
 - Artifacts are written to:
 	- `coverage/lcov.info`
 	- `coverage/coverage.csv`

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
 import 'package:flutter_pomodoro_app/state/app_lifecycle_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/services/notification_service.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
@@ -31,7 +32,8 @@ class _FakeScheduler implements NotificationScheduler {
       {required String channelId,
       required String title,
       required String body,
-      required Map<String, dynamic> payload}) async {
+      required Map<String, dynamic> payload,
+      String? soundId}) async {
     shown = true;
   }
 }
@@ -64,7 +66,7 @@ void main() {
     expect(fake.shown, isFalse);
   });
 
-  test('Foreground completion shows overlay instead of a system notification', () async {
+  test('Foreground completion shows banner/audio instead of a system notification', () async {
     final fake = _FakeScheduler();
     final container = ProviderContainer(overrides: [
       notificationSchedulerProvider.overrideWithValue(fake),
@@ -77,7 +79,7 @@ void main() {
     final notifier = container.read(timerProvider.notifier);
     notifier.triggerComplete();
     await Future<void>.delayed(const Duration(milliseconds: 10));
-    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
+    expect(container.read(alarmBannerVisibleProvider), isTrue);
     expect(fake.shown, isFalse);
   });
 }

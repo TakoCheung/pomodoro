@@ -19,7 +19,8 @@ class _FakeAlarm implements AlarmScheduler {
   }
 
   @override
-  Future<void> scheduleExact({required String timerId, required DateTime endUtc}) async {
+  Future<void> scheduleExact(
+      {required String timerId, required DateTime endUtc, String? soundId}) async {
     scheduleCalls++;
     lastId = timerId;
     lastEnd = endUtc;

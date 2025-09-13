@@ -10,10 +10,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
 import 'package:flutter_pomodoro_app/models/bible_version.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/state/settings_persistence.dart';
 import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
+import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
+import 'package:flutter_pomodoro_app/utils/sounds.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -296,56 +297,91 @@ class SettingsScreen extends ConsumerWidget {
                           ? _buildTimeRow(localSettings, localSettingsNotifier, isTablet)
                           : _buildTimeColumn(localSettings, localSettingsNotifier, isTablet),
                       const SizedBox(height: 12),
-                      if (showDebugControls) ...[
-                        const SizedBox(height: 12),
-                        const CustomDivider(spaceBefore: 30),
-                        Row(
+
+                      const SizedBox(height: 12),
+                      const CustomDivider(spaceBefore: 30),
+                      // Sound selection + preview
+                      const Text('ALARM SOUND', style: AppTextStyles.h4),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButton<String>(
+                              key: const Key('settings_sound_dropdown'),
+                              isExpanded: true,
+                              value: localSettings.soundId,
+                              items: const [
+                                DropdownMenuItem(
+                                    value: 'classic_bell',
+                                    key: Key('sound_option_classic_bell'),
+                                    child: Text('Classic Bell')),
+                                DropdownMenuItem(
+                                    value: 'gentle_chime',
+                                    key: Key('sound_option_gentle_chime'),
+                                    child: Text('Gentle Chime')),
+                                DropdownMenuItem(
+                                    value: 'beep',
+                                    key: Key('sound_option_beep'),
+                                    child: Text('Beep')),
+                              ],
+                              onChanged: (id) {
+                                if (id != null) {
+                                  localSettingsNotifier.updateSoundId(id);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          OutlinedButton(
+                            key: const Key('sound_preview'),
+                            onPressed: () {
+                              // Fire preview via AlarmService (in-app only). Do not post system notification.
+                              final alarm = ref.read(alarmServiceProvider);
+                              final id = ref.read(localSettingsProvider).soundId;
+                              // Use mapping util; in-app assets are .mp4 files in assets/audio
+                              final asset = inAppAssetFor(id);
+                              alarm.play(assetName: asset, loopFor: const Duration(seconds: 2));
+                            },
+                            child: const Text('Preview'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Haptics', style: AppTextStyles.h4),
+                          Switch(
+                            key: const Key('settings_haptics_toggle'),
+                            value: localSettings.hapticsEnabled,
+                            onChanged: (v) => localSettingsNotifier.updateHapticsEnabled(v),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Builder(builder: (context) {
+                        bool showNotificationsToggle = false;
+                        try {
+                          final flag = const String.fromEnvironment(
+                              'ENABLE_NOTIFICATIONS_TOGGLE_UI',
+                              defaultValue: 'false');
+                          showNotificationsToggle = flag == 'true';
+                        } catch (_) {}
+                        if (!showNotificationsToggle) {
+                          return const SizedBox.shrink();
+                        }
+                        return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Sound', style: AppTextStyles.h4),
+                            const Text('Notifications', style: AppTextStyles.h4),
                             Switch(
-                              key: const Key('settings_sound_toggle'),
-                              value: localSettings.soundEnabled,
-                              onChanged: (v) => localSettingsNotifier.updateSoundEnabled(v),
+                              key: const Key('notifications_switch'),
+                              value: localSettings.notificationsEnabled,
+                              onChanged: (v) => localSettingsNotifier.updateNotificationsEnabled(v),
                             )
                           ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Haptics', style: AppTextStyles.h4),
-                            Switch(
-                              key: const Key('settings_haptics_toggle'),
-                              value: localSettings.hapticsEnabled,
-                              onChanged: (v) => localSettingsNotifier.updateHapticsEnabled(v),
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Builder(builder: (context) {
-                          bool showNotificationsToggle = false;
-                          try {
-                            final flag = dotenv.env['ENABLE_NOTIFICATIONS_TOGGLE_UI'];
-                            showNotificationsToggle = flag == 'true';
-                          } catch (_) {}
-                          if (!showNotificationsToggle) {
-                            return const SizedBox.shrink();
-                          }
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Notifications', style: AppTextStyles.h4),
-                              Switch(
-                                key: const Key('notifications_switch'),
-                                value: localSettings.notificationsEnabled,
-                                onChanged: (v) =>
-                                    localSettingsNotifier.updateNotificationsEnabled(v),
-                              )
-                            ],
-                          );
-                        }),
-                      ],
+                        );
+                      }),
                       const CustomDivider(),
                       _buildFonts(timerState, localSettings, localSettingsNotifier, isTablet),
                       const CustomDivider(),

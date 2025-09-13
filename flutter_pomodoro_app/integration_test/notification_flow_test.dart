@@ -41,7 +41,8 @@ class _FakeScheduler implements NotificationScheduler {
       {required String channelId,
       required String title,
       required String body,
-      required Map<String, dynamic> payload}) async {
+      required Map<String, dynamic> payload,
+      String? soundId}) async {
     shown = true;
     this.title = title;
     this.body = body;

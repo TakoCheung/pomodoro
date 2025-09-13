@@ -20,6 +20,10 @@ import 'package:flutter_pomodoro_app/services/notification_service.dart';
 import 'package:flutter_pomodoro_app/state/clock_provider.dart';
 import 'package:flutter_pomodoro_app/state/active_timer_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
+import 'package:flutter_pomodoro_app/services/haptics_service.dart';
+import 'package:flutter_pomodoro_app/utils/sounds.dart';
 // import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 // import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 // import 'package:flutter_pomodoro_app/services/haptics_service.dart';
@@ -177,7 +181,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
               ActiveTimer(timerId: timerId, startUtc: now, endUtc: endUtc, label: label),
             ));
         final alarm = r.read(alarmSchedulerProvider);
-        unawaited(alarm.scheduleExact(timerId: timerId, endUtc: endUtc));
+        final soundId = r.read(localSettingsProvider).soundId;
+        unawaited(alarm.scheduleExact(timerId: timerId, endUtc: endUtc, soundId: soundId));
       }
     }
   }
@@ -382,9 +387,18 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final isFg = r.read(isAppForegroundProvider);
       final overlayVisible = r.read(scriptureOverlayVisibleProvider);
       final notificationsEnabled = settings.notificationsEnabled;
-      if (isFg && notificationsEnabled) {
-        // Foreground: show scripture overlay only; banner will be shown on notification tap.
-        r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+      if (isFg) {
+        // Foreground: show in-app banner and play audio/haptics per preference.
+        r.read(alarmBannerVisibleProvider.notifier).state = true;
+        // Play audio loop in foreground only.
+        final alarm = r.read(alarmServiceProvider);
+        final asset = inAppAssetFor(settings.soundId);
+        unawaited(alarm.play(assetName: asset, loopFor: const Duration(seconds: 10)));
+        // Haptics if enabled and supported (DefaultHapticsService may no-op on unsupported).
+        if (settings.hapticsEnabled && r.read(hapticsSupportedProvider)) {
+          final h = r.read(hapticsServiceProvider);
+          unawaited(h.pattern(const [HapticPulse.short, HapticPulse.long]));
+        }
       } else if (notificationsEnabled && !overlayVisible) {
         final scheduler = r.read(notificationSchedulerProvider);
         // Ensure initialized & channel exists; do not mutate providers here
@@ -403,6 +417,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
             title: res.title,
             body: res.body,
             payload: res.payload,
+            soundId: platformSoundBase(settings.soundId),
           );
           r.read(lastNotificationPostedProvider.notifier).state = true;
         } else {
@@ -410,9 +425,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
         }
       }
       // If notifications are disabled, still show overlay in foreground; in background do nothing.
-      if (isFg && !notificationsEnabled) {
-        r.read(scriptureOverlayVisibleProvider.notifier).state = true;
-      }
+      // If notifications are disabled, we still showed the banner above (isFg path) and do nothing in background.
     } catch (e) {
       debugPrint('TimerNotifier: fetch failed, using fallback: $e');
       final fallback = Passage(
@@ -425,8 +438,14 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final settings = r.read(localSettingsProvider);
       final isFg = r.read(isAppForegroundProvider);
       if (isFg) {
-        // Foreground: show scripture overlay only; banner will be shown on notification tap.
-        r.read(scriptureOverlayVisibleProvider.notifier).state = true;
+        r.read(alarmBannerVisibleProvider.notifier).state = true;
+        final alarm = r.read(alarmServiceProvider);
+        unawaited(alarm.play(
+            assetName: inAppAssetFor(settings.soundId), loopFor: const Duration(seconds: 10)));
+        if (settings.hapticsEnabled && r.read(hapticsSupportedProvider)) {
+          final h = r.read(hapticsServiceProvider);
+          unawaited(h.pattern(const [HapticPulse.short]));
+        }
       } else if (settings.notificationsEnabled) {
         final scheduler = r.read(notificationSchedulerProvider);
         await ensureChannelCreatedOnce(r, scheduler);
@@ -438,6 +457,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
             title: res.title,
             body: res.body,
             payload: res.payload,
+            soundId: platformSoundBase(settings.soundId),
           );
           r.read(lastNotificationPostedProvider.notifier).state = true;
         }

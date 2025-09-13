@@ -46,10 +46,10 @@ class AlarmBanner extends StatelessWidget {
                     ),
                     if (snippet != null && snippet!.isNotEmpty) ...[
                       const SizedBox(height: 2),
+                      // Allow full scripture rendering without truncation.
                       Text(
                         snippet!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: fontFamily,

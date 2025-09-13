@@ -51,8 +51,13 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
       final settings = await ios.requestPermissions(alert: true, badge: true, sound: true);
       return settings ?? true;
     }
-    // Android: many devices grant by default; for Android 13+, apps should add POST_NOTIFICATIONS permission.
-    // The plugin version in use may not expose a runtime request; return true here.
+    // Android 13+ requires the POST_NOTIFICATIONS runtime permission. Request if available.
+    final android =
+        _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      final bool? granted = await android.requestNotificationsPermission();
+      return granted ?? true;
+    }
     return true;
   }
 
@@ -61,13 +66,15 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
       {required String channelId,
       required String title,
       required String body,
-      required Map<String, dynamic> payload}) async {
+      required Map<String, dynamic> payload,
+      String? soundId}) async {
     final androidDetails = AndroidNotificationDetails(
       channelId,
       _channel?.name ?? 'Pomodoro',
       channelDescription: _channel?.description,
       importance: Importance.max,
       priority: Priority.high,
+      sound: soundId != null ? RawResourceAndroidNotificationSound(soundId) : null,
     );
     const iosDetails = DarwinNotificationDetails();
     final details = NotificationDetails(android: androidDetails, iOS: iosDetails);

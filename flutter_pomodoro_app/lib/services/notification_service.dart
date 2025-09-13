@@ -48,7 +48,8 @@ abstract class NotificationScheduler {
       {required String channelId,
       required String title,
       required String body,
-      required Map<String, dynamic> payload});
+      required Map<String, dynamic> payload,
+      String? soundId});
   Future<void> createAndroidChannel(
       {required String id, required String name, required String description, int importance = 4});
 }
@@ -72,5 +73,6 @@ class NoopNotificationScheduler implements NotificationScheduler {
       {required String channelId,
       required String title,
       required String body,
-      required Map<String, dynamic> payload}) async {}
+      required Map<String, dynamic> payload,
+      String? soundId}) async {}
 }

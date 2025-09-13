@@ -8,6 +8,7 @@ import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
 import 'package:flutter_pomodoro_app/state/active_timer_provider.dart';
 import 'package:flutter_pomodoro_app/state/app_lifecycle_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
+import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 
 import 'package:flutter_pomodoro_app/services/alarm_scheduler.dart';
 
@@ -24,7 +25,8 @@ class _FakeAlarmScheduler implements AlarmScheduler {
   }
 
   @override
-  Future<void> scheduleExact({required String timerId, required DateTime endUtc}) async {
+  Future<void> scheduleExact(
+      {required String timerId, required DateTime endUtc, String? soundId}) async {
     scheduledId = timerId;
     scheduledAt = endUtc.toUtc();
     scheduleCount++;
@@ -98,11 +100,11 @@ void main() {
         );
 
     await container.read(timerProvider.notifier).resyncAndProcessOverdue();
-    // Scripture overlay becomes visible in foreground on overdue completion
-    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
+    // Alarm banner becomes visible in foreground on overdue completion
+    expect(container.read(alarmBannerVisibleProvider), isTrue);
     // Second resync should be idempotent (still visible, no crash)
     await container.read(timerProvider.notifier).resyncAndProcessOverdue();
-    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
+    expect(container.read(alarmBannerVisibleProvider), isTrue);
   });
 
   test('Cancel updates schedules and clears persisted activeTimer', () async {

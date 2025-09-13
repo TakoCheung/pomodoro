@@ -12,6 +12,10 @@ import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 
 const String _prefsKeySettings = 'settings_v1';
+// New granular keys for faster lookups and partial writes (backward compatible):
+const String prefsKeySoundId = 'settings.sound_id';
+const String prefsKeyNotifications = 'settings.notifications_enabled';
+const String prefsKeyHaptics = 'settings.haptics_enabled';
 
 Map<String, dynamic> _defaultsJson() => <String, dynamic>{
       'pomodoro': TimerDefaults.pomodoroDefault,
@@ -24,8 +28,9 @@ Map<String, dynamic> _defaultsJson() => <String, dynamic>{
       'bibleVersionId': '32664dc3288a28df-01',
       'debugMode': false,
       'notificationsEnabled': true,
-      'soundEnabled': true,
+      'soundEnabled': true, // legacy
       'hapticsEnabled': true,
+      'soundId': 'classic_bell',
     };
 
 Color _colorFromHex(String hex) {
@@ -60,6 +65,7 @@ LocalSettings _mergeIntoDefaults(Map<String, dynamic> jsonMap) {
     notificationsEnabled: (d['notificationsEnabled'] as bool?) ?? true,
     soundEnabled: (d['soundEnabled'] as bool?) ?? true,
     hapticsEnabled: (d['hapticsEnabled'] as bool?) ?? true,
+    soundId: (d['soundId'] as String?) ?? 'classic_bell',
     bibleVersionName: (d['bibleVersionName'] as String?) ?? kDefaultBibleVersionName,
     bibleVersionId: d['bibleVersionId'] as String?,
   );
@@ -77,6 +83,7 @@ Map<String, dynamic> _toJson(LocalSettings s) => <String, dynamic>{
       'notificationsEnabled': s.notificationsEnabled,
       'soundEnabled': s.soundEnabled,
       'hapticsEnabled': s.hapticsEnabled,
+      'soundId': s.soundId,
     };
 
 /// Exposes helpers to load and persist LocalSettings into SharedPreferences.
@@ -86,21 +93,34 @@ class SettingsPersistence {
 
   LocalSettings loadOrDefaults() {
     final raw = prefs.getString(_prefsKeySettings);
+    // Check granular overrides first
+    final granular = <String, dynamic>{};
+    final gSound = prefs.getString(prefsKeySoundId);
+    final gNotif = prefs.getBool(prefsKeyNotifications);
+    final gHapt = prefs.getBool(prefsKeyHaptics);
+    if (gSound != null) granular['soundId'] = gSound;
+    if (gNotif != null) granular['notificationsEnabled'] = gNotif;
+    if (gHapt != null) granular['hapticsEnabled'] = gHapt;
     if (raw == null || raw.isEmpty) {
-      return _mergeIntoDefaults(const <String, dynamic>{});
+      return _mergeIntoDefaults(granular);
     }
     try {
       final map = json.decode(raw) as Map<String, dynamic>;
+      map.addAll(granular);
       return _mergeIntoDefaults(map);
     } catch (e) {
       debugPrint('SettingsPersistence: failed to decode cache: $e');
-      return _mergeIntoDefaults(const <String, dynamic>{});
+      return _mergeIntoDefaults(granular);
     }
   }
 
   Future<void> persist(LocalSettings s) async {
     try {
       await prefs.setString(_prefsKeySettings, json.encode(_toJson(s)));
+      // Also persist granular keys for fast access across app lifecycles/platform glue.
+      await prefs.setString(prefsKeySoundId, s.soundId);
+      await prefs.setBool(prefsKeyNotifications, s.notificationsEnabled);
+      await prefs.setBool(prefsKeyHaptics, s.hapticsEnabled);
     } catch (e) {
       debugPrint('SettingsPersistence: failed to persist: $e');
     }
@@ -109,6 +129,9 @@ class SettingsPersistence {
   Future<void> resetToDefaults() async {
     try {
       await prefs.remove(_prefsKeySettings);
+      await prefs.remove(prefsKeySoundId);
+      await prefs.remove(prefsKeyNotifications);
+      await prefs.remove(prefsKeyHaptics);
     } catch (_) {}
   }
 }
@@ -148,6 +171,7 @@ final settingsPersistenceInitializerProvider = Provider<bool>((ref) {
       notifier.updateNotificationsEnabled(loaded.notificationsEnabled);
       notifier.updateSoundEnabled(loaded.soundEnabled);
       notifier.updateHapticsEnabled(loaded.hapticsEnabled);
+      notifier.updateSoundId(loaded.soundId);
       // Stage session-scoped settings into LocalSettings only; timer picks them up
       // at the next session boundary.
       notifier.updateTime(TimerMode.pomodoro, loaded.initPomodoro ~/ 60);

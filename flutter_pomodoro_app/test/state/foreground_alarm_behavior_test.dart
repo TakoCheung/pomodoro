@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/services/scripture_service.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
+import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 
 class TestAlarmService extends NoopAlarmService {}
 
@@ -19,7 +20,7 @@ class _FakeScriptureService implements ScriptureServiceInterface {
 }
 
 void main() {
-  test('Foreground completion shows scripture overlay only (no banner/alarm)', () async {
+  test('Foreground completion shows banner and plays in-app alarm (no system notif)', () async {
     final container = ProviderContainer(overrides: [
       isAppForegroundProvider.overrideWith((_) => true),
       alarmServiceProvider.overrideWithValue(TestAlarmService()),
@@ -36,9 +37,8 @@ void main() {
     timer.triggerComplete();
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
-    // Foreground should show scripture overlay; banner is only on deep-link tap.
-    expect(container.read(scriptureOverlayVisibleProvider), isTrue);
-    // Alarm sound should not auto-play in foreground.
-    expect(container.read(alarmServiceProvider).isPlaying, isFalse);
+    // Foreground should show in-app banner and start alarm sound.
+    expect(container.read(alarmBannerVisibleProvider), isTrue);
+    expect(container.read(alarmServiceProvider).isPlaying, isTrue);
   });
 }
