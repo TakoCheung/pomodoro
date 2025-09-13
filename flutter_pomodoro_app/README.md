@@ -24,11 +24,12 @@ Simulator validation screenshots are saved under `artifacts/ios/`, e.g. `scriptu
 
 ### Environment (.env)
 
-- Copy `.env.example` to `.env` for local overrides.
+- Copy `.env.sample` to `.env` for local overrides.
 - Keys:
 	- `SCRIPTURE_API_KEY`: API key for the Scripture API. Required at runtime to fetch live passages and the Bible catalog. Tests mock HTTP and don't need it.
 	- `BIBLE_ID` (optional): explicit Bible ID override. Normally not needed; the app maps from the selected Bible version using the fetched catalog or a static fallback.
 - Build-time `lib/env_config.dart` may set safe defaults; `.env` overrides are read at runtime when available.
+- SECURITY: `.env` is gitignored at repo root; never commit real keys. CI uses a dummy `.env` from `.env.sample`.
 --------------------
 
 This project uses a small build-time config `lib/env_config.dart` for safe

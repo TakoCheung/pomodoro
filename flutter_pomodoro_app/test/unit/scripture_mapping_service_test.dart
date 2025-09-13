@@ -244,12 +244,13 @@ void main() {
       expect(m2.isEmpty, isFalse);
     });
 
-    test('corrupted cached json is ignored and service is used', () async {
+    test('corrupted cached json (old daily key) is ignored and service is used', () async {
       // Seed bad cache for today key
       final today = DateTime.now();
       final dateKey =
           '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       final prefsMap = <String, Object>{
+        // Seed using legacy daily key format to verify graceful migration/ignore
         'scripture_mapping_v1:BIBLE:$dateKey': '{not json}',
       };
       SharedPreferences.setMockInitialValues(prefsMap);

@@ -114,11 +114,10 @@ final scriptureMappingServiceProvider = Provider<ScriptureMappingServiceInterfac
 final scriptureMappingProvider =
     FutureProvider.family<ScriptureMapping, String>((ref, bibleId) async {
   final prefs = await ref.read(sharedPreferencesProvider.future);
-  final today = DateTime.now();
-  final dateKey =
-      '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-  final key = '$_prefsKeyPrefix:$bibleId:$dateKey';
-  final cached = prefs.getString(key);
+  // Permanent cache key per bibleId (no daily rotation)
+  final key = '$_prefsKeyPrefix:$bibleId';
+  String? cached = prefs.getString(key);
+
   if (cached != null) {
     try {
       final jsonMap = json.decode(cached) as Map<String, dynamic>;
