@@ -125,3 +125,13 @@ Settings staging & persistence
 Artifacts
 ---------
 - iOS simulator validation screenshots are saved in `artifacts/ios/`, e.g. `notification_flow.png` and the end-to-end `_flow.png` produced by `integration_test/_flow_test.dart`.
+
+Scripture Mapping (assets > prefs > network)
+--------------------------------------------
+- Load order for a given bibleId:
+	1) If an asset exists at `assets/scripture_mapping/{bibleId}.json`, it is loaded and used.
+		 On success, the JSON is also cached to SharedPreferences under `scripture_mapping_v1:{bibleId}`.
+	2) Else, if SharedPreferences contains a cached mapping, it is used.
+	3) Else, the mapping is fetched via the configured `ScriptureMappingService` (requires `SCRIPTURE_API_KEY`) and then cached to prefs.
+- Assets are read-only at runtime. To pre-bundle a mapping, drop a JSON file at `assets/scripture_mapping/` and ensure `pubspec.yaml` includes that directory (this repo already does). Example fixture: `assets/scripture_mapping/TEST_BIBLE.json`.
+- Tests override `assetBundleProvider`, `sharedPreferencesProvider`, and `scriptureMappingServiceProvider` for deterministic behavior with no real HTTP.

@@ -75,6 +75,7 @@ flutter:
   assets:
   - fonts/
   - assets/audio/
+  - assets/scripture_mapping/
   # Local environment file for dev/simulator runs. Do not commit secrets to
   # production builds. This allows flutter_dotenv to load the API key at
   # runtime when running on a device/simulator.

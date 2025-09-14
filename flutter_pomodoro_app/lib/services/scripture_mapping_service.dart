@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart' show AssetBundle, rootBundle, Clipboard, ClipboardData;
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart'
     show sharedPreferencesProvider;
 
@@ -102,6 +103,9 @@ class ScriptureMappingService implements ScriptureMappingServiceInterface {
 
 const _prefsKeyPrefix = 'scripture_mapping_v1';
 
+/// Injectable [AssetBundle] to allow overriding in tests.
+final assetBundleProvider = Provider<AssetBundle>((ref) => rootBundle);
+
 final scriptureMappingServiceProvider = Provider<ScriptureMappingServiceInterface>((ref) {
   final key = dotenv.env['SCRIPTURE_API_KEY'];
   if (key == null || key.isEmpty) {
@@ -113,21 +117,56 @@ final scriptureMappingServiceProvider = Provider<ScriptureMappingServiceInterfac
 
 final scriptureMappingProvider =
     FutureProvider.family<ScriptureMapping, String>((ref, bibleId) async {
-  final prefs = await ref.read(sharedPreferencesProvider.future);
-  // Permanent cache key per bibleId (no daily rotation)
-  final key = '$_prefsKeyPrefix:$bibleId';
-  String? cached = prefs.getString(key);
+  // 1) Try bundled asset first for fast/offline startup.
+  try {
+    final bundle = ref.read(assetBundleProvider);
+    final assetPath = 'assets/scripture_mapping/$bibleId.json';
+    final jsonStr = await bundle.loadString(assetPath);
+    final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
+    final mapping = ScriptureMapping.fromJson(jsonMap);
+    // Backfill SharedPreferences cache best-effort.
+    try {
+      final prefs = await ref.read(sharedPreferencesProvider.future);
+      final key = '$_prefsKeyPrefix:$bibleId';
+      await prefs.setString(key, json.encode(mapping.toJson()));
+    } catch (_) {}
+    return mapping;
+  } catch (_) {
+    // Asset miss or parse error: fall through.
+  }
 
+  // 2) Try SharedPreferences cache.
+  final prefs = await ref.read(sharedPreferencesProvider.future);
+  final key = '$_prefsKeyPrefix:$bibleId';
+  final cached = prefs.getString(key);
   if (cached != null) {
     try {
       final jsonMap = json.decode(cached) as Map<String, dynamic>;
+      if (kDebugMode) {
+        try {
+          final pretty = const JsonEncoder.withIndent('  ').convert(jsonMap);
+          // is it possible to save the pretty into the clipboard for easier inspection?
+          try {
+            await Clipboard.setData(ClipboardData(text: pretty));
+            debugPrint('Copied cached scripture mapping JSON for $bibleId to clipboard');
+          } catch (_) {
+            // ignore clipboard errors
+          }
+        } catch (_) {
+          debugPrint('Cached scripture mapping JSON (raw) for $bibleId: $jsonMap');
+        }
+      }
+      if (kDebugMode) debugPrint('Loaded scripture mapping for $bibleId from cache');
       final mapping = ScriptureMapping.fromJson(jsonMap);
       return mapping;
-    } catch (_) {}
+    } catch (_) {
+      // ignore corrupt cache
+    }
   }
+
+  // 3) Fallback to network service and cache result.
   final service = ref.read(scriptureMappingServiceProvider);
   final mapping = await service.buildMapping(bibleId);
-  // Persist cache best-effort
   try {
     await prefs.setString(key, json.encode(mapping.toJson()));
   } catch (_) {}
