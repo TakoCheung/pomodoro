@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_colors.dart';
 
 class AlarmBanner extends StatelessWidget {
   final VoidCallback onDismiss;
@@ -51,7 +52,7 @@ class AlarmBanner extends StatelessWidget {
                         snippet!,
                         softWrap: true,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.cobalt,
                           fontFamily: fontFamily,
                         ),
                       ),

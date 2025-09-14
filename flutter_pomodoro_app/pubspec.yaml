@@ -41,6 +41,7 @@ dependencies:
   html: ^0.15.4
   flutter_local_notifications: ^17.2.3
   timezone: ^0.9.4
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:

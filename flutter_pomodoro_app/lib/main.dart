@@ -14,6 +14,7 @@ import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_pomodoro_app/services/alarm_scheduler.dart';
+import 'package:flutter_pomodoro_app/services/alarm_service.dart';
 // import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 // import 'package:flutter_pomodoro_app/env_config.dart';
 
@@ -46,6 +47,8 @@ Future<void> main() async {
       alarmSchedulerProvider.overrideWithValue(
         FlutterLocalNotificationsAlarmScheduler(FlutterLocalNotificationsPlugin()),
       ),
+    // Use real in-app audio for preview/foreground alarms in non-test runs.
+    alarmServiceProvider.overrideWithValue(AssetAlarmService()),
   ];
   runApp(ProviderScope(overrides: overrides, child: const MyApp()));
 }
