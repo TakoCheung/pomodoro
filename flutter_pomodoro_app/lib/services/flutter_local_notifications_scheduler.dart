@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_pomodoro_app/services/notification_service.dart';
+import 'package:flutter_pomodoro_app/state/deeplink_handler.dart';
 
 class FlutterLocalNotificationsScheduler implements NotificationScheduler {
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
@@ -19,9 +20,43 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
     );
     const initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
     await _plugin.initialize(initSettings, onDidReceiveNotificationResponse: (response) {
-      // Deep-link handling would be wired here by parsing response.payload
+      // Route notification taps into app deep-link dispatcher.
       if (kDebugMode) debugPrint('Notification tapped: ${response.payload}');
+      try {
+        final payload = response.payload;
+        if (payload != null && payload.isNotEmpty) {
+          final map = jsonDecode(payload) as Map<String, dynamic>;
+          DeepLinkDispatcher.notify(map);
+        } else {
+          DeepLinkDispatcher.notify(const {'action': 'open_timer'});
+        }
+      } catch (_) {
+        // Fallback to opening timer screen if payload was malformed.
+        DeepLinkDispatcher.notify(const {'action': 'open_timer'});
+      }
     });
+  }
+
+  @override
+  Future<void> processPendingTapLaunch() async {
+    try {
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      final resp = details?.notificationResponse;
+      if (resp != null) {
+        if (kDebugMode) debugPrint('Notification launch tap: ${resp.payload}');
+        try {
+          final payload = resp.payload;
+          if (payload != null && payload.isNotEmpty) {
+            final map = jsonDecode(payload) as Map<String, dynamic>;
+            DeepLinkDispatcher.notify(map);
+          } else {
+            DeepLinkDispatcher.notify(const {'action': 'open_timer'});
+          }
+        } catch (_) {
+          DeepLinkDispatcher.notify(const {'action': 'open_timer'});
+        }
+      }
+    } catch (_) {}
   }
 
   @override
@@ -80,7 +115,15 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
       enableVibration: true,
       vibrationPattern: Int64List.fromList(<int>[0, 200, 100, 200]),
     );
-    const iosDetails = DarwinNotificationDetails();
+    // On iOS, ensure a sound is presented. If custom sounds aren't bundled,
+    // presentSound=true will use the default system sound.
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: false,
+      presentSound: true,
+      // Custom sound file (e.g., '<id>.caf') can be set when bundled.
+      // sound: soundId != null ? '${soundId}.caf' : null,
+    );
     final details = NotificationDetails(android: androidDetails, iOS: iosDetails);
     await _plugin.show(0, title, body, details, payload: jsonEncode(payload));
   }

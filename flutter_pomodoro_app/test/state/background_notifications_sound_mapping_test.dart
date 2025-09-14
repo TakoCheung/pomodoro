@@ -40,6 +40,9 @@ class _FakeScheduler implements NotificationScheduler {
     lastChannelId = channelId;
     lastSoundId = soundId;
   }
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }
 
 class _FakeService implements ScriptureServiceInterface {

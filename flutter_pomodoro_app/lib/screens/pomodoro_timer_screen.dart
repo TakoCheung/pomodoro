@@ -28,7 +28,8 @@ class PomodoroTimerScreen extends ConsumerWidget {
     final bibleId = ref.watch(bibleIdProvider);
     // Rationale visibility is driven by the coordinator (initialized at app start).
     final auto = ref.watch(permissionAutostartProvider);
-    final rationaleVisible = auto && ref.watch(notifRationaleVisibleProvider);
+    // Ensure the alarm banner is never obscured by the permission rationale.
+    final rationaleVisible = auto && ref.watch(notifRationaleVisibleProvider) && !showBanner;
     // Log basic debug info when needed.
     // debugPrint('PomodoroTimerScreen: bibleId=$bibleId');
     return Scaffold(

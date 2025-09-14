@@ -32,6 +32,9 @@ class _FakeScheduler implements NotificationScheduler {
       required String name,
       required String description,
       int importance = 4}) async {}
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }
 
 void main() {

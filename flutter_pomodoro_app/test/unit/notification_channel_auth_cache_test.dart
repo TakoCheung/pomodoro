@@ -32,6 +32,9 @@ class _SpyScheduler implements NotificationScheduler {
       required String body,
       required Map<String, dynamic> payload,
       String? soundId}) async {}
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }
 
 void main() {

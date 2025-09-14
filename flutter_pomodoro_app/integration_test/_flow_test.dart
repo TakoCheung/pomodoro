@@ -41,6 +41,9 @@ class _FakeScheduler implements NotificationScheduler {
     shown = true;
     lastSoundId = soundId;
   }
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }
 
 void main() {

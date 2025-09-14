@@ -52,6 +52,12 @@ abstract class NotificationScheduler {
       String? soundId});
   Future<void> createAndroidChannel(
       {required String id, required String name, required String description, int importance = 4});
+
+  /// On iOS (and Android), when the app is launched or resumed due to a
+  /// notification tap, there may be a pending response available before the
+  /// plugin is initialized. Implementations should surface that payload and
+  /// dispatch to DeepLinkDispatcher if present.
+  Future<void> processPendingTapLaunch();
 }
 
 class NoopNotificationScheduler implements NotificationScheduler {
@@ -75,4 +81,7 @@ class NoopNotificationScheduler implements NotificationScheduler {
       required String body,
       required Map<String, dynamic> payload,
       String? soundId}) async {}
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }

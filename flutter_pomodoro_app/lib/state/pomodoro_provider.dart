@@ -398,7 +398,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
         // Ensure initialized & channel exists; do not mutate providers here
         await ensureChannelCreatedOnce(r, scheduler);
         // Ask for permission once per app lifecycle
-        final granted = await ensureNotificationPermissionOnce(r, scheduler, provisional: true);
+        // Request full permission before posting so iOS can play sound (provisional is quiet).
+        final granted = await ensureNotificationPermissionOnce(r, scheduler, provisional: false);
         if (granted) {
           final res = NotificationContentBuilder.build(
             bibleId: bibleId,
@@ -414,6 +415,9 @@ class TimerNotifier extends StateNotifier<TimerState> {
             soundId: platformSoundBase(settings.soundId),
           );
           r.read(lastNotificationPostedProvider.notifier).state = true;
+          // Ensure we surface a banner on the next resume in case the tap
+          // callback isn’t delivered by the OS.
+          r.read(bannerPendingOnNextResumeProvider.notifier).state = true;
         } else {
           // Record a non-blocking message by setting overlay with fallback hint (no-op UI here)
         }
@@ -443,7 +447,8 @@ class TimerNotifier extends StateNotifier<TimerState> {
       } else if (settings.notificationsEnabled) {
         final scheduler = r.read(notificationSchedulerProvider);
         await ensureChannelCreatedOnce(r, scheduler);
-        final granted = await ensureNotificationPermissionOnce(r, scheduler, provisional: true);
+        // Request full permission before posting so iOS can play sound (provisional is quiet).
+        final granted = await ensureNotificationPermissionOnce(r, scheduler, provisional: false);
         if (granted) {
           final res = NotificationContentBuilder.fallback();
           await scheduler.show(
@@ -454,6 +459,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
             soundId: platformSoundBase(settings.soundId),
           );
           r.read(lastNotificationPostedProvider.notifier).state = true;
+          r.read(bannerPendingOnNextResumeProvider.notifier).state = true;
         }
       }
     } finally {

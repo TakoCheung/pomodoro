@@ -66,9 +66,37 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
+    // Handle notification taps ASAP: show banner; ensure this is set before plugin init.
+    DeepLinkDispatcher.onNotificationTap = (payload) {
+      // Only one action for now: open timer/scripture overlay.
+      final action = payload['action'] as String?;
+      if (action == null || action == 'open_timer') {
+        try {
+          // Show only the banner with verse when user taps the notification.
+          ref.read(scriptureOverlayVisibleProvider.notifier).state = false;
+          ref.read(alarmBannerVisibleProvider.notifier).state = true;
+          // Consume any pending-on-resume flag since an explicit tap happened.
+          ref.read(bannerPendingOnNextResumeProvider.notifier).state = false;
+          // Stop any ongoing alarm sound, banner will be visible.
+          final alarm = ref.read(alarmServiceProvider);
+          alarm.stop();
+        } catch (_) {}
+      }
+    };
     // Attach lifecycle observer to keep foreground/background state accurate.
     _observer = LifecycleObserver(ref, onChange: (ref, state) {
       if (state == AppLifecycleState.resumed) {
+        // Capture any pending tap that resumed the app (warm resume case)
+        try {
+          ref.read(notificationSchedulerProvider).processPendingTapLaunch();
+        } catch (_) {}
+        // If a notification was posted previously and we resume without a
+        // tap callback, force-show the banner once to ensure visibility.
+        final pending = ref.read(bannerPendingOnNextResumeProvider);
+        if (pending) {
+          ref.read(alarmBannerVisibleProvider.notifier).state = true;
+          ref.read(bannerPendingOnNextResumeProvider.notifier).state = false;
+        }
         // Reschedule active timers or process overdue completion once
         ref.read(timerProvider.notifier).resyncAndProcessOverdue();
       }
@@ -81,21 +109,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         ref.read(permissionCoordinatorProvider.notifier).initialize();
       }
     });
-    // Handle notification taps: show scripture overlay and stop any ongoing alarm.
-    DeepLinkDispatcher.onNotificationTap = (payload) {
-      // Only one action for now: open timer/scripture overlay.
-      final action = payload['action'] as String?;
-      if (action == null || action == 'open_timer') {
-        try {
-          // Show only the banner with verse when user taps the notification.
-          ref.read(scriptureOverlayVisibleProvider.notifier).state = false;
-          ref.read(alarmBannerVisibleProvider.notifier).state = true;
-          // Stop any ongoing alarm sound, banner will be visible.
-          final alarm = ref.read(alarmServiceProvider);
-          alarm.stop();
-        } catch (_) {}
-      }
-    };
   }
 
   @override

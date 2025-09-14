@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:flutter_pomodoro_app/state/deeplink_handler.dart';
 
 abstract class AlarmScheduler {
   Future<void> scheduleExact({required String timerId, required DateTime endUtc, String? soundId});
@@ -32,7 +34,22 @@ class FlutterLocalNotificationsAlarmScheduler implements AlarmScheduler {
       requestSoundPermission: false,
     );
     const initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
-    _plugin.initialize(initSettings);
+    _plugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (response) {
+        try {
+          final payload = response.payload;
+          if (payload != null && payload.isNotEmpty) {
+            final map = jsonDecode(payload) as Map<String, dynamic>;
+            DeepLinkDispatcher.notify(map);
+          } else {
+            DeepLinkDispatcher.notify(const {'action': 'open_timer'});
+          }
+        } catch (_) {
+          DeepLinkDispatcher.notify(const {'action': 'open_timer'});
+        }
+      },
+    );
     // Ensure timezone database is initialized; set local to UTC to avoid missing tz.local.
     try {
       tzdata.initializeTimeZones();
@@ -59,7 +76,13 @@ class FlutterLocalNotificationsAlarmScheduler implements AlarmScheduler {
         enableVibration: true,
         vibrationPattern: Int64List.fromList(<int>[0, 200, 100, 200]),
       ),
-      iOS: const DarwinNotificationDetails(),
+      // Ensure iOS shows alert and plays a sound (default system sound if none specified).
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: false,
+        presentSound: true,
+        // sound: soundId != null ? '${soundId}.caf' : null,
+      ),
     );
     await _plugin.zonedSchedule(
       timerId.hashCode,

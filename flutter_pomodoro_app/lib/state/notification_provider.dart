@@ -24,10 +24,19 @@ final _channelCreatedProvider = StateProvider<bool>((_) => false);
 /// is present without requiring real platform I/O.
 final lastNotificationPostedProvider = StateProvider<bool>((_) => false);
 
-Future<bool> ensureNotificationPermissionOnce(Ref ref, NotificationScheduler sched,
-    {bool provisional = false}) async {
+Future<bool> ensureNotificationPermissionOnce(
+  Ref ref,
+  NotificationScheduler sched, {
+  bool provisional = false,
+}) async {
   final cached = ref.read(_authStateProvider);
-  if (cached != null) return cached;
+  // If previously granted, short-circuit.
+  if (cached == true) return true;
+  // If previously denied and caller only wants provisional behavior, honor the cached denial
+  // to avoid spamming the user with OS prompts.
+  if (cached == false && provisional) return false;
+  // Otherwise (no cache, or denied but now explicitly asking for full permission),
+  // attempt to request again and update the cache with the latest answer.
   final granted = await sched.requestPermission(provisional: provisional);
   ref.read(_authStateProvider.notifier).state = granted;
   return granted;

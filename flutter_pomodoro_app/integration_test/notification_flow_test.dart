@@ -48,6 +48,9 @@ class _FakeScheduler implements NotificationScheduler {
     this.body = body;
     this.payload = payload;
   }
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }
 
 class _FakeService implements ScriptureServiceInterface {

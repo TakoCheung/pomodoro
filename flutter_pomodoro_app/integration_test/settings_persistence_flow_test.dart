@@ -18,6 +18,8 @@ void main() {
     // Open settings and ensure the pomodoro field shows 30 immediately via value text
     await tester.tap(find.byKey(const Key('settingsButton')));
     await tester.pumpAndSettle();
+    // Ensure the time section is visible on small devices before reading values
+    await tester.ensureVisible(find.byKey(const Key('timeSection')));
     final valueFinder = find.byKey(const Key('pomodoro_value'));
     expect(valueFinder, findsOneWidget);
     final textWidget = tester.widget<Text>(valueFinder);
@@ -31,7 +33,9 @@ void main() {
     await tester.tap(find.byKey(const Key('settingsButton')));
     await tester.pumpAndSettle();
     // Change pomodoro once, then reset
-    await tester.tap(find.byKey(const Key('pomodoro_inc')));
+    final incBtn = find.byKey(const Key('pomodoro_inc'));
+    await tester.ensureVisible(incBtn);
+    await tester.tap(incBtn);
     await tester.pump();
     final resetBtn = find.byKey(const Key('reset_defaults_button'));
     await tester.ensureVisible(resetBtn);
@@ -39,6 +43,7 @@ void main() {
     await tester.pumpAndSettle();
     // Verify defaults are shown immediately in the dialog (25)
     final valueFinder2 = find.byKey(const Key('pomodoro_value'));
+    await tester.ensureVisible(valueFinder2);
     expect(valueFinder2, findsOneWidget);
     final textWidget2 = tester.widget<Text>(valueFinder2);
     expect(textWidget2.data, '25');

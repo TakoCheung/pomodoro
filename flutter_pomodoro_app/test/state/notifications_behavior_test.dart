@@ -36,6 +36,9 @@ class _FakeScheduler implements NotificationScheduler {
       String? soundId}) async {
     shown = true;
   }
+
+  @override
+  Future<void> processPendingTapLaunch() async {}
 }
 
 class _FakeService implements ScriptureServiceInterface {
