@@ -83,6 +83,13 @@ class LocalSettings {
 class LocalSettingsNotifier extends StateNotifier<LocalSettings> {
   LocalSettingsNotifier(super.state);
 
+  /// Replace the entire settings snapshot atomically. Intended for commits
+  /// from SettingsRepository.apply() to ensure the app reads a consistent
+  /// committed view.
+  void replace(LocalSettings next) {
+    state = next;
+  }
+
   void updateFont(String fontFamily) {
     state = state.copyWith(fontFamily: fontFamily);
   }

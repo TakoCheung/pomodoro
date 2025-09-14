@@ -183,11 +183,13 @@ final settingsPersistenceInitializerProvider = Provider<bool>((ref) {
     });
   }
 
-  // Persist on every settings change.
-  ref.listen<LocalSettings>(localSettingsProvider, (prev, next) {
-    if (prev == next) return;
-    persistence.persist(next);
-  });
+  // Do not persist on every change anymore. Persistence occurs explicitly via
+  // SettingsController.apply(). Keeping this listener disabled avoids unintended
+  // writes while a settings panel is open and staging ephemeral values.
+  // ref.listen<LocalSettings>(localSettingsProvider, (prev, next) {
+  //   if (prev == next) return;
+  //   persistence.persist(next);
+  // });
 
   return true;
 });

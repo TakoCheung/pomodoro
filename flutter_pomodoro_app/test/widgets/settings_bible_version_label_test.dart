@@ -45,8 +45,10 @@ void main() {
     // Header label should be uppercase like other section headers
     expect(find.text('BIBLE VERSION'), findsOneWidget);
 
-    // Open dropdown and verify abbreviations appear in the menu
-    await tester.tap(find.byKey(const Key('bible_version_dropdown')));
+    // Scroll into view and open dropdown, then verify abbreviations appear
+    final dropdown = find.byKey(const Key('bible_version_dropdown'));
+    await tester.ensureVisible(dropdown);
+    await tester.tap(dropdown);
     await tester.pumpAndSettle();
     expect(find.text('ESV-local'), findsWidgets);
     // Depending on mapping, label may be 'SV' or full name; accept either.

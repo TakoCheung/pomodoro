@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/screens/setting_screen.dart';
-import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
+import 'package:flutter_pomodoro_app/state/settings_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,11 +27,11 @@ void main() {
     await tester.tap(hapticsFinder, warnIfMissed: false);
     await tester.pump();
 
-    // Read provider to confirm
-    final settings = ProviderScope.containerOf(tester.element(find.byType(SettingsScreen)))
-        .read(localSettingsProvider);
-    // Because initial defaults are true, after taps they should be false.
-    expect(settings.soundId, 'gentle_chime');
-    expect(settings.hapticsEnabled, isFalse);
+    // Read staged settings from the SettingsController to confirm (committed
+    // LocalSettings updates only on Apply).
+    final settingsCtl = ProviderScope.containerOf(tester.element(find.byType(SettingsScreen)))
+        .read(settingsControllerProvider);
+    expect(settingsCtl.staged.soundId, 'gentle_chime');
+    expect(settingsCtl.staged.hapticsEnabled, isFalse);
   });
 }

@@ -117,6 +117,11 @@ Tests & Coverage
 	- `coverage/coverage.csv`
 - Integration tests live under `integration_test/` and rely on provider overrides and fakes for stability.
 
+Settings staging & persistence
+------------------------------
+- The settings dialog now stages changes via a SettingsController. Nothing is written to SharedPreferences until Apply is pressed.
+- Useful Keys in tests: `settings_panel`, `settings_close`, `settings_apply` (alias on Apply Next Session), `settings_scrim`, `settings_dirty_badge`, `settings_commit_state_summary`, and the toggles `settings_sound_toggle`, `settings_haptics_toggle`, `settings_notifications_toggle`.
+
 Artifacts
 ---------
 - iOS simulator validation screenshots are saved in `artifacts/ios/`, e.g. `notification_flow.png` and the end-to-end `_flow.png` produced by `integration_test/_flow_test.dart`.
