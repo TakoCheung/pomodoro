@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -36,6 +37,8 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
       description: description,
       importance: Importance.max,
       playSound: true,
+      enableVibration: true,
+      vibrationPattern: Int64List.fromList(<int>[0, 200, 100, 200]),
     );
     _channel = android;
     final androidPlugin =
@@ -75,6 +78,8 @@ class FlutterLocalNotificationsScheduler implements NotificationScheduler {
       importance: Importance.max,
       priority: Priority.high,
       sound: soundId != null ? RawResourceAndroidNotificationSound(soundId) : null,
+      enableVibration: true,
+      vibrationPattern: Int64List.fromList(<int>[0, 200, 100, 200]),
     );
     const iosDetails = DarwinNotificationDetails();
     final details = NotificationDetails(android: androidDetails, iOS: iosDetails);

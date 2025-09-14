@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
@@ -55,6 +56,8 @@ class FlutterLocalNotificationsAlarmScheduler implements AlarmScheduler {
         priority: Priority.high,
         playSound: true,
         sound: soundId != null ? RawResourceAndroidNotificationSound(soundId) : null,
+        enableVibration: true,
+        vibrationPattern: Int64List.fromList(<int>[0, 200, 100, 200]),
       ),
       iOS: const DarwinNotificationDetails(),
     );

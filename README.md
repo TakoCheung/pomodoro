@@ -20,3 +20,8 @@ Setup once:
 - Ensure Prettier is installed locally: `npm i -D prettier`
 
 On commit, staged JS/TS/JSON/Markdown/YAML/CSS/HTML files will be formatted and re-added.
+
+## Background notifications: sound & vibration
+
+- Android: Background/killed completions post a high-importance notification with sound and vibration. The app enables vibration on the notification channel and per-notification with a short pattern. Sound selection honors your chosen sound in Settings.
+- iOS: The system controls vibration for notifications. The app requests alert and sound permissions and plays the default notification sound. Background notification haptics cannot be explicitly enabled by the app.
