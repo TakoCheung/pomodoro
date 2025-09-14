@@ -1,5 +1,4 @@
 import 'dart:async';
-// ...existing code...
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
@@ -9,7 +8,6 @@ import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/timer_model.dart';
 export 'package:flutter_pomodoro_app/state/timer_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/models/passage.dart';
@@ -24,10 +22,6 @@ import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 import 'package:flutter_pomodoro_app/services/haptics_service.dart';
 import 'package:flutter_pomodoro_app/utils/sounds.dart';
-// import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
-// import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
-// import 'package:flutter_pomodoro_app/services/haptics_service.dart';
-// ...existing code...
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
 // Show a simple overlay when a completion is detected on cold start/resume.

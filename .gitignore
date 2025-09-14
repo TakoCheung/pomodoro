@@ -1,4 +1,14 @@
 .DS_Store
 **/.env
+**/.env.*
 coverage/
+**/coverage/
 artifacts/
+**/artifacts/
+node_modules/
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
