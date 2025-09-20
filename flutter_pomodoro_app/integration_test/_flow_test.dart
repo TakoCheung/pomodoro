@@ -67,6 +67,9 @@ void main() {
     expect(container.read(alarmBannerVisibleProvider), isTrue);
     expect(container.read(scriptureOverlayVisibleProvider), isFalse);
     expect(find.byKey(const Key('alarm_banner')), findsOneWidget);
+    // TaskBar present with settings button.
+    expect(find.byKey(const Key('task_bar')), findsOneWidget);
+    expect(find.byKey(const Key('task_bar_settings')), findsOneWidget);
 
     await binding.takeScreenshot('artifacts/ios/_flow.png');
   });
@@ -106,6 +109,9 @@ void main() {
     expect(container.read(alarmBannerVisibleProvider), isTrue);
     expect(container.read(scriptureOverlayVisibleProvider), isFalse);
     expect(find.byKey(const Key('alarm_banner')), findsOneWidget);
+    // TaskBar present with settings button.
+    expect(find.byKey(const Key('task_bar')), findsOneWidget);
+    expect(find.byKey(const Key('task_bar_settings')), findsOneWidget);
 
     await binding.takeScreenshot('artifacts/ios/_flow.png');
   });

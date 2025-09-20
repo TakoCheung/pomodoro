@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/components/timer/timer_display.dart';
-import 'package:flutter_pomodoro_app/components/timer/timer_gearicon_button.dart';
 import 'package:flutter_pomodoro_app/components/timer/timer_mode_switch_ui.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_pomodoro_app/widgets/alarm_banner.dart';
 import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
 import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
+import 'package:flutter_pomodoro_app/components/timer/task_bar.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
   const PomodoroTimerScreen({super.key});
@@ -60,7 +60,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
                 Flexible(child: SizedBox(height: 48)),
                 TimerDisplay(),
                 Flexible(child: SizedBox(height: 40)),
-                GearIconButton(),
+                // GearIconButton removed; now provided in TaskBar.
               ],
             ),
           ),
@@ -85,10 +85,13 @@ class PomodoroTimerScreen extends ConsumerWidget {
           Consumer(builder: (context, ref, _) {
             final speaking = ref.watch(isScriptureSpeakingProvider);
             if (!speaking) return const SizedBox.shrink();
+            // Add extra padding for task bar height to keep indicator above it.
+            const basePad = 24.0;
+            const barHeight = TaskBarDefaults.height;
             return Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 24),
+                padding: const EdgeInsets.only(bottom: basePad + barHeight),
                 child: Container(
                   key: const Key('scripture_voice_playing'),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -157,6 +160,11 @@ class PomodoroTimerScreen extends ConsumerWidget {
                 ),
               ),
             ),
+          // Minimal TaskBar placeholder (will evolve)
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: TaskBar(),
+          ),
         ],
       ),
       // No debug FAB.
