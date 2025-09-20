@@ -41,6 +41,7 @@ dependencies:
   flutter_local_notifications: ^17.2.3
   timezone: ^0.9.4
   audioplayers: ^5.2.1
+  flutter_tts: ^3.8.5
 
 dev_dependencies:
   flutter_test:

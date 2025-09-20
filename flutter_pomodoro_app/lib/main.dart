@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_pomodoro_app/screens/pomodoro_timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_pomodoro_app/state/alarm_scheduler_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_pomodoro_app/services/alarm_scheduler.dart';
 import 'package:flutter_pomodoro_app/services/alarm_service.dart';
+import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
 // import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 // import 'package:flutter_pomodoro_app/env_config.dart';
 
@@ -49,6 +51,8 @@ Future<void> main() async {
       ),
     // Use real in-app audio for preview/foreground alarms in non-test runs.
     alarmServiceProvider.overrideWithValue(AssetAlarmService()),
+    // Real TTS engine for scripture voice.
+    ttsEngineProvider.overrideWithValue(RealTtsEngine()),
   ];
   runApp(ProviderScope(overrides: overrides, child: const MyApp()));
 }
@@ -80,6 +84,10 @@ class _MyAppState extends ConsumerState<MyApp> {
           // Stop any ongoing alarm sound, banner will be visible.
           final alarm = ref.read(alarmServiceProvider);
           alarm.stop();
+          // Auto start scripture TTS if the feature is enabled and a passage is present.
+          if (ref.read(scriptureAudioEnabledProvider)) {
+            unawaited(ref.read(scriptureAudioControllerProvider).playForCurrentPassage());
+          }
         } catch (_) {}
       }
     };

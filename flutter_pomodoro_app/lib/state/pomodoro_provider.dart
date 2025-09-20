@@ -22,6 +22,7 @@ import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 import 'package:flutter_pomodoro_app/services/haptics_service.dart';
 import 'package:flutter_pomodoro_app/utils/sounds.dart';
+import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
 
 final scriptureOverlayVisibleProvider = StateProvider<bool>((ref) => false);
 // Show a simple overlay when a completion is detected on cold start/resume.
@@ -385,9 +386,16 @@ class TimerNotifier extends StateNotifier<TimerState> {
         // Foreground: show in-app banner and play audio/haptics per preference.
         r.read(alarmBannerVisibleProvider.notifier).state = true;
         // Play audio loop in foreground only.
-        final alarm = r.read(alarmServiceProvider);
-        final asset = inAppAssetFor(settings.soundId);
-        unawaited(alarm.play(assetName: asset, loopFor: const Duration(seconds: 10)));
+        // If scripture TTS selected, skip looping alarm beeps to allow clear voice playback.
+        if (settings.soundId != 'tts_scripture') {
+          final alarm = r.read(alarmServiceProvider);
+          final asset = inAppAssetFor(settings.soundId);
+          unawaited(alarm.play(assetName: asset, loopFor: const Duration(seconds: 10)));
+        }
+        // Scripture TTS auto playback if enabled.
+        if (r.read(scriptureAudioEnabledProvider)) {
+          unawaited(r.read(scriptureAudioControllerProvider).playForCurrentPassage());
+        }
         // Haptics if enabled and supported (DefaultHapticsService may no-op on unsupported).
         if (settings.hapticsEnabled && r.read(hapticsSupportedProvider)) {
           final h = r.read(hapticsServiceProvider);
@@ -437,9 +445,14 @@ class TimerNotifier extends StateNotifier<TimerState> {
       final isFg = r.read(isAppForegroundProvider);
       if (isFg) {
         r.read(alarmBannerVisibleProvider.notifier).state = true;
-        final alarm = r.read(alarmServiceProvider);
-        unawaited(alarm.play(
-            assetName: inAppAssetFor(settings.soundId), loopFor: const Duration(seconds: 10)));
+        if (settings.soundId != 'tts_scripture') {
+          final alarm = r.read(alarmServiceProvider);
+          unawaited(alarm.play(
+              assetName: inAppAssetFor(settings.soundId), loopFor: const Duration(seconds: 10)));
+        }
+        if (r.read(scriptureAudioEnabledProvider)) {
+          unawaited(r.read(scriptureAudioControllerProvider).playForCurrentPassage());
+        }
         if (settings.hapticsEnabled && r.read(hapticsSupportedProvider)) {
           final h = r.read(hapticsServiceProvider);
           unawaited(h.pattern(const [HapticPulse.short]));

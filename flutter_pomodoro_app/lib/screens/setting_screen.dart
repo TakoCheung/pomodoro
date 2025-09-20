@@ -15,6 +15,7 @@ import 'package:flutter_pomodoro_app/state/settings_controller.dart';
 import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 import 'package:flutter_pomodoro_app/utils/sounds.dart';
+import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -218,6 +219,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         value: 'beep',
                                         key: Key('sound_option_beep'),
                                         child: Text('Beep')),
+                                    DropdownMenuItem(
+                                        value: 'tts_scripture',
+                                        key: Key('sound_option_tts_scripture'),
+                                        child: Text('Read Scripture')),
                                   ],
                                   onChanged: (id) {
                                     if (id != null) {
@@ -519,7 +524,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _formatCommitSummary(SettingsControllerState s) {
     String onOff(bool v) => v ? 'On' : 'Off';
     final c = s.committed;
-    return 'Sound ${onOff(c.soundEnabled)} • Haptics ${onOff(c.hapticsEnabled)}';
+    // Derived scripture voice flag via provider (cannot watch in helper; use container read instead).
+    try {
+      final enabled = ref.read(scriptureAudioEnabledProvider);
+      final base = 'Sound ${onOff(c.soundEnabled)} • Haptics ${onOff(c.hapticsEnabled)}';
+      return enabled ? '$base • Scripture Voice On' : base;
+    } catch (_) {
+      return 'Sound ${onOff(c.soundEnabled)} • Haptics ${onOff(c.hapticsEnabled)}';
+    }
   }
 
   void _showCachedPassagesDialog(BuildContext context, WidgetRef ref) {

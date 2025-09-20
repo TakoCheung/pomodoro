@@ -14,6 +14,7 @@ import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/widgets/alarm_banner.dart';
 import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
+import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
 
 class PomodoroTimerScreen extends ConsumerWidget {
   const PomodoroTimerScreen({super.key});
@@ -80,6 +81,33 @@ class PomodoroTimerScreen extends ConsumerWidget {
                 snippet: shown?.text,
               ),
             ),
+          // Scripture voice indicator (beneath rationale sheet, above banner/overlay stacking earlier)
+          Consumer(builder: (context, ref, _) {
+            final speaking = ref.watch(isScriptureSpeakingProvider);
+            if (!speaking) return const SizedBox.shrink();
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Container(
+                  key: const Key('scripture_voice_playing'),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.graphic_eq, color: Colors.white, size: 18),
+                      SizedBox(width: 8),
+                      Text('Reading Scripture...', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
           if (notifPosted)
             const Align(
               alignment: Alignment.bottomLeft,
