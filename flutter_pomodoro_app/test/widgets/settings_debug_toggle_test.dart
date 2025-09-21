@@ -11,6 +11,8 @@ void main() {
     // Toggle debug mode (use key to avoid ambiguity with other switches)
     final debugSwitch = find.byKey(const Key('debug_mode_switch'));
     expect(debugSwitch, findsOneWidget);
+    // Ensure the switch is actually visible before tapping (avoid off-screen tap warnings)
+    await tester.ensureVisible(debugSwitch);
     await tester.tap(debugSwitch);
     await tester.pumpAndSettle();
 
@@ -18,6 +20,8 @@ void main() {
     // Find the first number input's down button and tap multiple times, then ensure it shows a smaller number.
     final downButtons = find.byIcon(Icons.keyboard_arrow_down);
     expect(downButtons, findsWidgets);
+    // Scroll into view in case inputs are laid out near bottom on smaller virtual test surfaces.
+    await tester.ensureVisible(downButtons.first);
     for (int i = 0; i < 5; i++) {
       await tester.tap(downButtons.first);
       await tester.pump();

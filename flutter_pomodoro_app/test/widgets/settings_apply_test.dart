@@ -11,17 +11,20 @@ void main() {
     // Open settings
     final settingsBtn = find.byKey(const Key('settingsButton'));
     expect(settingsBtn, findsOneWidget);
+    await tester.ensureVisible(settingsBtn);
     await tester.tap(settingsBtn);
     await tester.pumpAndSettle();
 
     // Find a NumberInput and increment pomodoro minutes (+1)
     final plusButton = find.byIcon(Icons.keyboard_arrow_up).first;
+    await tester.ensureVisible(plusButton);
     await tester.tap(plusButton);
     await tester.pumpAndSettle();
 
     // Apply changes for next session (non-interrupting)
     final applyBtn = find.byKey(const Key('apply_next_session_button'));
     expect(applyBtn, findsOneWidget);
+    await tester.ensureVisible(applyBtn);
     await tester.tap(applyBtn);
     await tester.pumpAndSettle();
 

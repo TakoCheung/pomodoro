@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_dimensions.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
@@ -100,7 +101,7 @@ class TimerDisplay extends ConsumerWidget {
                         fontFamily: timerState.fontFamily),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 // Cancel button removed to reduce redundancy with Pause.
                 // Expose remaining label for tests
                 Text(

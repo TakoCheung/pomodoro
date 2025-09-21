@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_dimensions.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter_pomodoro_app/components/setting/divider.dart';
 import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/data/bible_versions.dart';
 import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
 import 'package:flutter_pomodoro_app/models/bible_version.dart';
-import 'package:flutter_pomodoro_app/state/scripture_repository.dart';
 import 'package:flutter_pomodoro_app/state/settings_controller.dart';
 import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
@@ -158,7 +158,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               alignment: Alignment.centerLeft,
                               child: Container(
                                 key: const Key('settings_dirty_badge'),
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: AppInsets.chipTight,
                                 decoration: BoxDecoration(
                                   color: Colors.orange.shade700,
                                   borderRadius: BorderRadius.circular(999),
@@ -167,7 +167,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     style: TextStyle(color: Colors.white, fontSize: 11)),
                               ),
                             ),
-                          if (settingsCtl.isDirty) const SizedBox(height: 8),
+                          if (settingsCtl.isDirty) const SizedBox(height: AppSpacing.xs),
                           if (showDebugControls) ...[
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -184,7 +184,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ],
                           // Sound enabled + selection + preview (placed early so it's always visible without scrolling in tests)
                           const Text('ALARM SOUND', style: AppTextStyles.h4),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -198,7 +198,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               )
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Row(
                             children: [
                               Expanded(
@@ -246,7 +246,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -379,7 +379,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               // Show the On/Off badge on the same line using trailing.
                               trailing: Container(
                                 key: const Key('permission_status_badge'),
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: AppInsets.chipTight,
                                 decoration: BoxDecoration(
                                   color: statusText == 'On'
                                       ? Colors.green.shade600
@@ -404,12 +404,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ? _buildTimeRow(settingsCtl, settingsCtlNotifier, isTablet)
                               : _buildTimeColumn(settingsCtl, settingsCtlNotifier, isTablet),
                           // (Sound/Haptics section moved earlier)
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Builder(builder: (context) {
                             bool showNotificationsToggle = false;
                             try {
                               final flag = const String.fromEnvironment(
-                                  'ENABLE_NOTIFICATIONS_TOGGLE_UI',
+                                  'ENABLE_NOTIFICATIONS_TOGGLE',
                                   defaultValue: 'false');
                               showNotificationsToggle = flag == 'true';
                             } catch (_) {}
@@ -445,13 +445,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: LayoutBuilder(builder: (context, constraints) {
                       final isNarrow = constraints.maxWidth < 360;
                       final buttons = <Widget>[
-                        if (settingsCtl.staged.debugMode)
-                          OutlinedButton.icon(
-                            key: const Key('view_cached_passages_button'),
-                            icon: const Icon(Icons.history),
-                            label: const Text('View cached passages'),
-                            onPressed: () => _showCachedPassagesDialog(context, ref),
-                          ),
                         // Default: Apply next session (non-interrupting). This updates live settings
                         // immediately and stages durations for the next session boundary.
                         KeyedSubtree(
@@ -497,7 +490,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           ),
                         ),
-                        if (!isNarrow) const SizedBox(width: 12) else const SizedBox(height: 8),
+                        if (!isNarrow)
+                          const SizedBox(width: AppSpacing.sm)
+                        else
+                          const SizedBox(height: AppSpacing.xs),
                       ];
                       return isNarrow
                           ? Column(
@@ -532,52 +528,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (_) {
       return 'Sound ${onOff(c.soundEnabled)} • Haptics ${onOff(c.hapticsEnabled)}';
     }
-  }
-
-  void _showCachedPassagesDialog(BuildContext context, WidgetRef ref) {
-    final repo = ref.read(scriptureRepositoryProvider);
-    final history = repo.history;
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        key: const Key('cached_passages_dialog'),
-        title: const Text('Cached Passages (today and history)'),
-        // Give the dialog content a fixed box; avoid shrinkWrap ListView which
-        // conflicts with AlertDialog's IntrinsicWidth during layout.
-        content: SizedBox(
-          width: 500,
-          height: 400,
-          child: history.isEmpty
-              ? const Text('No passages cached yet.')
-              : Scrollbar(
-                  child: ListView.separated(
-                    key: const Key('cached_passages_list'),
-                    primary: false,
-                    itemCount: history.length,
-                    separatorBuilder: (_, __) => const Divider(height: 12),
-                    itemBuilder: (_, i) {
-                      final p = history[i];
-                      return ListTile(
-                        dense: true,
-                        title: Text(p.reference),
-                        subtitle: Text(
-                          p.text,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          )
-        ],
-      ),
-    );
   }
 
   Widget _buildTimeRow(

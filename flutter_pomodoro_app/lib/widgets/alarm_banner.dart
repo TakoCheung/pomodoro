@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_dimensions.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 
 class AlarmBanner extends StatelessWidget {
@@ -26,7 +27,7 @@ class AlarmBanner extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: AppInsets.banner,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

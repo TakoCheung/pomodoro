@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_dimensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
@@ -60,11 +61,11 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
       final p = direct;
       debugPrint('ScriptureOverlay: showing Passage from state ${p.reference}');
       return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
         child: Material(
           elevation: 6,
           color: Colors.white70,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppRadii.md),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -84,7 +85,7 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                 Text(p.reference,
                     key: const Key('scripture_reference'),
                     style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Text(p.text,
                     key: const Key('scripture_text'),
                     maxLines: 6,
@@ -103,11 +104,11 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
       data: (p) {
         debugPrint('ScriptureOverlay: showing fetched Passage ${p.reference}');
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
           child: Material(
             elevation: 6,
             color: Colors.white70,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadii.md),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -127,7 +128,7 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
                   Text(p.reference,
                       key: const Key('scripture_reference'),
                       style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(p.text,
                       key: const Key('scripture_text'),
                       maxLines: 6,

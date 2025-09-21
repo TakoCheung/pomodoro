@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro_app/design/app_dimensions.dart';
 import 'package:flutter_pomodoro_app/components/timer/timer_display.dart';
 import 'package:flutter_pomodoro_app/components/timer/timer_mode_switch_ui.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
@@ -135,7 +136,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

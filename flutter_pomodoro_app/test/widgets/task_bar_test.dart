@@ -34,16 +34,29 @@ void main() {
   });
 
   group('TaskBar dynamic actions (RED)', () {
-    testWidgets('Single action (settings) centers at slot 2', (tester) async {
+    testWidgets('Single action (settings) at center slot 2', (tester) async {
       await tester.pumpWidget(_wrap(const TaskBar(actions: [GearIconButton()])));
       await tester.pump();
       expect(find.byKey(const Key('task_bar_settings')), findsOneWidget);
-      // Should expose slot key for center only.
       expect(find.byKey(const Key('task_bar_slot_2')), findsOneWidget);
       expect(find.byKey(const Key('task_bar_slot_0')), findsNothing);
+      expect(find.byKey(const Key('task_bar_slot_1')), findsNothing);
     });
 
-    testWidgets('Three actions produce slots 1,2,3 populated', (tester) async {
+    testWidgets('Two actions occupy slots 1 and 3', (tester) async {
+      await tester.pumpWidget(_wrap(const TaskBar(actions: [
+        GearIconButton(),
+        _Dummy('b'),
+      ])));
+      await tester.pump();
+      expect(find.byKey(const Key('task_bar_slot_1')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_3')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_0')), findsNothing);
+      expect(
+          find.byKey(const Key('task_bar_slot_2')), findsNothing); // center left open for symmetry
+    });
+
+    testWidgets('Three actions occupy center cluster 1,2,3', (tester) async {
       await tester.pumpWidget(_wrap(const TaskBar(actions: [
         _Dummy('a'),
         GearIconButton(),
@@ -53,6 +66,22 @@ void main() {
       expect(find.byKey(const Key('task_bar_slot_1')), findsOneWidget);
       expect(find.byKey(const Key('task_bar_slot_2')), findsOneWidget);
       expect(find.byKey(const Key('task_bar_slot_3')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_0')), findsNothing);
+    });
+
+    testWidgets('Four actions occupy 0,1,3,4 (skip 2)', (tester) async {
+      await tester.pumpWidget(_wrap(const TaskBar(actions: [
+        _Dummy('0'),
+        _Dummy('1'),
+        GearIconButton(),
+        _Dummy('3'),
+      ])));
+      await tester.pump();
+      expect(find.byKey(const Key('task_bar_slot_0')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_1')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_3')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_4')), findsOneWidget);
+      expect(find.byKey(const Key('task_bar_slot_2')), findsNothing);
     });
 
     testWidgets('Five actions fill slots 0..4', (tester) async {
@@ -69,7 +98,7 @@ void main() {
       }
     });
 
-    testWidgets('More than five actions drops extras silently', (tester) async {
+    testWidgets('More than five actions drops extras silently (still 0..4)', (tester) async {
       await tester.pumpWidget(_wrap(const TaskBar(actions: [
         _Dummy('0'),
         _Dummy('1'),
