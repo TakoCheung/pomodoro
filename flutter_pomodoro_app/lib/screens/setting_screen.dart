@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro_app/design/app_dimensions.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter_pomodoro_app/components/setting/divider.dart';
-import 'package:flutter_pomodoro_app/components/setting/number_input.dart';
 import 'package:flutter_pomodoro_app/design/app_colors.dart';
 import 'package:flutter_pomodoro_app/design/app_text_styles.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pomodoro_app/data/bible_versions.dart';
-import 'package:flutter_pomodoro_app/services/bible_catalog_service.dart';
-import 'package:flutter_pomodoro_app/models/bible_version.dart';
 import 'package:flutter_pomodoro_app/state/settings_controller.dart';
 import 'package:flutter_pomodoro_app/state/permission_coordinator.dart';
 import 'package:flutter_pomodoro_app/state/alarm_haptics_providers.dart';
 import 'package:flutter_pomodoro_app/utils/sounds.dart';
 import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
+import 'package:flutter_pomodoro_app/screens/settings/settings_time_section.dart';
+import 'package:flutter_pomodoro_app/screens/settings/settings_font_section.dart';
+import 'package:flutter_pomodoro_app/screens/settings/settings_color_section.dart';
+import 'package:flutter_pomodoro_app/screens/settings/settings_bible_version_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -262,111 +263,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           const CustomDivider(spaceBefore: 15),
                           // Bible Version selector
-                          Row(
-                            children: [
-                              const Text('BIBLE VERSION', style: AppTextStyles.h4),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Consumer(builder: (context, ref, _) {
-                                  final AsyncValue<List<BibleVersion>> versionsAsync =
-                                      ref.watch(bibleVersionsProvider);
-                                  return versionsAsync.when(
-                                    data: (list) {
-                                      final Map<String, BibleVersion> byId = {
-                                        for (final v in list) v.id: v
-                                      };
-                                      final uniqueList = byId.values.toList(growable: false);
-                                      final items = uniqueList
-                                          .map((v) => DropdownMenuItem<String>(
-                                                value: v.id,
-                                                child: Text(v.label),
-                                              ))
-                                          .toList(growable: false);
-
-                                      final currentName = settingsCtl.staged.bibleVersionName;
-                                      final match = uniqueList.firstWhere(
-                                        (v) =>
-                                            v.label == currentName ||
-                                            v.displayName == currentName ||
-                                            v.name == currentName ||
-                                            v.abbreviationLocal == currentName ||
-                                            v.abbreviation == currentName,
-                                        orElse: () => uniqueList.first,
-                                      );
-                                      final selectedId = match.id;
-
-                                      return DropdownButton<String>(
-                                        key: const Key('bible_version_dropdown'),
-                                        isExpanded: true,
-                                        value: settingsCtl.staged.bibleVersionId ?? selectedId,
-                                        items: items,
-                                        onChanged: (id) {
-                                          if (id == null) return;
-                                          final sel = uniqueList.firstWhere((v) => v.id == id,
-                                              orElse: () => match);
-                                          settingsCtlNotifier.updateStaged(
-                                            bibleVersionName: sel.label,
-                                            bibleVersionId: sel.id,
-                                          );
-                                        },
-                                      );
-                                    },
-                                    loading: () {
-                                      final entries =
-                                          kBibleVersions.entries.toList(growable: false);
-                                      final items = entries
-                                          .map((e) => DropdownMenuItem<String>(
-                                              value: e.value, child: Text(e.key)))
-                                          .toList(growable: false);
-                                      final selectedId = settingsCtl.staged.bibleVersionId ??
-                                          kBibleVersions[settingsCtl.staged.bibleVersionName] ??
-                                          (entries.isNotEmpty ? entries.first.value : null);
-                                      return DropdownButton<String>(
-                                        key: const Key('bible_version_dropdown'),
-                                        isExpanded: true,
-                                        value: selectedId,
-                                        items: items,
-                                        onChanged: (id) {
-                                          if (id == null) return;
-                                          final e = entries.firstWhere((e) => e.value == id,
-                                              orElse: () => entries.first);
-                                          settingsCtlNotifier.updateStaged(
-                                            bibleVersionName: e.key,
-                                            bibleVersionId: e.value,
-                                          );
-                                        },
-                                      );
-                                    },
-                                    error: (_, __) {
-                                      final entries =
-                                          kBibleVersions.entries.toList(growable: false);
-                                      final items = entries
-                                          .map((e) => DropdownMenuItem<String>(
-                                              value: e.value, child: Text(e.key)))
-                                          .toList(growable: false);
-                                      final selectedId = settingsCtl.staged.bibleVersionId ??
-                                          kBibleVersions[settingsCtl.staged.bibleVersionName] ??
-                                          (entries.isNotEmpty ? entries.first.value : null);
-                                      return DropdownButton<String>(
-                                        key: const Key('bible_version_dropdown'),
-                                        isExpanded: true,
-                                        value: selectedId,
-                                        items: items,
-                                        onChanged: (id) {
-                                          if (id == null) return;
-                                          final e = entries.firstWhere((e) => e.value == id,
-                                              orElse: () => entries.first);
-                                          settingsCtlNotifier.updateStaged(
-                                            bibleVersionName: e.key,
-                                            bibleVersionId: e.value,
-                                          );
-                                        },
-                                      );
-                                    },
-                                  );
-                                }),
-                              ),
-                            ],
+                          SettingsBibleVersionSection(
+                            settingsCtl: settingsCtl,
+                            settingsCtlNotifier: settingsCtlNotifier,
                           ),
                           const CustomDivider(spaceBefore: 15),
                           // Notifications permission status (single-line)
@@ -395,14 +294,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             );
                           }),
                           const CustomDivider(spaceBefore: 15),
-                          const Text(
-                            'TIME (MINUTES)',
-                            style: AppTextStyles.h4,
-                          ),
+                          const Text('TIME (MINUTES)', style: AppTextStyles.h4),
                           const SizedBox(height: 10),
-                          isTablet
-                              ? _buildTimeRow(settingsCtl, settingsCtlNotifier, isTablet)
-                              : _buildTimeColumn(settingsCtl, settingsCtlNotifier, isTablet),
+                          SettingsTimeSection(
+                            staged: settingsCtl,
+                            settingsCtlNotifier: settingsCtlNotifier,
+                            isTablet: isTablet,
+                          ),
                           // (Sound/Haptics section moved earlier)
                           const SizedBox(height: AppSpacing.xs),
                           Builder(builder: (context) {
@@ -431,9 +329,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             );
                           }),
                           const CustomDivider(),
-                          _buildFonts(timerState, settingsCtl, settingsCtlNotifier, isTablet),
+                          SettingsFontSection(
+                            timerState: timerState,
+                            staged: settingsCtl,
+                            settingsCtlNotifier: settingsCtlNotifier,
+                            isTablet: isTablet,
+                          ),
                           const CustomDivider(),
-                          _buildColor(timerState, settingsCtl, settingsCtlNotifier, isTablet),
+                          SettingsColorSection(
+                            timerState: timerState,
+                            staged: settingsCtl,
+                            settingsCtlNotifier: settingsCtlNotifier,
+                            isTablet: isTablet,
+                          ),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -527,244 +435,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return enabled ? '$base • Scripture Voice On' : base;
     } catch (_) {
       return 'Sound ${onOff(c.soundEnabled)} • Haptics ${onOff(c.hapticsEnabled)}';
-    }
-  }
-
-  Widget _buildTimeRow(
-      SettingsControllerState staged, SettingsController settingsCtlNotifier, bool isTablet) {
-    // Use Expanded to prevent horizontal overflow on narrow layouts while keeping a single row on tablets.
-    return Row(
-      key: const Key('timeSection'),
-      children: [
-        Expanded(
-          child: _buildNumberInput(TimerMode.pomodoro, staged.staged.initPomodoro,
-              staged.staged.debugMode ? 0 : 25, 60, settingsCtlNotifier, isTablet,
-              keyPrefix: 'pomodoro'),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildNumberInput(TimerMode.shortBreak, staged.staged.initShortBreak,
-              staged.staged.debugMode ? 0 : 5, 15, settingsCtlNotifier, isTablet,
-              keyPrefix: 'shortBreak'),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildNumberInput(TimerMode.longBreak, staged.staged.initLongBreak,
-              staged.staged.debugMode ? 0 : 15, 30, settingsCtlNotifier, isTablet,
-              keyPrefix: 'longBreak'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeColumn(
-      SettingsControllerState staged, SettingsController settingsCtlNotifier, bool isTablet) {
-    return Column(
-      key: const Key('timeSection'),
-      children: [
-        _buildNumberInput(TimerMode.pomodoro, staged.staged.initPomodoro,
-            staged.staged.debugMode ? 0 : 25, 60, settingsCtlNotifier, isTablet,
-            keyPrefix: 'pomodoro'),
-        const SizedBox(height: 10),
-        _buildNumberInput(TimerMode.shortBreak, staged.staged.initShortBreak,
-            staged.staged.debugMode ? 0 : 5, 15, settingsCtlNotifier, isTablet,
-            keyPrefix: 'shortBreak'),
-        const SizedBox(height: 10),
-        _buildNumberInput(TimerMode.longBreak, staged.staged.initLongBreak,
-            staged.staged.debugMode ? 0 : 15, 30, settingsCtlNotifier, isTablet,
-            keyPrefix: 'longBreak'),
-      ],
-    );
-  }
-
-  Widget _buildFonts(TimerState timerState, SettingsControllerState staged,
-      SettingsController settingsCtlNotifier, bool isTablet) {
-    return isTablet
-        ? Row(
-            key: const Key('fontSection'),
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-                const Text(
-                  'FONT',
-                  style: AppTextStyles.h4,
-                ),
-                const SizedBox(height: 10),
-                Container(child: _buildFontRow(timerState, staged, settingsCtlNotifier))
-              ])
-        : Column(
-            key: const Key('fontSection'),
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-                const Text(
-                  'FONT',
-                  style: AppTextStyles.h4,
-                ),
-                const SizedBox(height: 10),
-                Container(child: _buildFontRow(timerState, staged, settingsCtlNotifier))
-              ]);
-  }
-
-  Widget _buildFontRow(TimerState timerState, SettingsControllerState staged,
-      SettingsController settingsCtlNotifier) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildFontOption('Aa', AppTextStyles.kumbhSans, timerState, staged, settingsCtlNotifier),
-        const SizedBox(
-          width: 16,
-        ),
-        _buildFontOption('Aa', AppTextStyles.robotoSlab, timerState, staged, settingsCtlNotifier),
-        const SizedBox(
-          width: 16,
-        ),
-        _buildFontOption('Aa', AppTextStyles.spaceMono, timerState, staged, settingsCtlNotifier),
-      ],
-    );
-  }
-
-  Widget _buildColor(TimerState timerState, SettingsControllerState staged,
-      SettingsController settingsCtlNotifier, bool isTablet) {
-    return isTablet
-        ? Row(
-            key: const Key('colorSection'),
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-                const Text(
-                  'COLOR',
-                  style: AppTextStyles.h4,
-                ),
-                const SizedBox(height: 10),
-                _buildColorRow(staged, settingsCtlNotifier, timerState),
-              ])
-        : Column(
-            key: const Key('colorSection'),
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-                const Text(
-                  'COLOR',
-                  style: AppTextStyles.h4,
-                ),
-                const SizedBox(height: 10),
-                _buildColorRow(staged, settingsCtlNotifier, timerState),
-              ]);
-  }
-
-  Widget _buildColorRow(SettingsControllerState staged, SettingsController settingsCtlNotifier,
-      TimerState timerState) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildColorOption(AppColors.orangeRed, staged, settingsCtlNotifier, timerState),
-        const SizedBox(
-          width: 16,
-        ),
-        _buildColorOption(AppColors.lightBlue, staged, settingsCtlNotifier, timerState),
-        const SizedBox(
-          width: 16,
-        ),
-        _buildColorOption(AppColors.lightPurle, staged, settingsCtlNotifier, timerState),
-      ],
-    );
-  }
-
-  Widget _buildNumberInput(TimerMode mode, int timeInSec, int min, int max,
-      SettingsController settingsCtlNotifier, bool isTablet,
-      {String? keyPrefix}) {
-    return NumberInput(
-        title: _timerModeName(mode),
-        initialValue: timeInSec ~/ 60,
-        minValue: min,
-        maxValue: max,
-        onValueChanged: (value) {
-          int seconds;
-          // Debug semantics: 0 minutes means 1 second for fast flows.
-          if (value == 0) {
-            seconds = 0; // keep 0 here; TimerNotifier will treat as 1 second
-          } else {
-            seconds = value * 60;
-          }
-          switch (mode) {
-            case TimerMode.pomodoro:
-              settingsCtlNotifier.updateStaged(initPomodoro: seconds);
-              break;
-            case TimerMode.shortBreak:
-              settingsCtlNotifier.updateStaged(initShortBreak: seconds);
-              break;
-            case TimerMode.longBreak:
-              settingsCtlNotifier.updateStaged(initLongBreak: seconds);
-              break;
-          }
-        },
-        isTablet: isTablet,
-        testKeyPrefix: keyPrefix);
-  }
-
-  Widget _buildFontOption(String text, String fontFamily, TimerState timerState,
-      SettingsControllerState staged, SettingsController settingsCtlNotifier) {
-    bool currentActive = timerState.fontFamily == fontFamily;
-    return GestureDetector(
-      onTap: () => settingsCtlNotifier.updateStaged(fontFamily: fontFamily),
-      child: Container(
-        // maybe better to contain the ring inside the container
-        width: 40,
-        height: 40,
-        padding: const EdgeInsets.all(12.5),
-        decoration: BoxDecoration(
-          color: currentActive ? AppColors.darkDarkBlue : Colors.transparent,
-          shape: BoxShape.circle,
-          border: Border.all(
-            strokeAlign: 5,
-            color:
-                staged.staged.fontFamily != fontFamily ? Colors.transparent : AppColors.lightGray,
-            width: 2.0,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-              fontFamily: fontFamily,
-              fontSize: AppTextStyles.h3FontSize,
-              color: currentActive ? Colors.white : AppColors.darkBlue,
-              fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildColorOption(Color color, SettingsControllerState staged,
-      SettingsController settingsCtlNotifier, TimerState timerState) {
-    return GestureDetector(
-        onTap: () => settingsCtlNotifier.updateStaged(color: color),
-        child: Container(
-          width: 40,
-          height: 40,
-          padding: const EdgeInsets.all(11.5),
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: Border.all(
-              strokeAlign: 5,
-              color: staged.staged.color != color ? Colors.transparent : AppColors.lightGray,
-              width: 2.0, //different than figma
-            ),
-          ),
-          child: CircleAvatar(
-            backgroundColor: Colors.transparent,
-            child: timerState.color == color
-                ? const Icon(Icons.check, color: AppColors.darkDarkBlue)
-                : null,
-          ),
-        ));
-  }
-
-  String _timerModeName(TimerMode mode) {
-    switch (mode) {
-      case TimerMode.pomodoro:
-        return 'Pomodoro';
-      case TimerMode.shortBreak:
-        return 'Short Break';
-      case TimerMode.longBreak:
-        return 'Long Break';
     }
   }
 }
