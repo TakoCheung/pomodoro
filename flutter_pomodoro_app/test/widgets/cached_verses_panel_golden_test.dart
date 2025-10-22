@@ -25,8 +25,8 @@ class _FakeRepo extends ScriptureRepository {
 
 void main() {
   testWidgets('CachedVersesPanel golden – light & dark, non-empty & empty', (tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(600, 900);
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1.0;
 
     final passages = [
       Passage(
@@ -67,8 +67,8 @@ void main() {
         matchesGoldenFile('../goldens/cached_verses_panel_dark_empty.png'));
 
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
   });
 }

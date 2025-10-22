@@ -35,8 +35,8 @@ Widget _host(double width, List<Passage> seed) => ProviderScope(
 
 void main() {
   testWidgets('CachedVersesPanel multi-width golden', (tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(1200, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(1200, 1000);
 
     final passages = [
       Passage(
@@ -66,8 +66,8 @@ void main() {
         find.byType(Row), matchesGoldenFile('../goldens/cached_verses_panel_multi_width.png'));
 
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
   });
 }

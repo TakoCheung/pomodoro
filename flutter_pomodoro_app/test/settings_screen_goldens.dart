@@ -21,7 +21,7 @@ void main() async {
     // small render overflows during golden rendering.
     final width = 540.0;
     // Set DPR for stable logical size calculations in headless runs
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    tester.view.devicePixelRatio = 1.0;
     final widget = ProviderScope(
       child: MaterialApp(
         home: Scaffold(
@@ -41,8 +41,8 @@ void main() async {
     await screenMatchesGolden(tester, 'setting_screen_mobile');
 
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
   });
 }
