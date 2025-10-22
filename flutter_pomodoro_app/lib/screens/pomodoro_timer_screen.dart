@@ -97,7 +97,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
                   key: const Key('scripture_voice_playing'),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: const Row(
