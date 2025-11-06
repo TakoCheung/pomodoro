@@ -7,6 +7,7 @@ import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/state/pomodoro_provider.dart';
 import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 import 'package:flutter_pomodoro_app/models/scripture_request.dart';
+import 'package:flutter_pomodoro_app/state/encouragement_provider.dart';
 
 class ScriptureOverlay extends ConsumerStatefulWidget {
   final String bibleId;
@@ -24,6 +25,62 @@ class ScriptureOverlay extends ConsumerStatefulWidget {
 
 class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
   Timer? _hideTimer;
+
+  Widget _buildOverlayContent({
+    required BuildContext context,
+    required String font,
+    required String reference,
+    required String text,
+    String? encouragement,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
+        child: Material(
+          key: const Key('scripture_overlay_material'),
+          elevation: 6,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: SingleChildScrollView(
+              key: const Key('scripture_overlay_scroll'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      key: const Key('scripture_close_button'),
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: _dismiss,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+                  Text(reference,
+                      key: const Key('scripture_reference'),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(text, key: const Key('scripture_text'), style: TextStyle(fontFamily: font)),
+                  if (encouragement != null && encouragement.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(encouragement,
+                        key: const Key('scripture_encouragement'),
+                        style: TextStyle(fontFamily: font, color: Colors.black87)),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   void _startAutoHide() {
     _hideTimer?.cancel();
@@ -60,41 +117,15 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
     if (direct != null) {
       final p = direct;
       debugPrint('ScriptureOverlay: showing Passage from state ${p.reference}');
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-        child: Material(
-          elevation: 6,
-          color: Colors.white70,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    key: const Key('scripture_close_button'),
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: _dismiss,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ),
-                Text(p.reference,
-                    key: const Key('scripture_reference'),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
-                const SizedBox(height: AppSpacing.xs),
-                Text(p.text,
-                    key: const Key('scripture_text'),
-                    maxLines: 6,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: font)),
-              ],
-            ),
-          ),
-        ),
+      final maybeEnc = ref
+          .watch(encouragementForCurrentPassageProvider)
+          .maybeWhen(data: (v) => v, orElse: () => null);
+      return _buildOverlayContent(
+        context: context,
+        font: font,
+        reference: p.reference,
+        text: p.text,
+        encouragement: maybeEnc,
       );
     }
 
@@ -103,41 +134,15 @@ class _ScriptureOverlayState extends ConsumerState<ScriptureOverlay> {
     return asyncPassage.when(
       data: (p) {
         debugPrint('ScriptureOverlay: showing fetched Passage ${p.reference}');
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-          child: Material(
-            elevation: 6,
-            color: Colors.white70,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      key: const Key('scripture_close_button'),
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: _dismiss,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ),
-                  Text(p.reference,
-                      key: const Key('scripture_reference'),
-                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: font)),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(p.text,
-                      key: const Key('scripture_text'),
-                      maxLines: 6,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontFamily: font)),
-                ],
-              ),
-            ),
-          ),
+        final maybeEnc = ref
+            .watch(encouragementForCurrentPassageProvider)
+            .maybeWhen(data: (v) => v, orElse: () => null);
+        return _buildOverlayContent(
+          context: context,
+          font: font,
+          reference: p.reference,
+          text: p.text,
+          encouragement: maybeEnc,
         );
       },
       loading: () => const SizedBox.shrink(),

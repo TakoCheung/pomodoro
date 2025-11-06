@@ -99,17 +99,38 @@ class TimerState {
 
 class TimerNotifier extends StateNotifier<TimerState> {
   final Ref? ref;
+  TimerNotifier({this.ref}) : super(_initialState(ref)) {
+    // Initialized from LocalSettings to avoid using watch on a nullable Ref.
+    // Best-effort resume/cleanup if an active timer exists in persistence.
+    if (ref != null) {
+      unawaited(Future.microtask(resyncAndProcessOverdue));
+    }
+  }
 
-  TimerNotifier({this.ref})
-      : super(TimerState(
-            timeRemaining: TimerDefaults.pomodoroDefault,
-            isRunning: false,
-            mode: TimerMode.pomodoro,
-            initLongBreak: TimerDefaults.longBreakDefault,
-            initPomodoro: TimerDefaults.pomodoroDefault,
-            initShortBreak: TimerDefaults.shortBreakDefault,
-            fontFamily: AppTextStyles.kumbhSans,
-            color: AppColors.orangeRed));
+  static TimerState _initialState(Ref? ref) {
+    // Read cached settings first; fall back to defaults if unavailable.
+    final s = ref?.read(localSettingsProvider);
+    final initPomodoro = s?.initPomodoro ?? TimerDefaults.pomodoroDefault;
+    final initShortBreak = s?.initShortBreak ?? TimerDefaults.shortBreakDefault;
+    final initLongBreak = s?.initLongBreak ?? TimerDefaults.longBreakDefault;
+    final fontFamily = s?.fontFamily ?? AppTextStyles.kumbhSans;
+    final color = s?.color ?? AppColors.orangeRed;
+
+    // Respect "0 minutes = 1 second" fast-flow semantics.
+    final initialRemaining = initPomodoro == 0 ? 1 : initPomodoro;
+
+    return TimerState(
+      timeRemaining: initialRemaining,
+      isRunning: false,
+      mode: TimerMode.pomodoro,
+      initLongBreak: initLongBreak,
+      initPomodoro: initPomodoro,
+      initShortBreak: initShortBreak,
+      fontFamily: fontFamily,
+      color: color,
+    );
+  }
+
   Timer? _timer;
 
   void startTimer() {
@@ -141,6 +162,9 @@ class TimerNotifier extends StateNotifier<TimerState> {
   }
 
   void pauseTimer() {
+    // Cancel the ticking timer immediately to avoid leaving a pending
+    // periodic timer around until the next tick.
+    _timer?.cancel();
     state = state.copyWith(isRunning: false);
     // Clear persisted active timer and cancel scheduled alarm
     if (ref != null) {

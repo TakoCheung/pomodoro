@@ -16,7 +16,6 @@ import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
 import 'package:flutter_pomodoro_app/screens/settings/settings_time_section.dart';
 import 'package:flutter_pomodoro_app/screens/settings/settings_font_section.dart';
 import 'package:flutter_pomodoro_app/screens/settings/settings_color_section.dart';
-import 'package:flutter_pomodoro_app/screens/settings/settings_bible_version_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});

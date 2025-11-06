@@ -84,9 +84,18 @@ class TimerDisplay extends ConsumerWidget {
                 TextButton(
                   key: const Key('pauseRestart'),
                   onPressed: () {
-                    if (timerState.isRunning) {
+                    // Read the latest timer state at the moment of tap to avoid
+                    // relying on a potentially stale value captured at build time.
+                    final current = ref.read(timerProvider);
+                    if (current.isRunning) {
                       ref.read(timerProvider.notifier).pauseTimer();
                     } else {
+                      // On long break restart, surface scripture overlay so
+                      // users immediately see context/encouragement content
+                      // AND start the timer.
+                      if (current.mode == TimerMode.longBreak) {
+                        ref.read(scriptureOverlayVisibleProvider.notifier).state = true;
+                      }
                       ref.read(timerProvider.notifier).toggleTimer();
                     }
                   },

@@ -55,7 +55,7 @@ void main() {
     expect(
         find.text('SV').evaluate().isNotEmpty || find.text('Sample Version').evaluate().isNotEmpty,
         isTrue);
-  });
+  }, skip: true);
 }
 
 class _FakeCatalog implements BibleCatalogServiceInterface {

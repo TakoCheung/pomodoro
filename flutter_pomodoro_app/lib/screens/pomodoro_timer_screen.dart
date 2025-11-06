@@ -12,6 +12,7 @@ import 'package:flutter_pomodoro_app/state/local_settings_provider.dart';
 // import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro_app/state/scripture_provider.dart';
 import 'package:flutter_pomodoro_app/widgets/alarm_banner.dart';
+import 'package:flutter_pomodoro_app/state/encouragement_provider.dart';
 import 'package:flutter_pomodoro_app/state/alarm_banner_provider.dart';
 import 'package:flutter_pomodoro_app/state/notification_provider.dart';
 import 'package:flutter_pomodoro_app/state/scripture_audio_providers.dart';
@@ -28,6 +29,10 @@ class PomodoroTimerScreen extends ConsumerWidget {
     final settings = ref.watch(localSettingsProvider);
     final shown = ref.watch(shownScriptureProvider);
     final bibleId = ref.watch(bibleIdProvider);
+    // Resolve optional encouragement text for current passage (long break only)
+    final maybeEnc = ref
+        .watch(encouragementForCurrentPassageProvider)
+        .maybeWhen(data: (v) => v, orElse: () => null);
     // Rationale visibility is driven by the coordinator (initialized at app start).
     final auto = ref.watch(permissionAutostartProvider);
     // Ensure the alarm banner is never obscured by the permission rationale.
@@ -69,7 +74,7 @@ class PomodoroTimerScreen extends ConsumerWidget {
           if (showScripture)
             Align(
               alignment: Alignment.center,
-              child: ScriptureOverlay(bibleId: bibleId, passageId: 'GEN.1.1'),
+              child: ScriptureOverlay(bibleId: bibleId, passageId: shown?.reference ?? ''),
             ),
           if (showBanner)
             Align(
