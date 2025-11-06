@@ -261,13 +261,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               )
                             ],
                           ),
-                          const CustomDivider(spaceBefore: 15),
-                          // Bible Version selector
-                          SettingsBibleVersionSection(
-                            settingsCtl: settingsCtl,
-                            settingsCtlNotifier: settingsCtlNotifier,
-                          ),
-                          const CustomDivider(spaceBefore: 15),
+                          // const CustomDivider(spaceBefore: 15),
+                          // // Bible Version selector
+                          // SettingsBibleVersionSection(
+                          //   settingsCtl: settingsCtl,
+                          //   settingsCtlNotifier: settingsCtlNotifier,
+                          // ),
+                          // const CustomDivider(spaceBefore: 15),
                           // Notifications permission status (single-line)
                           Builder(builder: (context) {
                             final statusText = ref.watch(permissionStatusTextProvider);
